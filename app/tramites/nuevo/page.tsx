@@ -617,7 +617,9 @@ export default function FormulacionRequerimientosPage() {
                             toggleCategoryCollapse(cat);
                           }}
                           className="p-1 rounded-lg text-slate-500 hover:text-[#002855] hover:bg-slate-100 transition-colors"
-                          title={isCollapsed ? "Desplegar trámite" : "Plegar trámite"}
+                          title={
+                            isCollapsed ? "Desplegar trámite" : "Plegar trámite"
+                          }
                         >
                           {isCollapsed ? (
                             <ChevronDown className="w-5 h-5" />
@@ -844,7 +846,7 @@ export default function FormulacionRequerimientosPage() {
                 <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
                   <div>
                     <h3 className="font-extrabold text-sm text-[#001B47] uppercase tracking-wider">
-                      DETALLE DE {" "}
+                      DETALLE DE{" "}
                       {selectedItem.categoria === "SERVICIO"
                         ? "SERVICIO"
                         : "REQUERIMIENTO"}
