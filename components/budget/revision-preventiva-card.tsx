@@ -6,7 +6,7 @@ import {
   generarSelloPreventivo,
   SelloPreventivo,
 } from "@/lib/budget/preventivo-service";
-import { ShieldCheck, CheckCircle2, AlertOctagon, X, Stamp } from "lucide-react";
+import { ShieldCheck, CheckCircle2, AlertOctagon, X, Stamp } from "lucide-react";import { tramitesStore } from "@/lib/store/tramites-store";
 
 interface RevisionPreventivaCardProps {
   tramiteId: string;
@@ -15,11 +15,18 @@ interface RevisionPreventivaCardProps {
 }
 
 export function RevisionPreventivaCard({
+  tramiteId,
   onApproveSuccess,
   onRejectSuccess,
 }: RevisionPreventivaCardProps) {
-  const [sello, setSello] = useState<SelloPreventivo | null>(null);
-  const [isObservado, setIsObservado] = useState(false);
+  const [sello, setSello] = useState<SelloPreventivo | null>(() => {
+    const item = tramitesStore.getTramiteById(tramiteId);
+    return item?.selloPreventivo || null;
+  });
+  const [isObservado, setIsObservado] = useState(() => {
+    const item = tramitesStore.getTramiteById(tramiteId);
+    return item?.estado === "Observado por Presupuestos";
+  });
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [observacionTexto, setObservacionTexto] = useState("");
 
@@ -28,6 +35,7 @@ export function RevisionPreventivaCard({
   const handleAprobar = () => {
     const nuevoSello = generarSelloPreventivo("Alan - Resp. Presupuestos");
     setSello(nuevoSello);
+    tramitesStore.approvePreventivo(tramiteId, nuevoSello, "Alan - Resp. Presupuestos");
     if (onApproveSuccess) onApproveSuccess(nuevoSello);
   };
 
@@ -35,6 +43,7 @@ export function RevisionPreventivaCard({
     if (!observacionTexto.trim()) return;
     setIsObservado(true);
     setShowRejectModal(false);
+    tramitesStore.rejectTramite(tramiteId, observacionTexto, "Alan - Resp. Presupuestos");
     if (onRejectSuccess) onRejectSuccess(observacionTexto);
   };
 

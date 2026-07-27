@@ -30,6 +30,7 @@ import {
   PartidaObjetoGasto,
 } from "@/lib/requisitions/clasificador-objeto-gasto";
 import { ItemCategoria } from "@/types/requisitions";
+import { tramitesStore, TramiteStoreItem } from "@/lib/store/tramites-store";
 
 // Item model
 interface ItemData {
@@ -320,6 +321,63 @@ export default function FormulacionRequerimientosPage() {
     }
 
     const trackingCode = `TR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newStoreItem: TramiteStoreItem = {
+      id: trackingCode.toLowerCase(),
+      nro: `${Math.floor(1 + Math.random() * 99)}`.padStart(2, "0"),
+      codigoSeguimiento: trackingCode,
+      proyecto,
+      tipoTramite: cat === "ACTIVO_FIJO" ? "Solicitud de Activo Fijo" : cat === "SERVICIO" ? "Solicitud de Servicio" : "Solicitud de Materiales",
+      categoria: cat,
+      fecha: new Date().toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" }),
+      fechaISO: new Date().toISOString(),
+      creador: "Dr. Marcelino Pérez",
+      justificacion: headers[cat].justificacion,
+      custodioNombre: headers[cat].custodioNombre,
+      custodioUbicacion: headers[cat].custodioUbicacion,
+      proformas: headers[cat].proformas,
+      items: catItems.map((it) => ({
+        id: it.id,
+        nombre: it.nombre,
+        categoria: it.categoria,
+        cantidad: Number(it.cantidad) || 1,
+        precioReferencial: Number(it.precioReferencial) || 0,
+        especificacionesTecnicasTexto: it.especificacionesTecnicasTexto,
+        detalleServicio: it.detalleServicio,
+        partidaPresupuestaria: it.partidaPresupuestaria,
+        partidaNombre: it.partidaNombre,
+        documentotecnicoNombre: it.documentotecnicoNombre,
+      })),
+      pasos: [
+        { id: "p1", numero: 1, nombre: "Solicitud", estado: "COMPLETADO" },
+        { id: "p2", numero: 2, nombre: "Presupuesto", estado: "EN_CURSO" },
+        { id: "p3", numero: 3, nombre: "Recepción", estado: "PENDIENTE" },
+        { id: "p4", numero: 4, nombre: "Completado", estado: "PENDIENTE" },
+      ],
+      tareas: [
+        {
+          id: `t1-${Date.now()}`,
+          pasoId: "p1",
+          nombre: "Formulación de Requerimiento",
+          rolResponsable: "Investigador Principal",
+          usuarioAsignado: "Marcelino Perez",
+          estado: "COMPLETADO",
+          fechaCompletado: new Date().toLocaleString("es-BO"),
+        },
+        {
+          id: `t2-${Date.now()}`,
+          pasoId: "p2",
+          nombre: "Sello Preventivo y Certificación de Saldos",
+          rolResponsable: "Responsable de Presupuestos",
+          usuarioAsignado: "Alan",
+          estado: "EN_CURSO",
+        },
+      ],
+      estado: "Pendiente",
+      requiereAccion: true,
+    };
+
+    tramitesStore.addTramites([newStoreItem]);
+
     setHeaders((prev) => ({
       ...prev,
       [cat]: {
@@ -331,7 +389,10 @@ export default function FormulacionRequerimientosPage() {
     }));
 
     setLastSubmittedCode(trackingCode);
-    setTimeout(() => setLastSubmittedCode(null), 4000);
+    setTimeout(() => {
+      setLastSubmittedCode(null);
+      router.push("/tramites");
+    }, 1500);
   };
 
   // Resilient Batch Submit ("Enviar Todos los Trámites" / "Enviar")
@@ -369,6 +430,64 @@ export default function FormulacionRequerimientosPage() {
           }));
         } else {
           const trackingCode = `TR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+          const catItems = items.filter((i) => i.categoria === cat);
+          const newStoreItem: TramiteStoreItem = {
+            id: trackingCode.toLowerCase(),
+            nro: `${Math.floor(1 + Math.random() * 99)}`.padStart(2, "0"),
+            codigoSeguimiento: trackingCode,
+            proyecto,
+            tipoTramite: cat === "ACTIVO_FIJO" ? "Solicitud de Activo Fijo" : cat === "SERVICIO" ? "Solicitud de Servicio" : "Solicitud de Materiales",
+            categoria: cat,
+            fecha: new Date().toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" }),
+            fechaISO: new Date().toISOString(),
+            creador: "Dr. Marcelino Pérez",
+            justificacion: headers[cat].justificacion,
+            custodioNombre: headers[cat].custodioNombre,
+            custodioUbicacion: headers[cat].custodioUbicacion,
+            proformas: headers[cat].proformas,
+            items: catItems.map((it) => ({
+              id: it.id,
+              nombre: it.nombre,
+              categoria: it.categoria,
+              cantidad: Number(it.cantidad) || 1,
+              precioReferencial: Number(it.precioReferencial) || 0,
+              especificacionesTecnicasTexto: it.especificacionesTecnicasTexto,
+              detalleServicio: it.detalleServicio,
+              partidaPresupuestaria: it.partidaPresupuestaria,
+              partidaNombre: it.partidaNombre,
+              documentotecnicoNombre: it.documentotecnicoNombre,
+            })),
+            pasos: [
+              { id: "p1", numero: 1, nombre: "Solicitud", estado: "COMPLETADO" },
+              { id: "p2", numero: 2, nombre: "Presupuesto", estado: "EN_CURSO" },
+              { id: "p3", numero: 3, nombre: "Recepción", estado: "PENDIENTE" },
+              { id: "p4", numero: 4, nombre: "Completado", estado: "PENDIENTE" },
+            ],
+            tareas: [
+              {
+                id: `t1-${Date.now()}`,
+                pasoId: "p1",
+                nombre: "Formulación de Requerimiento",
+                rolResponsable: "Investigador Principal",
+                usuarioAsignado: "Marcelino Perez",
+                estado: "COMPLETADO",
+                fechaCompletado: new Date().toLocaleString("es-BO"),
+              },
+              {
+                id: `t2-${Date.now()}`,
+                pasoId: "p2",
+                nombre: "Sello Preventivo y Certificación de Saldos",
+                rolResponsable: "Responsable de Presupuestos",
+                usuarioAsignado: "Alan",
+                estado: "EN_CURSO",
+              },
+            ],
+            estado: "Pendiente",
+            requiereAccion: true,
+          };
+
+          tramitesStore.addTramites([newStoreItem]);
+
           setHeaders((prev) => ({
             ...prev,
             [cat]: {
@@ -383,6 +502,9 @@ export default function FormulacionRequerimientosPage() {
     );
 
     setBatchSubmitting(false);
+    setTimeout(() => {
+      router.push("/tramites");
+    }, 1500);
   };
 
   return (
