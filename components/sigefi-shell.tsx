@@ -3,8 +3,22 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Folder, FileText, LogOut, Bell, User, Menu, LayoutDashboard, Settings } from "lucide-react";
-import { getStoredUser, logoutSession, MOCK_USUARIOS, UsuarioSchema } from "@/lib/auth/auth-service";
+import {
+  Folder,
+  FileText,
+  LogOut,
+  Bell,
+  User,
+  Menu,
+  LayoutDashboard,
+  Settings,
+} from "lucide-react";
+import {
+  getStoredUser,
+  logoutSession,
+  MOCK_USUARIOS,
+  UsuarioSchema,
+} from "@/lib/auth/auth-service";
 
 interface SigefiShellProps {
   children: React.ReactNode;
@@ -58,22 +72,16 @@ export function SigefiShell({ children }: SigefiShellProps) {
                 {currentUser.nombreCompleto}
               </p>
               <p className="text-[10px] text-[#6b7280] font-mono mt-0.5">
-                Rol: <strong className="text-[#002855]">{currentUser.rolActivo}</strong>
+                Rol:{" "}
+                <strong className="text-[#002855]">
+                  {currentUser.rolActivo}
+                </strong>
               </p>
             </div>
 
             <div className="w-8 h-8 rounded-full bg-[#002855] text-white flex items-center justify-center font-bold text-xs shadow-xs">
               <User className="w-4 h-4" />
             </div>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              title="Cerrar Sesión"
-              className="p-1.5 text-[#6b7280] hover:text-[#BC000C] hover:bg-red-50 rounded-lg transition-colors ml-1"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </header>
@@ -101,19 +109,7 @@ export function SigefiShell({ children }: SigefiShellProps) {
             {/* Menú Principal de Navegación */}
             <nav className="space-y-1 text-xs">
               <Link
-                href="/tramites"
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
-                  isDashboardActive
-                    ? "bg-[#002855] text-white shadow-xs"
-                    : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
-                }`}
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Dashboard
-              </Link>
-
-              <Link
-                href="/tramites"
+                href="/proyectos"
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
                   isProyectosActive
                     ? "bg-[#002855] text-white shadow-xs"
@@ -135,18 +131,6 @@ export function SigefiShell({ children }: SigefiShellProps) {
                 <FileText className="w-4 h-4" />
                 Trámites
               </Link>
-
-              <Link
-                href="/tramites"
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
-                  isConfigActive
-                    ? "bg-[#002855] text-white shadow-xs"
-                    : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                Configuración
-              </Link>
             </nav>
           </div>
 
@@ -166,11 +150,6 @@ export function SigefiShell({ children }: SigefiShellProps) {
         {/* Content Area */}
         <main className="flex-1 p-4 md:p-8 flex flex-col justify-between min-h-[calc(100vh-3.5rem)]">
           <div className="max-w-6xl mx-auto w-full">{children}</div>
-
-          {/* Footer del contenido */}
-          <footer className="mt-12 pt-4 border-t border-[#e5e7eb]/80 text-center text-[11px] text-[#9ca3af]">
-            © 2024 UNIVERSIDAD MAYOR DE SAN SIMÓN • DPA - SISTEMA DE GESTIÓN
-          </footer>
         </main>
       </div>
     </div>

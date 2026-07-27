@@ -10,6 +10,7 @@ import {
   Package,
   Trash2,
   ChevronDown,
+  ChevronUp,
   FileUp,
   X,
   CheckCircle2,
@@ -111,7 +112,7 @@ export default function FormulacionRequerimientosPage() {
     },
     SERVICIO: {
       categoria: "SERVICIO",
-      titulo: "Servicios contratados",
+      titulo: "Servicios",
       justificacion: "",
       custodioNombre: "",
       custodioUbicacion: "",
@@ -120,6 +121,18 @@ export default function FormulacionRequerimientosPage() {
       errores: [],
     },
   });
+
+  // Collapsible cards state
+  const [collapsedCategories, setCollapsedCategories] = useState<
+    Record<string, boolean>
+  >({});
+
+  const toggleCategoryCollapse = (cat: ItemCategoria) => {
+    setCollapsedCategories((prev) => ({
+      ...prev,
+      [cat]: !prev[cat],
+    }));
+  };
 
   // Inline Side-Panel Item Editing State (NO MODAL! Right column side-panel)
   const [selectedItem, setSelectedItem] = useState<ItemData | null>(null);
@@ -313,6 +326,7 @@ export default function FormulacionRequerimientosPage() {
 
     const errs = validateSingleRequisition(cat);
     if (errs.length > 0) {
+      setCollapsedCategories((prev) => ({ ...prev, [cat]: false }));
       setHeaders((prev) => ({
         ...prev,
         [cat]: { ...prev[cat], estado: "ERROR_VALIDACION", errores: errs },
@@ -424,6 +438,7 @@ export default function FormulacionRequerimientosPage() {
 
         const errs = validateSingleRequisition(cat);
         if (errs.length > 0) {
+          setCollapsedCategories((prev) => ({ ...prev, [cat]: false }));
           setHeaders((prev) => ({
             ...prev,
             [cat]: { ...prev[cat], estado: "ERROR_VALIDACION", errores: errs },
@@ -513,7 +528,7 @@ export default function FormulacionRequerimientosPage() {
         {/* Título de Formulación de Requerimientos */}
         <div className="text-center space-y-1">
           <h1 className="text-2xl md:text-3xl font-extrabold text-[#001B47] tracking-tight">
-            Formulación de Requerimientos
+            Solicitud de Bienes y Servicios
           </h1>
         </div>
 
@@ -645,11 +660,14 @@ export default function FormulacionRequerimientosPage() {
                 const catItems = items.filter((i) => i.categoria === cat);
                 const isActivo = cat === "ACTIVO_FIJO";
                 const isServicio = cat === "SERVICIO";
+                const isCollapsed = collapsedCategories[cat] ?? false;
 
                 return (
                   <div
                     key={cat}
-                    className={`bg-white rounded-2xl border transition-all shadow-xs overflow-hidden space-y-4 p-5 ${
+                    className={`bg-white rounded-2xl border transition-all shadow-xs overflow-hidden p-5 ${
+                      !isCollapsed ? "space-y-4" : ""
+                    } ${
                       catHeader.estado === "ERROR_VALIDACION"
                         ? "border-red-500 bg-red-50/10"
                         : catHeader.estado === "ENVIADO"
@@ -658,7 +676,12 @@ export default function FormulacionRequerimientosPage() {
                     }`}
                   >
                     {/* Encabezado del Trámite Generado */}
-                    <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
+                    <div
+                      onClick={() => toggleCategoryCollapse(cat)}
+                      className={`flex items-center justify-between cursor-pointer select-none ${
+                        !isCollapsed ? "border-b border-[#e5e7eb] pb-3" : ""
+                      }`}
+                    >
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-[#002855] text-white rounded-lg">
                           {isActivo ? (
@@ -671,7 +694,7 @@ export default function FormulacionRequerimientosPage() {
                         </div>
                         <div>
                           <h2 className="font-bold text-sm text-[#001B47] flex items-center gap-2">
-                            {catHeader.titulo}
+                            Trámite de {catHeader.titulo}
                             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
                               {catItems.length}
                             </span>
@@ -679,8 +702,8 @@ export default function FormulacionRequerimientosPage() {
                         </div>
                       </div>
 
-                      {/* Badge de Estado del Trámite */}
-                      <div>
+                      {/* Badge de Estado del Trámite + Botón Plegar / Desplegar */}
+                      <div className="flex items-center gap-3">
                         {catHeader.estado === "ENVIADO" ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-full border border-emerald-200">
                             <CheckCircle2 className="w-3 h-3" />
@@ -697,209 +720,229 @@ export default function FormulacionRequerimientosPage() {
                             Borrador
                           </span>
                         )}
-                      </div>
-                    </div>
 
-                    {/* Mensajes de Error de Validación Destacados */}
-                    {catHeader.estado === "ERROR_VALIDACION" &&
-                      catHeader.errores.length > 0 && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-xl space-y-1 text-xs text-red-700 font-medium">
-                          <p className="font-bold flex items-center gap-1.5 text-red-800">
-                            <AlertCircle className="w-4 h-4 text-red-600" />
-                            Campos obligatorios requeridos:
-                          </p>
-                          <ul className="list-disc pl-5 space-y-0.5 text-[11px]">
-                            {catHeader.errores.map((err, idx) => (
-                              <li key={idx}>{err}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                    {/* Justificación y Datos Generales ÚNICOS de este Trámite */}
-                    <div className="p-3.5 bg-[#f8fafc] rounded-xl border border-[#e5e7eb] space-y-3">
-                      <div className="space-y-1">
-                        <label className="text-xs font-semibold text-[#2c3e50]">
-                          Justificación del Trámite ({catHeader.titulo}) *
-                        </label>
-                        <textarea
-                          rows={2}
-                          disabled={catHeader.estado === "ENVIADO"}
-                          placeholder="Describa brevemente la justificación y necesidad de este trámite..."
-                          value={catHeader.justificacion}
-                          onChange={(e) =>
-                            setHeaders((prev) => ({
-                              ...prev,
-                              [cat]: {
-                                ...prev[cat],
-                                justificacion: e.target.value,
-                              },
-                            }))
-                          }
-                          className={`w-full p-2.5 text-xs bg-white border rounded-lg text-[#2c3e50] ${
-                            catHeader.estado === "ERROR_VALIDACION" &&
-                            !catHeader.justificacion.trim()
-                              ? "border-red-500 ring-1 ring-red-500"
-                              : "border-[#e5e7eb]"
-                          }`}
-                        />
-                      </div>
-
-                      {/* Campos de Custodio para Activos Fijos */}
-                      {isActivo && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                          <div className="space-y-1">
-                            <label className="text-xs font-semibold text-[#2c3e50] flex items-center gap-1">
-                              <UserCheck className="w-3.5 h-3.5 text-[#002855]" />
-                              Nombre del Custodio *
-                            </label>
-                            <input
-                              type="text"
-                              disabled={catHeader.estado === "ENVIADO"}
-                              placeholder="Ej: Dr. Marcelino Pérez"
-                              value={catHeader.custodioNombre}
-                              onChange={(e) =>
-                                setHeaders((prev) => ({
-                                  ...prev,
-                                  [cat]: {
-                                    ...prev[cat],
-                                    custodioNombre: e.target.value,
-                                  },
-                                }))
-                              }
-                              className={`w-full p-2 text-xs bg-white border rounded-lg ${
-                                catHeader.estado === "ERROR_VALIDACION" &&
-                                !catHeader.custodioNombre.trim()
-                                  ? "border-red-500 ring-1 ring-red-500"
-                                  : "border-[#e5e7eb]"
-                              }`}
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-xs font-semibold text-[#2c3e50] flex items-center gap-1">
-                              <MapPin className="w-3.5 h-3.5 text-[#002855]" />
-                              Lugar / Laboratorio de Ubicación *
-                            </label>
-                            <input
-                              type="text"
-                              disabled={catHeader.estado === "ENVIADO"}
-                              placeholder="Ej: Lab. de IA - Edificio DICYT"
-                              value={catHeader.custodioUbicacion}
-                              onChange={(e) =>
-                                setHeaders((prev) => ({
-                                  ...prev,
-                                  [cat]: {
-                                    ...prev[cat],
-                                    custodioUbicacion: e.target.value,
-                                  },
-                                }))
-                              }
-                              className={`w-full p-2 text-xs bg-white border rounded-lg ${
-                                catHeader.estado === "ERROR_VALIDACION" &&
-                                !catHeader.custodioUbicacion.trim()
-                                  ? "border-red-500 ring-1 ring-red-500"
-                                  : "border-[#e5e7eb]"
-                              }`}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Carga de Proformas / Cotizaciones específicas de este trámite (Imagen o PDF) */}
-                      <div className="space-y-1 pt-1">
-                        <label className="text-xs font-semibold text-[#2c3e50]">
-                          Archivos de Respaldo (Proformas / Cotizaciones en
-                          Imagen o PDF) *
-                        </label>
-                        {catHeader.estado !== "ENVIADO" && (
-                          <div className="flex items-center gap-3">
-                            <input
-                              type="file"
-                              accept=".pdf,.png,.jpg,.jpeg,.webp"
-                              onChange={(e) => handleProformaUpload(cat, e)}
-                              className="text-xs text-[#6b7280] file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#002855] file:text-white cursor-pointer"
-                            />
-                          </div>
-                        )}
-                        {catHeader.proformas.length > 0 && (
-                          <div className="flex flex-wrap gap-2 pt-1.5">
-                            {catHeader.proformas.map((p) => (
-                              <span
-                                key={p.id}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs bg-white border border-[#e5e7eb] rounded-md font-medium text-[#001B47]"
-                              >
-                                <Paperclip className="w-3 h-3 text-[#64748b]" />
-                                {p.nombre}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Lista de Ítems dentro del Trámite */}
-                    <div className="space-y-2">
-                      {catItems.map((item, idx) => (
-                        <div
-                          key={item.id}
-                          onClick={() =>
-                            catHeader.estado !== "ENVIADO" &&
-                            setSelectedItem(item)
-                          }
-                          className={`p-3.5 bg-white border rounded-xl flex items-center justify-between cursor-pointer transition-all shadow-2xs group ${
-                            selectedItem?.id === item.id
-                              ? "border-2 border-[#BC000C] bg-red-50/5"
-                              : "border-[#002855] hover:border-[#001B47]"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <ChevronDown className="w-4 h-4 text-[#9ca3af] group-hover:text-[#002855]" />
-                            <div>
-                              <div className="font-bold text-xs text-[#001B47] uppercase">
-                                {isServicio
-                                  ? `SERVICIO ${idx + 1}`
-                                  : `ITEM ${idx + 1}`}{" "}
-                                | {item.nombre}
-                              </div>
-                              <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-[#64748b]">
-                                <span className="px-2 py-0.5 bg-[#002855]/10 text-[#002855] rounded font-bold text-[10px] uppercase">
-                                  {isServicio ? "SERVICIO" : "CATÁLOGO"}
-                                </span>
-                                <span>Cantidad: {item.cantidad || 1}</span>
-                                {item.precioReferencial !== "" && (
-                                  <span>
-                                    Total: {item.precioReferencial} Bs
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {catHeader.estado !== "ENVIADO" && (
-                            <button
-                              type="button"
-                              onClick={(e) => removeItem(item.id, e)}
-                              className="text-[#9ca3af] hover:text-[#BC000C] transition-colors p-1"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Botón de Envío INDIVIDUAL por Trámite */}
-                    {catHeader.estado !== "ENVIADO" && (
-                      <div className="pt-2 flex justify-end">
                         <button
                           type="button"
-                          onClick={() => handleSubmitSingle(cat)}
-                          className="px-5 py-2.5 bg-[#002855] text-white text-xs font-bold rounded-xl hover:bg-[#001B47] transition-all flex items-center gap-2 shadow-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleCategoryCollapse(cat);
+                          }}
+                          className="p-1 rounded-lg text-slate-500 hover:text-[#002855] hover:bg-slate-100 transition-colors"
+                          title={isCollapsed ? "Desplegar trámite" : "Plegar trámite"}
                         >
-                          <Send className="w-3.5 h-3.5" />
-                          Enviar Trámite ({catHeader.titulo})
+                          {isCollapsed ? (
+                            <ChevronDown className="w-5 h-5" />
+                          ) : (
+                            <ChevronUp className="w-5 h-5" />
+                          )}
                         </button>
                       </div>
+                    </div>
+
+                    {!isCollapsed && (
+                      <>
+                        {/* Mensajes de Error de Validación Destacados */}
+                        {catHeader.estado === "ERROR_VALIDACION" &&
+                          catHeader.errores.length > 0 && (
+                            <div className="p-3 bg-red-50 border border-red-200 rounded-xl space-y-1 text-xs text-red-700 font-medium">
+                              <p className="font-bold flex items-center gap-1.5 text-red-800">
+                                <AlertCircle className="w-4 h-4 text-red-600" />
+                                Campos obligatorios requeridos:
+                              </p>
+                              <ul className="list-disc pl-5 space-y-0.5 text-[11px]">
+                                {catHeader.errores.map((err, idx) => (
+                                  <li key={idx}>{err}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                        {/* Justificación y Datos Generales ÚNICOS de este Trámite */}
+                        <div className="p-3.5 bg-[#f8fafc] rounded-xl border border-[#e5e7eb] space-y-3">
+                          <div className="space-y-1">
+                            <label className="text-xs font-semibold text-[#2c3e50]">
+                              Justificación del Trámite ({catHeader.titulo}) *
+                            </label>
+                            <textarea
+                              rows={2}
+                              disabled={catHeader.estado === "ENVIADO"}
+                              placeholder="Describa brevemente la justificación y necesidad de este trámite..."
+                              value={catHeader.justificacion}
+                              onChange={(e) =>
+                                setHeaders((prev) => ({
+                                  ...prev,
+                                  [cat]: {
+                                    ...prev[cat],
+                                    justificacion: e.target.value,
+                                  },
+                                }))
+                              }
+                              className={`w-full p-2.5 text-xs bg-white border rounded-lg text-[#2c3e50] ${
+                                catHeader.estado === "ERROR_VALIDACION" &&
+                                !catHeader.justificacion.trim()
+                                  ? "border-red-500 ring-1 ring-red-500"
+                                  : "border-[#e5e7eb]"
+                              }`}
+                            />
+                          </div>
+
+                          {/* Campos de Custodio para Activos Fijos */}
+                          {isActivo && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                              <div className="space-y-1">
+                                <label className="text-xs font-semibold text-[#2c3e50] flex items-center gap-1">
+                                  <UserCheck className="w-3.5 h-3.5 text-[#002855]" />
+                                  Nombre del Custodio *
+                                </label>
+                                <input
+                                  type="text"
+                                  disabled={catHeader.estado === "ENVIADO"}
+                                  placeholder="Ej: Dr. Marcelino Pérez"
+                                  value={catHeader.custodioNombre}
+                                  onChange={(e) =>
+                                    setHeaders((prev) => ({
+                                      ...prev,
+                                      [cat]: {
+                                        ...prev[cat],
+                                        custodioNombre: e.target.value,
+                                      },
+                                    }))
+                                  }
+                                  className={`w-full p-2 text-xs bg-white border rounded-lg ${
+                                    catHeader.estado === "ERROR_VALIDACION" &&
+                                    !catHeader.custodioNombre.trim()
+                                      ? "border-red-500 ring-1 ring-red-500"
+                                      : "border-[#e5e7eb]"
+                                  }`}
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-xs font-semibold text-[#2c3e50] flex items-center gap-1">
+                                  <MapPin className="w-3.5 h-3.5 text-[#002855]" />
+                                  Lugar / Laboratorio de Ubicación *
+                                </label>
+                                <input
+                                  type="text"
+                                  disabled={catHeader.estado === "ENVIADO"}
+                                  placeholder="Ej: Lab. de IA - Edificio DICYT"
+                                  value={catHeader.custodioUbicacion}
+                                  onChange={(e) =>
+                                    setHeaders((prev) => ({
+                                      ...prev,
+                                      [cat]: {
+                                        ...prev[cat],
+                                        custodioUbicacion: e.target.value,
+                                      },
+                                    }))
+                                  }
+                                  className={`w-full p-2 text-xs bg-white border rounded-lg ${
+                                    catHeader.estado === "ERROR_VALIDACION" &&
+                                    !catHeader.custodioUbicacion.trim()
+                                      ? "border-red-500 ring-1 ring-red-500"
+                                      : "border-[#e5e7eb]"
+                                  }`}
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Carga de Proformas / Cotizaciones específicas de este trámite (Imagen o PDF) */}
+                          <div className="space-y-1 pt-1">
+                            <label className="text-xs font-semibold text-[#2c3e50]">
+                              Archivos de Respaldo (Proformas / Cotizaciones en
+                              Imagen o PDF) *
+                            </label>
+                            {catHeader.estado !== "ENVIADO" && (
+                              <div className="flex items-center gap-3">
+                                <input
+                                  type="file"
+                                  accept=".pdf,.png,.jpg,.jpeg,.webp"
+                                  onChange={(e) => handleProformaUpload(cat, e)}
+                                  className="text-xs text-[#6b7280] file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#002855] file:text-white cursor-pointer"
+                                />
+                              </div>
+                            )}
+                            {catHeader.proformas.length > 0 && (
+                              <div className="flex flex-wrap gap-2 pt-1.5">
+                                {catHeader.proformas.map((p) => (
+                                  <span
+                                    key={p.id}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs bg-white border border-[#e5e7eb] rounded-md font-medium text-[#001B47]"
+                                  >
+                                    <Paperclip className="w-3 h-3 text-[#64748b]" />
+                                    {p.nombre}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Lista de Ítems dentro del Trámite */}
+                        <div className="space-y-2">
+                          {catItems.map((item, idx) => (
+                            <div
+                              key={item.id}
+                              onClick={() =>
+                                catHeader.estado !== "ENVIADO" &&
+                                setSelectedItem(item)
+                              }
+                              className={`p-3.5 bg-white border rounded-xl flex items-center justify-between cursor-pointer transition-all shadow-2xs group ${
+                                selectedItem?.id === item.id
+                                  ? "border-2 border-[#BC000C] bg-red-50/5"
+                                  : "border-[#002855] hover:border-[#001B47]"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <ChevronDown className="w-4 h-4 text-[#9ca3af] group-hover:text-[#002855]" />
+                                <div>
+                                  <div className="font-bold text-xs text-[#001B47] uppercase">
+                                    {isServicio
+                                      ? `SERVICIO ${idx + 1}`
+                                      : `ITEM ${idx + 1}`}{" "}
+                                    | {item.nombre}
+                                  </div>
+                                  <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-[#64748b]">
+                                    <span className="px-2 py-0.5 bg-[#002855]/10 text-[#002855] rounded font-bold text-[10px] uppercase">
+                                      {isServicio ? "SERVICIO" : "CATÁLOGO"}
+                                    </span>
+                                    <span>Cantidad: {item.cantidad || 1}</span>
+                                    {item.precioReferencial !== "" && (
+                                      <span>
+                                        Total: {item.precioReferencial} Bs
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {catHeader.estado !== "ENVIADO" && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => removeItem(item.id, e)}
+                                  className="text-[#9ca3af] hover:text-[#BC000C] transition-colors p-1"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Botón de Envío INDIVIDUAL por Trámite */}
+                        {catHeader.estado !== "ENVIADO" && (
+                          <div className="pt-2 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleSubmitSingle(cat)}
+                              className="px-5 py-2.5 bg-[#002855] text-white text-xs font-bold rounded-xl hover:bg-[#001B47] transition-all flex items-center gap-2 shadow-sm"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                              Enviar Trámite ({catHeader.titulo})
+                            </button>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 );
@@ -912,7 +955,7 @@ export default function FormulacionRequerimientosPage() {
                 <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
                   <div>
                     <h3 className="font-extrabold text-sm text-[#001B47] uppercase tracking-wider">
-                      EDITAR{" "}
+                      DETALLE DE {" "}
                       {selectedItem.categoria === "SERVICIO"
                         ? "SERVICIO"
                         : "REQUERIMIENTO"}
