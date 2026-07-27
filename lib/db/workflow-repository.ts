@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
-import { NODOS_COMPRA_MENOR, NodoWorkflow } from "@/lib/workflow/compra-menor-strategy";
+import type { NodoWorkflow } from "@/lib/workflow/compra-menor-strategy";
+import { obtenerNodoPorId } from "@/lib/workflow/workflow-db-service";
 
 export interface TramiteDBRow {
   id: number;
@@ -21,47 +22,15 @@ export interface HistorialEstadoDBRow {
   observaciones: string | null;
 }
 
-// Mapping Node IDs to Schema DB `estado_paso_flujo.id` (1 to 19)
-export const NODE_ID_TO_DB_ID: Record<string, number> = {
-  node_1_1: 1,
-  node_1_2: 2,
-  node_1_3: 3,
-  node_1_4: 4,
-  node_1_5: 5,
-  node_1_6: 6,
-  node_1_7: 7,
-  node_1_8: 8,
-  node_2_1: 9,
-  node_2_2: 10,
-  node_2_3: 11,
-  node_2_4: 12,
-  node_3_1: 13,
-  node_3_2: 14,
-  node_3_3: 15,
-  node_3_4: 16,
-  node_3_5: 17,
-  node_4_1: 18,
-  node_4_2: 19,
-};
-
-export const DB_ID_TO_NODE_ID: Record<number, string> = Object.entries(NODE_ID_TO_DB_ID).reduce(
-  (acc, [nodeId, dbId]) => {
-    acc[dbId] = nodeId;
-    return acc;
-  },
-  {} as Record<number, string>
-);
-
 export class WorkflowRepository {
   private supabase = createClient();
 
   /**
-   * Get active node for a trámite by ID
+   * Get active node for a trámite by ID — consultando la BD real
    */
   public async getEstadoActualTramite(tramiteIdNum: number): Promise<{
     dbIdEstado: number;
-    nodoId: string;
-    nodo: NodoWorkflow;
+    nodo: NodoWorkflow | null;
   }> {
     try {
       const { data, error } = await this.supabase
@@ -71,31 +40,22 @@ export class WorkflowRepository {
         .single();
 
       if (error || !data) {
-        return {
-          dbIdEstado: 1,
-          nodoId: "node_1_1",
-          nodo: NODOS_COMPRA_MENOR["node_1_1"],
-        };
+        const nodoFallback = await obtenerNodoPorId(1);
+        return { dbIdEstado: 1, nodo: nodoFallback };
       }
 
       const dbId = data.id_estado_tramite || 1;
-      const nodeId = DB_ID_TO_NODE_ID[dbId] || "node_1_1";
-      return {
-        dbIdEstado: dbId,
-        nodoId: nodeId,
-        nodo: NODOS_COMPRA_MENOR[nodeId] || NODOS_COMPRA_MENOR["node_1_1"],
-      };
+      const nodo = await obtenerNodoPorId(dbId);
+      return { dbIdEstado: dbId, nodo };
     } catch {
-      return {
-        dbIdEstado: 1,
-        nodoId: "node_1_1",
-        nodo: NODOS_COMPRA_MENOR["node_1_1"],
-      };
+      const nodoFallback = await obtenerNodoPorId(1);
+      return { dbIdEstado: 1, nodo: nodoFallback };
     }
   }
 
   /**
    * Execute node transition in DB (inserts into `historial_estado_tramite` and updates `tramite.id_estado_tramite`)
+   * Trabaja directamente con IDs de la BD — sin mapeos intermedios.
    */
   public async transicionarEstadoTramite(
     tramiteIdNum: number,
@@ -121,7 +81,7 @@ export class WorkflowRepository {
         .update({
           id_estado_tramite: estadoDestinoDbId,
           fecha_actualizacion: new Date().toISOString(),
-          rechazado: estadoDestinoDbId === 4,
+          rechazado: estadoDestinoDbId === 4, // estado_paso_flujo.id=4 es "Rechazo definitivo"
         })
         .eq("id", tramiteIdNum);
 

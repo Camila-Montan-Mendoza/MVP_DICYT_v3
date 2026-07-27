@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/client";
-import { DB_ID_TO_NODE_ID, NODE_ID_TO_DB_ID } from "./workflow-repository";
 
 export interface TramiteDBItem {
   id: number;
@@ -14,11 +13,12 @@ export interface TramiteDBItem {
   justificacion: string;
   custodioNombre?: string;
   custodioUbicacion?: string;
+  /** ID directo de estado_paso_flujo en la BD */
   idEstadoTramite: number;
-  currentNodeId: string;
   estadoNombre: string;
   estado: string;
   requiereAccion?: boolean;
+  /** Orden del paso macro (1-4) leído de paso_flujo.orden */
   pasoNumero: number;
   pasoNombre: string;
   selloPreventivo?: {
@@ -44,7 +44,8 @@ export class TramiteDBRepository {
   private supabase = createClient();
 
   /**
-   * Fetch all trámites from real Supabase DB
+   * Fetch all trámites from real Supabase DB.
+   * Los datos del nodo actual (nombre, paso, orden) vienen del JOIN con estado_paso_flujo → paso_flujo.
    */
   public async getTramites(): Promise<TramiteDBItem[]> {
     try {
@@ -55,12 +56,13 @@ export class TramiteDBRepository {
           id_proyecto,
           id_tipo_tramite,
           id_estado_tramite,
+          justificacion,
           fecha_creacion,
           fecha_actualizacion,
           rechazado,
           proyecto ( nombre, codigo ),
           tipo_tramite ( nombre ),
-          estado_paso_flujo ( id, nombre, id_paso_flujo, paso_flujo ( id, orden, nombre ) )
+          estado_paso_flujo ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo ( id, orden, nombre ) )
         `)
         .order("id", { ascending: false });
 
@@ -72,13 +74,13 @@ export class TramiteDBRepository {
         const estadoObj = t.estado_paso_flujo || {};
         const pasoObj = estadoObj.paso_flujo || {};
         const dbIdEstado = t.id_estado_tramite || 1;
-        const nodeId = DB_ID_TO_NODE_ID[dbIdEstado] || "node_1_1";
+        const esFinal = estadoObj.es_final || false;
 
         return {
           id: t.id,
           nro: `${tramites.length - idx}`.padStart(2, "0"),
           codigoSeguimiento: `TR-2026-${String(t.id).padStart(3, "0")}`,
-          proyecto: t.proyecto?.nombre || "Implementación de IA para la Agricultura",
+          proyecto: t.proyecto?.nombre || "Proyecto DICYT",
           tipoTramite: t.tipo_tramite?.nombre || "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
           categoria: "MATERIAL",
           fecha: new Date(t.fecha_creacion || Date.now()).toLocaleDateString("es-BO", {
@@ -88,14 +90,17 @@ export class TramiteDBRepository {
           }),
           fechaISO: t.fecha_creacion || new Date().toISOString(),
           creador: "Dr. Daniel Pérez",
-          justificacion: "Adquisición de insumos y reactivos para investigación.",
+          justificacion: t.justificacion || "Adquisición de insumos y reactivos para investigación.",
           idEstadoTramite: dbIdEstado,
-          currentNodeId: nodeId,
-          estadoNombre: estadoObj.nombre || "Revisión de disponibilidad presupuestaria y certificación de fondos",
-          estado: dbIdEstado === 19 ? "Aprobado" : dbIdEstado === 4 ? "Rechazado" : dbIdEstado === 3 ? "Observado por Presupuestos" : "En proceso",
-          requiereAccion: dbIdEstado === 1 || dbIdEstado === 2,
+          estadoNombre: estadoObj.nombre || "Estado desconocido",
+          estado: esFinal && !t.rechazado
+            ? "Aprobado"
+            : t.rechazado
+            ? "Rechazado"
+            : "En proceso",
+          requiereAccion: !esFinal && !t.rechazado,
           pasoNumero: pasoObj.orden || 1,
-          pasoNombre: pasoObj.nombre || "PASO 1: Solicitud",
+          pasoNombre: pasoObj.nombre || "Solicitud",
           items: [],
         };
       });
@@ -117,7 +122,8 @@ export class TramiteDBRepository {
   }
 
   /**
-   * Create new trámite in real database
+   * Create new trámite in real database.
+   * El estado inicial es estado_paso_flujo.id=1 (es_inicial=true del primer paso).
    */
   public async createTramite(data: {
     proyectoId?: number;
@@ -126,13 +132,25 @@ export class TramiteDBRepository {
     items?: any[];
   }): Promise<TramiteDBItem> {
     try {
+      // Buscar el estado inicial del flujo del tipo de trámite
+      const { data: estadoInicial } = await this.supabase
+        .from("estado_paso_flujo")
+        .select("id, nombre, paso_flujo ( orden, nombre )")
+        .eq("es_inicial", true)
+        .limit(1)
+        .single();
+
+      const estadoInicialId = (estadoInicial as any)?.id || 1;
+      const estadoInicialNombre = (estadoInicial as any)?.nombre || "Estado inicial";
+      const pasoInicial = (estadoInicial as any)?.paso_flujo;
+
       const { data: newRow, error } = await this.supabase
         .from("tramite")
         .insert({
           id_proyecto: data.proyectoId || 1,
           id_tipo_tramite: data.tipoTramiteId || 1,
-          id_estado_tramite: 1, // Start at node_1_1
-          id_usuario: 1, // Dr. Daniel Pérez
+          id_estado_tramite: estadoInicialId,
+          id_usuario: 1,
           justificacion: data.justificacion || "Solicitud de compra menor",
           fecha_creacion: new Date().toISOString(),
           fecha_actualizacion: new Date().toISOString(),
@@ -157,12 +175,11 @@ export class TramiteDBRepository {
         fechaISO: newRow.fecha_creacion,
         creador: "Dr. Daniel Pérez",
         justificacion: data.justificacion || "Solicitud de compra menor",
-        idEstadoTramite: 1,
-        currentNodeId: "node_1_1",
-        estadoNombre: "Revisión de disponibilidad presupuestaria y certificación de fondos",
+        idEstadoTramite: estadoInicialId,
+        estadoNombre: estadoInicialNombre,
         estado: "En proceso",
-        pasoNumero: 1,
-        pasoNombre: "PASO 1: Solicitud",
+        pasoNumero: pasoInicial?.orden || 1,
+        pasoNombre: pasoInicial?.nombre || "Solicitud",
         items: data.items || [],
       };
     } catch {
@@ -173,62 +190,22 @@ export class TramiteDBRepository {
   private getFallbackTramites(): TramiteDBItem[] {
     return [
       {
-        id: 1,
-        nro: "01",
-        codigoSeguimiento: "TR-2026-001",
-        proyecto: "Implementación de IA para la Agricultura",
-        tipoTramite: "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
+        id: 0,
+        nro: "00",
+        codigoSeguimiento: "TR-FALLBACK-000",
+        proyecto: "Sin conexión a BD",
+        tipoTramite: "Compra Menor",
         categoria: "MATERIAL",
-        fecha: "15 Ene 2026",
-        fechaISO: "2026-01-15T10:00:00Z",
-        creador: "Dr. Daniel Pérez",
-        justificacion: "Adquisición de servidor GPU y kit de sensores agrícolas para procesamiento de modelos de cultivo.",
+        fecha: new Date().toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" }),
+        fechaISO: new Date().toISOString(),
+        creador: "Sistema",
+        justificacion: "Error de conexión a la base de datos.",
         idEstadoTramite: 1,
-        currentNodeId: "node_1_1",
-        estadoNombre: "Revisión de disponibilidad presupuestaria y certificación de fondos",
-        estado: "En proceso",
+        estadoNombre: "Sin conexión",
+        estado: "Error",
         pasoNumero: 1,
-        pasoNombre: "PASO 1: Solicitud",
-        items: [
-          {
-            id: "it-1",
-            nombre: "KIT DE SENSORES Y TARJETA GPU",
-            categoria: "MATERIAL",
-            cantidad: 1,
-            precioReferencial: 4500,
-            partidaPresupuestaria: "43120",
-            partidaNombre: "Equipo de Computación",
-          },
-        ],
-      },
-      {
-        id: 2,
-        nro: "02",
-        codigoSeguimiento: "TR-2026-002",
-        proyecto: "VLIR RAWSAYTA AWANACHEJ",
-        tipoTramite: "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
-        categoria: "MATERIAL",
-        fecha: "18 Ene 2026",
-        fechaISO: "2026-01-18T14:30:00Z",
-        creador: "Ing. Winsor",
-        justificacion: "Reactivos químicos y reactores de cristal para ensayos bioquímicos.",
-        idEstadoTramite: 2,
-        currentNodeId: "node_1_2",
-        estadoNombre: "Revisión técnica inicial de solicitud",
-        estado: "En proceso",
-        pasoNumero: 1,
-        pasoNombre: "PASO 1: Solicitud",
-        items: [
-          {
-            id: "it-2",
-            nombre: "REACTIVOS DE EXTRACTO BOTÁNICO",
-            categoria: "MATERIAL",
-            cantidad: 5,
-            precioReferencial: 1200,
-            partidaPresupuestaria: "34200",
-            partidaNombre: "Productos Químicos y Farmacéuticos",
-          },
-        ],
+        pasoNombre: "Solicitud",
+        items: [],
       },
     ];
   }

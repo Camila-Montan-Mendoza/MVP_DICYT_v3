@@ -66,12 +66,12 @@ export default function ListaTramitesPage() {
     let label = `Paso ${num}/${totalPasos}: ${item.pasoNombre || "Solicitud"}`;
     if (num === 2) label = `Paso 2/4: Recepción de Material`;
     if (num === 3) label = `Paso 3/4: Pago a Proveedor`;
-    if (num === 4 || item.currentNodeId === "node_4_2") label = `Paso 4/4: Completado`;
+    if (num === 4 || item.estado === "Aprobado") label = `Paso 4/4: Completado`;
 
     return {
       num,
       label,
-      isCompletado: num === 4 || item.currentNodeId === "node_4_2",
+      isCompletado: num === 4 || item.estado === "Aprobado",
     };
   };
 

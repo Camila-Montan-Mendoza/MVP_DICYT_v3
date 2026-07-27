@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { SigefiShell } from "@/components/sigefi-shell";
 import { WorkflowStepper } from "@/components/workflow/workflow-stepper";
 import { PasoWorkflow, TareaWorkflow } from "@/lib/workflow/stepper-service";
 import { TaskTimeline } from "@/components/workflow/task-timeline";
-import { WorkflowSharedUI } from "@/components/workflow/workflow-shared-ui";
 import { InteractiveTaskWorkspace } from "@/components/workflow/interactive-task-workspace";
 import { tramiteDBRepository, TramiteDBItem } from "@/lib/db/tramite-repository";
-import { NODOS_COMPRA_MENOR } from "@/lib/workflow/compra-menor-strategy";
+import { cargarGrafoWorkflow, obtenerNodoPorId } from "@/lib/workflow/workflow-db-service";
+import type { NodoWorkflow } from "@/lib/workflow/compra-menor-strategy";
 import { ArrowLeft, Layers, CheckCircle2, Clock, Stamp } from "lucide-react";
 
 function TramiteWorkflowDetailContent() {
@@ -19,44 +19,67 @@ function TramiteWorkflowDetailContent() {
   const tramiteId = rawId || "1";
 
   const [tramite, setTramite] = useState<TramiteDBItem | undefined>();
+  const [grafo, setGrafo] = useState<Record<number, NodoWorkflow>>({});
+  const [nodoActual, setNodoActual] = useState<NodoWorkflow | null>(null);
 
-  const loadTramite = () => {
+  // Cargar el grafo del workflow desde la BD (con cache en memoria)
+  useEffect(() => {
+    cargarGrafoWorkflow(1).then(setGrafo);
+  }, []);
+
+  const loadTramite = useCallback(() => {
     tramiteDBRepository.getTramiteById(tramiteId).then((found) => {
-      if (found) setTramite(found);
-      else {
+      if (found) {
+        setTramite(found);
+      } else {
         tramiteDBRepository.getTramites().then((list) => setTramite(list[0]));
       }
     });
-  };
+  }, [tramiteId]);
 
   useEffect(() => {
     loadTramite();
-  }, [tramiteId]);
+  }, [loadTramite]);
+
+  // Cuando el trámite o el grafo cambian, resolver el nodo actual
+  useEffect(() => {
+    if (tramite && Object.keys(grafo).length > 0) {
+      const nodo = grafo[tramite.idEstadoTramite] || null;
+      setNodoActual(nodo);
+    }
+  }, [tramite, grafo]);
 
   const refreshTramite = () => {
     loadTramite();
   };
 
+  const resolveNextNode = async (destinoDbId: number): Promise<NodoWorkflow | null> => {
+    // Primero buscar en el grafo cacheado
+    if (grafo[destinoDbId]) return grafo[destinoDbId];
+    // Fallback: consultar la BD
+    return obtenerNodoPorId(destinoDbId);
+  };
+
   const activeTramite: TramiteDBItem = tramite || {
-    id: 1,
-    nro: "01",
-    codigoSeguimiento: "TR-2026-001",
-    proyecto: "Implementación de IA para la Agricultura",
-    tipoTramite: "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
+    id: 0,
+    nro: "00",
+    codigoSeguimiento: "Cargando...",
+    proyecto: "Cargando...",
+    tipoTramite: "Cargando...",
     categoria: "MATERIAL",
-    fecha: "15 Ene 2026",
+    fecha: "",
     fechaISO: new Date().toISOString(),
-    creador: "Dr. Daniel Pérez",
-    justificacion: "Adquisición de insumos y reactivos.",
+    creador: "",
+    justificacion: "",
     idEstadoTramite: 1,
-    currentNodeId: "node_1_1",
-    estadoNombre: "Revisión de disponibilidad presupuestaria y certificación de fondos",
+    estadoNombre: "Cargando...",
     estado: "En proceso",
     pasoNumero: 1,
-    pasoNombre: "PASO 1: Solicitud",
+    pasoNombre: "Solicitud",
     items: [],
   };
 
+  // Construir pasos macro dinámicamente
   const pasosList: PasoWorkflow[] = [
     { id: "p1", numero: 1, nombre: "Solicitud", estado: activeTramite.pasoNumero === 1 ? "EN_CURSO" : activeTramite.pasoNumero > 1 ? "COMPLETADO" : "PENDIENTE" },
     { id: "p2", numero: 2, nombre: "Recepción", estado: activeTramite.pasoNumero === 2 ? "EN_CURSO" : activeTramite.pasoNumero > 2 ? "COMPLETADO" : "PENDIENTE" },
@@ -73,19 +96,20 @@ function TramiteWorkflowDetailContent() {
 
   const activeStep = pasosList.find((p) => p.id === activeStepId) || currentStep;
 
-  // Retrieve ALL granular tasks belonging to the active macro step
-  const nodosDelPaso = Object.values(NODOS_COMPRA_MENOR).filter(
+  // Recuperar TODAS las tareas granulares del paso activo desde el grafo de la BD
+  const nodosDelPaso = Object.values(grafo).filter(
     (n) => n.pasoNumero === activeStep.numero
   );
-  const currentNodoActual =
-    NODOS_COMPRA_MENOR[activeTramite.currentNodeId] || NODOS_COMPRA_MENOR["node_1_1"];
+
+  const nodoActualResuelto = nodoActual || (Object.values(grafo)[0] ?? null);
 
   const tareasDelPaso: TareaWorkflow[] = nodosDelPaso.map((n) => {
-    const isCurrent = n.id === currentNodoActual.id;
+    const nodoId = parseInt(n.id, 10);
+    const currentId = nodoActualResuelto ? parseInt(nodoActualResuelto.id, 10) : 1;
+    const isCurrent = nodoId === currentId;
     const isCompleted =
       activeTramite.pasoNumero > n.pasoNumero ||
-      (activeTramite.pasoNumero === n.pasoNumero &&
-        parseInt(n.id.split("_")[2], 10) < parseInt(currentNodoActual.id.split("_")[2], 10));
+      (activeTramite.pasoNumero === n.pasoNumero && nodoId < currentId);
 
     return {
       id: n.id,
@@ -130,7 +154,7 @@ function TramiteWorkflowDetailContent() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-2xs ${
                   activeTramite.estado === "Aprobado"
                     ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                    : activeTramite.estado === "Observado por Presupuestos"
+                    : activeTramite.estado === "Rechazado"
                     ? "bg-red-100 text-red-800 border border-red-200"
                     : "bg-amber-100/90 text-amber-900 border border-amber-200"
                 }`}
@@ -161,7 +185,7 @@ function TramiteWorkflowDetailContent() {
           onSelectStep={setActiveStepId}
         />
 
-        {/* Layout Split de 2 Columnas (Lado Izquierdo: Cronología de Tareas; Lado Derecho: Espacio para UI Operativa) */}
+        {/* Layout Split de 2 Columnas */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Lado Izquierdo: Cronología Vertical de Tareas (4 columnas) */}
           <div className="lg:col-span-4">
@@ -172,7 +196,7 @@ function TramiteWorkflowDetailContent() {
             />
           </div>
 
-          {/* Lado Derecho: Contenedor para UI Operativa de Ejecución (8 columnas) */}
+          {/* Lado Derecho: Área Operativa Server-Driven (8 columnas) */}
           <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-[#e5e7eb] shadow-2xs space-y-4 flex flex-col justify-between min-h-[420px]">
             <div className="space-y-4">
               <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
@@ -187,28 +211,35 @@ function TramiteWorkflowDetailContent() {
                 </span>
               </div>
 
-              {/* UI Operativa Dinámica: Flujo de Transiciones y Estrategia Compra Menor */}
-              <InteractiveTaskWorkspace
-                tramiteId={String(activeTramite.id)}
-                initialNodeId={activeTramite.currentNodeId}
-                onNodeTransition={(nextNode, _log) => {
-                  const nuevoPasoId = `p${nextNode.pasoNumero}`;
-                  setActiveStepId(nuevoPasoId);
-                  refreshTramite();
-                }}
-              />
+              {/* Server-Driven UI: El componente renderiza lo que la BD dice */}
+              {nodoActualResuelto && (
+                <InteractiveTaskWorkspace
+                  tramiteId={String(activeTramite.id)}
+                  nodoActual={nodoActualResuelto}
+                  onResolveNextNode={resolveNextNode}
+                  onNodeTransition={(nextNode, _log) => {
+                    setNodoActual(nextNode);
+                    const nuevoPasoId = `p${nextNode.pasoNumero}`;
+                    setActiveStepId(nuevoPasoId);
+                    refreshTramite();
+                  }}
+                />
+              )}
 
-              {/* UI Operativa Dinámica Compartida por Tipo de Nodo */}
-              <WorkflowSharedUI
-                nodo={currentNodoActual}
-                tramiteId={String(activeTramite.id)}
-                onRefresh={refreshTramite}
-              />
+              {/* Tarjeta de Revisión Presupuestaria (solo si el nodo actual lo requiere) */}
+              {nodoActualResuelto && (
+                nodoActualResuelto.nombre.toLowerCase().includes("presupuestaria") ||
+                nodoActualResuelto.nombre.toLowerCase().includes("certificación")
+              ) && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-semibold">
+                  📋 La certificación presupuestaria se realizará como parte de esta tarea operativa.
+                </div>
+              )}
             </div>
 
             <div className="text-[11px] text-[#9ca3af] border-t border-[#e5e7eb] pt-3 flex items-center justify-between">
               <span>Módulo de Ejecución Operativa SIGEFI DICYT</span>
-              <span className="font-mono text-[#002855] font-bold">Estado Real: Conectado a Postgres DB</span>
+              <span className="font-mono text-[#002855] font-bold">Server-Driven UI · Conectado a Postgres DB</span>
             </div>
           </div>
         </div>

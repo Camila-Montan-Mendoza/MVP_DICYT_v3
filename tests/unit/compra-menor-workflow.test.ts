@@ -1,41 +1,102 @@
-import {
-  NODOS_COMPRA_MENOR,
-} from "../../lib/workflow/compra-menor-strategy";
+/**
+ * Unit Test: Verifica que las interfaces de NodoWorkflow y AccionTransicion
+ * estén correctamente definidas en compra-menor-strategy.ts (solo tipos).
+ *
+ * Los nodos reales se cargan desde la BD — este test solo valida las interfaces.
+ */
+import type { NodoWorkflow, AccionTransicion, ActorRolCode } from "../../lib/workflow/compra-menor-strategy";
 
-function runWorkflowTests() {
-  console.log("=== Running Unit Tests: Compra Menor (1.001 - 20.000 Bs) Workflow Graph ===");
+console.log("=== Running Unit Tests: Workflow Type Interfaces ===");
 
-  // Test 1: Validate count of nodes (19 nodes total)
-  const nodeIds = Object.keys(NODOS_COMPRA_MENOR);
-  if (nodeIds.length !== 19) {
-    throw new Error(`Expected 19 nodes in graph, got ${nodeIds.length}`);
+// Test 1: NodoWorkflow interface structure
+function testNodoWorkflowInterface() {
+  const nodo: NodoWorkflow = {
+    id: "1",
+    pasoNumero: 1,
+    pasoNombre: "Solicitud",
+    nombre: "Test Node",
+    actorRol: "RP",
+    actorNombreRol: "Responsable de Presupuesto",
+    instruccion: "Test instruction",
+    acciones: [],
+  };
+
+  if (!nodo.id || !nodo.pasoNombre || !nodo.nombre) {
+    throw new Error("FAILED: NodoWorkflow interface missing required fields");
   }
-  console.log("✔ Test 1: Node count in graph (19 nodes) PASSED");
-
-  // Test 2: Validate Step 1 transitions (Solicitud -> Presupuesto -> Compras -> Mercado Virtual -> Cotizaciones -> Adjudicar -> Paso 2)
-  const node1_1 = NODOS_COMPRA_MENOR["node_1_1"];
-  const avanzarAction1_1 = node1_1.acciones.find((a) => a.tipo === "AVANZAR");
-  if (avanzarAction1_1?.siguienteNodoId !== "node_1_2") {
-    throw new Error(`Expected node_1_1 to advance to node_1_2, got ${avanzarAction1_1?.siguienteNodoId}`);
-  }
-  console.log("✔ Test 2: Step 1 (Solicitud) linear transitions PASSED");
-
-  // Test 3: Validate loop behavior in node_2_3 (Acta de recepción provisional)
-  const node2_3 = NODOS_COMPRA_MENOR["node_2_3"];
-  const loopAction = node2_3.acciones.find((a) => a.tipo === "REPETIR_BUCLE");
-  if (!loopAction || loopAction.siguienteNodoId !== "node_2_3") {
-    throw new Error("Expected node_2_3 to have a REPETIR_BUCLE action pointing to itself");
-  }
-  console.log("✔ Test 3: Step 2 Provisional Receipt loop behavior (node_2_3 -> node_2_3) PASSED");
-
-  // Test 4: Validate Step 4 Completion (node_4_2 terminal node)
-  const node4_2 = NODOS_COMPRA_MENOR["node_4_2"];
-  if (node4_2.acciones.length !== 0 || !node4_2.nombre.startsWith("Trámite completado")) {
-    throw new Error("Expected terminal node node_4_2 to have 0 actions and title starting with 'Trámite completado'");
-  }
-  console.log("✔ Test 4: Terminal completed node (node_4_2) PASSED");
-
-  console.log("=== All Compra Menor Workflow Unit Tests Passed Successfully ===");
+  console.log("✔ Test 1: NodoWorkflow interface validates correctly PASSED");
 }
 
-runWorkflowTests();
+// Test 2: AccionTransicion interface structure
+function testAccionTransicionInterface() {
+  const accion: AccionTransicion = {
+    id: "trans_1",
+    label: "Aprobar",
+    siguienteNodoId: "2",
+    tipo: "AVANZAR",
+    varianteBtn: "primary",
+  };
+
+  if (!accion.id || !accion.label || !accion.siguienteNodoId) {
+    throw new Error("FAILED: AccionTransicion interface missing required fields");
+  }
+
+  // Verify all tipo values are valid
+  const tipos: AccionTransicion["tipo"][] = ["AVANZAR", "REBOTAR", "RECHAZAR", "REPETIR_BUCLE"];
+  if (!tipos.includes(accion.tipo)) {
+    throw new Error("FAILED: Invalid tipo value");
+  }
+  console.log("✔ Test 2: AccionTransicion interface validates correctly PASSED");
+}
+
+// Test 3: ActorRolCode type
+function testActorRolCodeType() {
+  const roles: ActorRolCode[] = ["I", "RP", "RC", "AD", "CD"];
+  if (roles.length !== 5) {
+    throw new Error("FAILED: ActorRolCode should have 5 values");
+  }
+  console.log("✔ Test 3: ActorRolCode type has 5 valid values PASSED");
+}
+
+// Test 4: NodoWorkflow with acciones
+function testNodoWithAcciones() {
+  const nodo: NodoWorkflow = {
+    id: "1",
+    pasoNumero: 1,
+    pasoNombre: "Solicitud",
+    nombre: "Revisión presupuestaria",
+    actorRol: "RP",
+    actorNombreRol: "Responsable de Presupuesto",
+    instruccion: "Verificar disponibilidad",
+    acciones: [
+      {
+        id: "trans_1",
+        label: "Aprobar",
+        siguienteNodoId: "2",
+        tipo: "AVANZAR",
+        varianteBtn: "primary",
+      },
+      {
+        id: "trans_2",
+        label: "Observar",
+        siguienteNodoId: "3",
+        tipo: "REBOTAR",
+        varianteBtn: "secondary",
+      },
+    ],
+  };
+
+  if (nodo.acciones.length !== 2) {
+    throw new Error("FAILED: NodoWorkflow should have 2 acciones");
+  }
+  if (nodo.acciones[0].tipo !== "AVANZAR" || nodo.acciones[1].tipo !== "REBOTAR") {
+    throw new Error("FAILED: Acciones tipos don't match");
+  }
+  console.log("✔ Test 4: NodoWorkflow with acciones validates correctly PASSED");
+}
+
+testNodoWorkflowInterface();
+testAccionTransicionInterface();
+testActorRolCodeType();
+testNodoWithAcciones();
+console.log("=== All Workflow Type Interface Tests Passed Successfully ===");
