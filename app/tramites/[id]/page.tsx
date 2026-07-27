@@ -6,8 +6,9 @@ import Link from "next/link";
 import { SigefiShell } from "@/components/sigefi-shell";
 import { WorkflowStepper } from "@/components/workflow/workflow-stepper";
 import { TaskTimeline } from "@/components/workflow/task-timeline";
+import { RevisionPreventivaCard } from "@/components/budget/revision-preventiva-card";
 import { getTramiteWorkflowDetail } from "@/lib/workflow/stepper-service";
-import { ArrowLeft, Layers, FileCode } from "lucide-react";
+import { ArrowLeft, Layers } from "lucide-react";
 
 function TramiteWorkflowDetailContent() {
   const routeParams = useParams();
@@ -80,24 +81,8 @@ function TramiteWorkflowDetailContent() {
                 </span>
               </div>
 
-              {/* Contenido Visual Interactivo de Ejemplo en el Espacio Operativo */}
-              <div className="p-6 bg-[#f8fafc] border border-dashed border-[#cbd5e1] rounded-xl text-center space-y-3">
-                <FileCode className="w-10 h-10 text-[#002855] mx-auto opacity-80" />
-                <h4 className="font-bold text-sm text-[#001B47]">
-                  Vista Funcional de Ejecución ({activeStep.nombre})
-                </h4>
-                <p className="text-xs text-[#6b7280] max-w-md mx-auto leading-relaxed">
-                  En este espacio de trabajo contiguo se integrarán dinámicamente los formularios funcionales (Formulación de Requerimientos, Recepción de Insumos, Aprobación de Fondos) para completar la tarea activa.
-                </p>
-                <div className="pt-2">
-                  <Link
-                    href="/tramites/nuevo"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#002855] text-white text-xs font-bold rounded-lg hover:bg-[#001B47] transition-all shadow-xs"
-                  >
-                    Abrir Formulario de Requerimientos
-                  </Link>
-                </div>
-              </div>
+              {/* UI Operativa de Revisión Presupuestaria y Sello Preventivo */}
+              <RevisionPreventivaCard tramiteId={tramiteId} />
             </div>
 
             <div className="text-[11px] text-[#9ca3af] border-t border-[#e5e7eb] pt-3 flex items-center justify-between">

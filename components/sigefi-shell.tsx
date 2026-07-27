@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Folder, FileText, LogOut, Bell, User, Menu, LayoutDashboard, Settings } from "lucide-react";
@@ -16,6 +17,8 @@ export function SigefiShell({ children }: SigefiShellProps) {
   const isTramitesActive = pathname.startsWith("/tramites");
   const isConfigActive = pathname.startsWith("/configuracion");
 
+  const [activeRole, setActiveRole] = useState("INVESTIGADOR");
+
   return (
     <div className="min-h-screen bg-[#f4f6f9] flex flex-col text-[#2c3e50]">
       {/* Header Superior Institucional */}
@@ -29,17 +32,22 @@ export function SigefiShell({ children }: SigefiShellProps) {
           </span>
         </div>
 
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4">
           <button className="relative text-[#6b7280] hover:text-[#002855] transition-colors p-1">
             <Bell className="w-4 h-4" />
             <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[#BC000C] rounded-full" />
           </button>
 
+          {/* Selector de Rol de Usuario (Investigador vs Resp. Presupuestos) */}
           <div className="flex items-center gap-2 pl-3 border-l border-[#e5e7eb]">
-            <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-[#001B47] leading-none">Administrador / Investigador</p>
-              <p className="text-[11px] text-[#6b7280]">Marcelino Perez</p>
-            </div>
+            <select
+              value={activeRole}
+              onChange={(e) => setActiveRole(e.target.value)}
+              className="text-xs bg-[#f8fafc] border border-[#e5e7eb] rounded-lg p-1.5 font-bold text-[#001B47] focus:outline-none"
+            >
+              <option value="INVESTIGADOR">Investigador: Marcelino Pérez</option>
+              <option value="PRESUPUESTOS">Resp. Presupuestos: Alan</option>
+            </select>
             <div className="w-8 h-8 rounded-full bg-[#002855] text-white flex items-center justify-center font-bold text-xs shadow-xs">
               <User className="w-4 h-4" />
             </div>
