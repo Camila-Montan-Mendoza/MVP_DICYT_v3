@@ -39,7 +39,7 @@ export function RequisitionCard({
   const getCategoryTitle = () => {
     switch (tramite.categoria) {
       case "MATERIAL":
-        return "Trámite de Materiales y Suministros";
+        return "Trámite de Materiales";
       case "ACTIVO_FIJO":
         return "Trámite de Activos Fijos y Maquinaria";
       case "SERVICIO":
