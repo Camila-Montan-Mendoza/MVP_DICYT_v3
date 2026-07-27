@@ -1,40 +1,175 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { SigefiShell } from "@/components/sigefi-shell";
 import { WorkflowStepper } from "@/components/workflow/workflow-stepper";
+import { PasoWorkflow, TareaWorkflow } from "@/lib/workflow/stepper-service";
 import { TaskTimeline } from "@/components/workflow/task-timeline";
-import { RevisionPreventivaCard } from "@/components/budget/revision-preventiva-card";
-import { tramitesStore, TramiteStoreItem } from "@/lib/store/tramites-store";
+import { InteractiveTaskWorkspace } from "@/components/workflow/interactive-task-workspace";
+import {
+  tramiteDBRepository,
+  TramiteDBItem,
+} from "@/lib/db/tramite-repository";
+import {
+  cargarGrafoWorkflow,
+  obtenerNodoPorId,
+} from "@/lib/workflow/workflow-db-service";
+import type { NodoWorkflow } from "@/lib/workflow/compra-menor-strategy";
 import { ArrowLeft, Layers, CheckCircle2, Clock, Stamp } from "lucide-react";
 
 function TramiteWorkflowDetailContent() {
   const routeParams = useParams();
-  const rawId = Array.isArray(routeParams?.id) ? routeParams.id[0] : routeParams?.id;
-  const tramiteId = rawId || "tr-2026-001";
+  const rawId = Array.isArray(routeParams?.id)
+    ? routeParams.id[0]
+    : routeParams?.id;
+  const tramiteId = rawId || "1";
 
-  const [tramite, setTramite] = useState<TramiteStoreItem | undefined>(() =>
-    tramitesStore.getTramiteById(tramiteId)
-  );
+  const [tramite, setTramite] = useState<TramiteDBItem | undefined>();
+  const [grafo, setGrafo] = useState<Record<number, NodoWorkflow>>({});
+  const [nodoActual, setNodoActual] = useState<NodoWorkflow | null>(null);
 
+  // Cargar el grafo del workflow desde la BD (con cache en memoria)
   useEffect(() => {
-    setTramite(tramitesStore.getTramiteById(tramiteId));
+    cargarGrafoWorkflow(1).then(setGrafo);
+  }, []);
+
+  const loadTramite = useCallback(() => {
+    tramiteDBRepository.getTramiteById(tramiteId).then((found) => {
+      if (found) {
+        setTramite(found);
+      } else {
+        tramiteDBRepository.getTramites().then((list) => setTramite(list[0]));
+      }
+    });
   }, [tramiteId]);
 
+  useEffect(() => {
+    loadTramite();
+  }, [loadTramite]);
+
+  // Cuando el trámite o el grafo cambian, resolver el nodo actual
+  useEffect(() => {
+    if (tramite && Object.keys(grafo).length > 0) {
+      const nodo = grafo[tramite.idEstadoTramite] || null;
+      setNodoActual(nodo);
+    }
+  }, [tramite, grafo]);
+
   const refreshTramite = () => {
-    setTramite(tramitesStore.getTramiteById(tramiteId));
+    loadTramite();
   };
 
-  const activeTramite = tramite || tramitesStore.getTramites()[0];
+  const resolveNextNode = async (
+    destinoDbId: number,
+  ): Promise<NodoWorkflow | null> => {
+    // Primero buscar en el grafo cacheado
+    if (grafo[destinoDbId]) return grafo[destinoDbId];
+    // Fallback: consultar la BD
+    return obtenerNodoPorId(destinoDbId);
+  };
 
-  // Selected Macro Step state (defaults to the step currently EN_CURSO)
-  const currentStep = activeTramite.pasos.find((p) => p.estado === "EN_CURSO") || activeTramite.pasos[0];
+  const activeTramite: TramiteDBItem = tramite || {
+    id: 0,
+    nro: "00",
+    codigoSeguimiento: "Cargando...",
+    proyecto: "Cargando...",
+    tipoTramite: "Cargando...",
+    categoria: "MATERIAL",
+    fecha: "",
+    fechaISO: new Date().toISOString(),
+    creador: "",
+    justificacion: "",
+    idEstadoTramite: 1,
+    estadoNombre: "Cargando...",
+    estado: "En proceso",
+    pasoNumero: 1,
+    pasoNombre: "Solicitud",
+    items: [],
+  };
+
+  // Construir pasos macro dinámicamente
+  const pasosList: PasoWorkflow[] = [
+    {
+      id: "p1",
+      numero: 1,
+      nombre: "Solicitud",
+      estado:
+        activeTramite.pasoNumero === 1
+          ? "EN_CURSO"
+          : activeTramite.pasoNumero > 1
+            ? "COMPLETADO"
+            : "PENDIENTE",
+    },
+    {
+      id: "p2",
+      numero: 2,
+      nombre: "Recepción",
+      estado:
+        activeTramite.pasoNumero === 2
+          ? "EN_CURSO"
+          : activeTramite.pasoNumero > 2
+            ? "COMPLETADO"
+            : "PENDIENTE",
+    },
+    {
+      id: "p3",
+      numero: 3,
+      nombre: "Pago",
+      estado:
+        activeTramite.pasoNumero === 3
+          ? "EN_CURSO"
+          : activeTramite.pasoNumero > 3
+            ? "COMPLETADO"
+            : "PENDIENTE",
+    },
+    {
+      id: "p4",
+      numero: 4,
+      nombre: "Evidencia",
+      estado: activeTramite.pasoNumero === 4 ? "EN_CURSO" : "PENDIENTE",
+    },
+  ];
+
+  const currentStep =
+    pasosList.find((p) => p.numero === activeTramite.pasoNumero) ||
+    pasosList[0];
   const [activeStepId, setActiveStepId] = useState(currentStep.id);
 
-  const activeStep = activeTramite.pasos.find((p) => p.id === activeStepId) || currentStep;
-  const tareasDelPaso = activeTramite.tareas.filter((t) => t.pasoId === activeStepId);
+  useEffect(() => {
+    setActiveStepId(`p${activeTramite.pasoNumero}`);
+  }, [activeTramite.pasoNumero]);
+
+  const activeStep =
+    pasosList.find((p) => p.id === activeStepId) || currentStep;
+
+  // Recuperar TODAS las tareas granulares del paso activo desde el grafo de la BD
+  const nodosDelPaso = Object.values(grafo).filter(
+    (n) => n.pasoNumero === activeStep.numero,
+  );
+
+  const nodoActualResuelto = nodoActual || (Object.values(grafo)[0] ?? null);
+
+  const tareasDelPaso: TareaWorkflow[] = nodosDelPaso.map((n) => {
+    const nodoId = parseInt(n.id, 10);
+    const currentId = nodoActualResuelto
+      ? parseInt(nodoActualResuelto.id, 10)
+      : 1;
+    const isCurrent = nodoId === currentId;
+    const isCompleted =
+      activeTramite.pasoNumero > n.pasoNumero ||
+      (activeTramite.pasoNumero === n.pasoNumero && nodoId < currentId);
+
+    return {
+      id: n.id,
+      pasoId: `p${n.pasoNumero}`,
+      nombre: n.nombre,
+      rolResponsable: n.actorNombreRol,
+      usuarioAsignado: n.actorNombreRol,
+      estado: isCurrent ? "EN_CURSO" : isCompleted ? "COMPLETADO" : "PENDIENTE",
+    };
+  });
 
   return (
     <SigefiShell>
@@ -58,8 +193,10 @@ function TramiteWorkflowDetailContent() {
                 Trámite Nº {activeTramite.codigoSeguimiento}
               </h1>
               <p className="text-xs text-[#64748b] mt-0.5">
-                <strong className="text-[#001B47]">Proyecto:</strong> {activeTramite.proyecto} |{" "}
-                <strong className="text-[#001B47]">Solicitante:</strong> {activeTramite.creador}
+                <strong className="text-[#001B47]">Proyecto:</strong>{" "}
+                {activeTramite.proyecto} |{" "}
+                <strong className="text-[#001B47]">Solicitante:</strong>{" "}
+                {activeTramite.creador}
               </p>
             </div>
 
@@ -69,9 +206,9 @@ function TramiteWorkflowDetailContent() {
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-2xs ${
                   activeTramite.estado === "Aprobado"
                     ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                    : activeTramite.estado === "Observado por Presupuestos"
-                    ? "bg-red-100 text-red-800 border border-red-200"
-                    : "bg-amber-100/90 text-amber-900 border border-amber-200"
+                    : activeTramite.estado === "Rechazado"
+                      ? "bg-red-100 text-red-800 border border-red-200"
+                      : "bg-amber-100/90 text-amber-900 border border-amber-200"
                 }`}
               >
                 {activeTramite.estado === "Aprobado" ? (
@@ -85,22 +222,27 @@ function TramiteWorkflowDetailContent() {
           </div>
 
           {/* Muestra de Sello Preventivo Estampado en Encabezado si existe */}
-          {activeTramite.selloPreventivo && activeTramite.selloPreventivo.correlativo !== "NO_EMITIDO" && (
-            <div className="pt-2 flex items-center gap-2 text-xs font-bold text-emerald-800 bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-200">
-              <Stamp className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Sello Preventivo Estampado: <strong>{activeTramite.selloPreventivo.correlativo}</strong> por {activeTramite.selloPreventivo.usuarioAprobador}</span>
-            </div>
-          )}
+          {activeTramite.selloPreventivo &&
+            activeTramite.selloPreventivo.correlativo !== "NO_EMITIDO" && (
+              <div className="pt-2 flex items-center gap-2 text-xs font-bold text-emerald-800 bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-200">
+                <Stamp className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>
+                  Sello Preventivo Estampado:{" "}
+                  <strong>{activeTramite.selloPreventivo.correlativo}</strong>{" "}
+                  por {activeTramite.selloPreventivo.usuarioAprobador}
+                </span>
+              </div>
+            )}
         </div>
 
         {/* Stepper Horizontal Superior de Pasos Macro */}
         <WorkflowStepper
-          pasos={activeTramite.pasos}
+          pasos={pasosList}
           activeStepId={activeStepId}
           onSelectStep={setActiveStepId}
         />
 
-        {/* Layout Split de 2 Columnas (Lado Izquierdo: Cronología de Tareas; Lado Derecho: Espacio para UI Operativa) */}
+        {/* Layout Split de 2 Columnas */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Lado Izquierdo: Cronología Vertical de Tareas (4 columnas) */}
           <div className="lg:col-span-4">
@@ -111,7 +253,7 @@ function TramiteWorkflowDetailContent() {
             />
           </div>
 
-          {/* Lado Derecho: Contenedor para UI Operativa de Ejecución (8 columnas) */}
+          {/* Lado Derecho: Área Operativa Server-Driven (8 columnas) */}
           <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-[#e5e7eb] shadow-2xs space-y-4 flex flex-col justify-between min-h-[420px]">
             <div className="space-y-4">
               <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
@@ -122,21 +264,31 @@ function TramiteWorkflowDetailContent() {
                   </h3>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f1f5f9] text-[#002855]">
-                  Paso {activeStep.numero} de {activeTramite.pasos.length}
+                  Paso {activeStep.numero} de 4
                 </span>
               </div>
 
-              {/* UI Operativa Dinámica: Revisión Presupuestaria y Sello Preventivo */}
-              <RevisionPreventivaCard
-                tramiteId={activeTramite.id}
-                onApproveSuccess={refreshTramite}
-                onRejectSuccess={refreshTramite}
-              />
+              {/* Server-Driven UI: El componente renderiza lo que la BD dice */}
+              {nodoActualResuelto && (
+                <InteractiveTaskWorkspace
+                  tramiteId={String(activeTramite.id)}
+                  nodoActual={nodoActualResuelto}
+                  onResolveNextNode={resolveNextNode}
+                  onNodeTransition={(nextNode, _log) => {
+                    setNodoActual(nextNode);
+                    const nuevoPasoId = `p${nextNode.pasoNumero}`;
+                    setActiveStepId(nuevoPasoId);
+                    refreshTramite();
+                  }}
+                />
+              )}
             </div>
 
             <div className="text-[11px] text-[#9ca3af] border-t border-[#e5e7eb] pt-3 flex items-center justify-between">
               <span>Módulo de Ejecución Operativa SIGEFI DICYT</span>
-              <span className="font-mono text-[#002855] font-bold">Estado Real: Conectado a Store</span>
+              <span className="font-mono text-[#002855] font-bold">
+                Server-Driven UI · Conectado a Postgres DB
+              </span>
             </div>
           </div>
         </div>

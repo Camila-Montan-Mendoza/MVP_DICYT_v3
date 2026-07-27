@@ -3,16 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Folder,
-  FileText,
-  LogOut,
-  Bell,
-  User,
-  Menu,
-  LayoutDashboard,
-  Settings,
-} from "lucide-react";
+import { Folder, FileText, LogOut, Bell, User, Menu } from "lucide-react";
 import {
   getCurrentUser,
   logoutSession,
@@ -33,10 +24,8 @@ export function SigefiShell({ children }: SigefiShellProps) {
     getCurrentUser().then(setUser);
   }, []);
 
-  const isDashboardActive = pathname === "/dashboard";
   const isProyectosActive = pathname.startsWith("/proyectos");
   const isTramitesActive = pathname.startsWith("/tramites");
-  const isConfigActive = pathname.startsWith("/configuracion");
 
   const handleLogout = async () => {
     await logoutSession();
@@ -46,6 +35,7 @@ export function SigefiShell({ children }: SigefiShellProps) {
   const currentUser = user ?? {
     nombreCompleto: "Cargando...",
     rolActivo: "",
+    roles: [],
   };
 
   return (
@@ -74,9 +64,8 @@ export function SigefiShell({ children }: SigefiShellProps) {
                 {currentUser.nombreCompleto}
               </p>
               <p className="text-[10px] text-[#6b7280] font-mono mt-0.5">
-                Rol:{" "}
                 <strong className="text-[#002855]">
-                  {currentUser.rolActivo}
+                  {currentUser.roles.map((r) => r.nombre).join(", ")}
                 </strong>
               </p>
             </div>

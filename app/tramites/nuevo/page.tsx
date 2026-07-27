@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SigefiShell } from "@/components/sigefi-shell";
 import {
@@ -26,12 +26,9 @@ import {
   FileCode,
 } from "lucide-react";
 import { uploadAttachmentFile } from "@/lib/supabase/storage";
-import {
-  CLASIFICADOR_OBJETO_GASTO,
-  PartidaObjetoGasto,
-} from "@/lib/requisitions/clasificador-objeto-gasto";
+import { itemDBRepository, ItemDBItem } from "@/lib/db/item-repository";
 import { ItemCategoria } from "@/types/requisitions";
-import { tramitesStore, TramiteStoreItem } from "@/lib/store/tramites-store";
+import { tramiteDBRepository } from "@/lib/db/tramite-repository";
 
 // Item model
 interface ItemData {
@@ -81,10 +78,15 @@ export default function FormulacionRequerimientosPage() {
 
   // Items list starts EMPTY per user request (items = [])
   const [items, setItems] = useState<ItemData[]>([]);
+  const [dbCatalogItems, setDbCatalogItems] = useState<ItemDBItem[]>([]);
 
   // Search & Autocomplete catalog
   const [catalogSearch, setCatalogSearch] = useState("");
   const [showCatalogDropdown, setShowCatalogDropdown] = useState(false);
+
+  useEffect(() => {
+    itemDBRepository.getItems().then(setDbCatalogItems);
+  }, []);
 
   // Independent Requisition Headers by Category
   const [headers, setHeaders] = useState<
@@ -158,42 +160,32 @@ export default function FormulacionRequerimientosPage() {
   if (materialesItems.length > 0) activeCategories.push("MATERIAL");
   if (serviciosItems.length > 0) activeCategories.push("SERVICIO");
 
-  // Filter catalog items for search dropdown
-  const filteredCatalog = CLASIFICADOR_OBJETO_GASTO.flatMap((p) =>
-    p.ejemplosInsumos
-      .filter(
-        (ej) =>
-          ej.toLowerCase().includes(catalogSearch.toLowerCase()) ||
-          p.denominacion.toLowerCase().includes(catalogSearch.toLowerCase()),
-      )
-      .map((ejem) => ({
-        ejemploNombre: ejem,
-        partida: p,
-      })),
+  // Filter catalog items from DB for search dropdown
+  const filteredCatalog = dbCatalogItems.filter(
+    (item) =>
+      item.nombre.toLowerCase().includes(catalogSearch.toLowerCase()) ||
+      String(item.partidaCodigo).includes(catalogSearch) ||
+      item.partidaNombre.toLowerCase().includes(catalogSearch.toLowerCase())
   );
 
-  const handleAddFromCatalog = (
-    ejemploNombre: string,
-    partida: PartidaObjetoGasto,
-  ) => {
-    // New item fields START BLANK (empty strings "") per user request!
+  const handleAddFromCatalog = (dbItem: ItemDBItem) => {
     const newItem: ItemData = {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      nombre: ejemploNombre.toUpperCase(),
-      categoria: partida.categoria,
+      nombre: dbItem.nombre.toUpperCase(),
+      categoria: dbItem.categoria,
       cantidad: 1,
-      unidad: partida.categoria === "SERVICIO" ? "Servicio" : "Unidad",
-      precioUnitario: "", // Starts blank!
-      precioReferencial: "", // Starts blank!
-      detalleServicio: "", // Starts blank!
-      especificacionesTecnicasTexto: "", // Starts blank!
-      partidaPresupuestaria: partida.codigo, // 5-digit deep code
-      partidaNombre: partida.denominacion,
-      documentotecnicoNombre: "", // Starts blank!
+      unidad: dbItem.categoria === "SERVICIO" ? "Servicio" : "Unidad",
+      precioUnitario: "",
+      precioReferencial: "",
+      detalleServicio: "",
+      especificacionesTecnicasTexto: "",
+      partidaPresupuestaria: String(dbItem.partidaCodigo),
+      partidaNombre: dbItem.partidaNombre,
+      documentotecnicoNombre: "",
     };
 
     setItems((prev) => [...prev, newItem]);
-    setSelectedItem(newItem); // Automatically open in right-side editing panel
+    setSelectedItem(newItem);
     setCatalogSearch("");
     setShowCatalogDropdown(false);
   };
@@ -296,7 +288,7 @@ export default function FormulacionRequerimientosPage() {
   };
 
   // Submit Single Requisition
-  const handleSubmitSingle = (cat: ItemCategoria) => {
+  const handleSubmitSingle = async (cat: ItemCategoria) => {
     const catItems = items.filter((i) => i.categoria === cat);
     const totalAmount = catItems.reduce(
       (acc, curr) => acc + (Number(curr.precioReferencial) || 0),
@@ -334,79 +326,19 @@ export default function FormulacionRequerimientosPage() {
       return;
     }
 
-    const trackingCode = `TR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    const newStoreItem: TramiteStoreItem = {
-      id: trackingCode.toLowerCase(),
-      nro: `${Math.floor(1 + Math.random() * 99)}`.padStart(2, "0"),
-      codigoSeguimiento: trackingCode,
-      proyecto,
-      tipoTramite: cat === "ACTIVO_FIJO" ? "Solicitud de Activo Fijo" : cat === "SERVICIO" ? "Solicitud de Servicio" : "Solicitud de Materiales",
-      categoria: cat,
-      fecha: new Date().toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" }),
-      fechaISO: new Date().toISOString(),
-      creador: "Dr. Marcelino Pérez",
+    await tramiteDBRepository.createTramite({
+      proyectoId: 1,
+      tipoTramiteId: 1,
       justificacion: headers[cat].justificacion,
-      custodioNombre: headers[cat].custodioNombre,
-      custodioUbicacion: headers[cat].custodioUbicacion,
-      proformas: headers[cat].proformas,
-      items: catItems.map((it) => ({
-        id: it.id,
-        nombre: it.nombre,
-        categoria: it.categoria,
-        cantidad: Number(it.cantidad) || 1,
-        precioReferencial: Number(it.precioReferencial) || 0,
-        especificacionesTecnicasTexto: it.especificacionesTecnicasTexto,
-        detalleServicio: it.detalleServicio,
-        partidaPresupuestaria: it.partidaPresupuestaria,
-        partidaNombre: it.partidaNombre,
-        documentotecnicoNombre: it.documentotecnicoNombre,
-      })),
-      pasos: [
-        { id: "p1", numero: 1, nombre: "Solicitud", estado: "COMPLETADO" },
-        { id: "p2", numero: 2, nombre: "Presupuesto", estado: "EN_CURSO" },
-        { id: "p3", numero: 3, nombre: "Recepción", estado: "PENDIENTE" },
-        { id: "p4", numero: 4, nombre: "Completado", estado: "PENDIENTE" },
-      ],
-      tareas: [
-        {
-          id: `t1-${Date.now()}`,
-          pasoId: "p1",
-          nombre: "Formulación de Requerimiento",
-          rolResponsable: "Investigador Principal",
-          usuarioAsignado: "Marcelino Perez",
-          estado: "COMPLETADO",
-          fechaCompletado: new Date().toLocaleString("es-BO"),
-        },
-        {
-          id: `t2-${Date.now()}`,
-          pasoId: "p2",
-          nombre: "Sello Preventivo y Certificación de Saldos",
-          rolResponsable: "Responsable de Presupuestos",
-          usuarioAsignado: "Alan",
-          estado: "EN_CURSO",
-        },
-      ],
-      estado: "Pendiente",
-      requiereAccion: true,
-    };
-
-    tramitesStore.addTramites([newStoreItem]);
+      items: catItems,
+    });
 
     setHeaders((prev) => ({
       ...prev,
-      [cat]: {
-        ...prev[cat],
-        estado: "ENVIADO",
-        codigoSeguimiento: trackingCode,
-        errores: [],
-      },
+      [cat]: { ...prev[cat], estado: "ENVIADO", errores: [] },
     }));
 
-    setLastSubmittedCode(trackingCode);
-    setTimeout(() => {
-      setLastSubmittedCode(null);
-      router.push("/tramites");
-    }, 1500);
+    router.push("/tramites");
   };
 
   // Resilient Batch Submit ("Enviar Todos los Trámites" / "Enviar")
@@ -444,71 +376,20 @@ export default function FormulacionRequerimientosPage() {
             [cat]: { ...prev[cat], estado: "ERROR_VALIDACION", errores: errs },
           }));
         } else {
-          const trackingCode = `TR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
           const catItems = items.filter((i) => i.categoria === cat);
-          const newStoreItem: TramiteStoreItem = {
-            id: trackingCode.toLowerCase(),
-            nro: `${Math.floor(1 + Math.random() * 99)}`.padStart(2, "0"),
-            codigoSeguimiento: trackingCode,
-            proyecto,
-            tipoTramite: cat === "ACTIVO_FIJO" ? "Solicitud de Activo Fijo" : cat === "SERVICIO" ? "Solicitud de Servicio" : "Solicitud de Materiales",
-            categoria: cat,
-            fecha: new Date().toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" }),
-            fechaISO: new Date().toISOString(),
-            creador: "Dr. Marcelino Pérez",
+          const created = await tramiteDBRepository.createTramite({
+            proyectoId: 1,
+            tipoTramiteId: 1,
             justificacion: headers[cat].justificacion,
-            custodioNombre: headers[cat].custodioNombre,
-            custodioUbicacion: headers[cat].custodioUbicacion,
-            proformas: headers[cat].proformas,
-            items: catItems.map((it) => ({
-              id: it.id,
-              nombre: it.nombre,
-              categoria: it.categoria,
-              cantidad: Number(it.cantidad) || 1,
-              precioReferencial: Number(it.precioReferencial) || 0,
-              especificacionesTecnicasTexto: it.especificacionesTecnicasTexto,
-              detalleServicio: it.detalleServicio,
-              partidaPresupuestaria: it.partidaPresupuestaria,
-              partidaNombre: it.partidaNombre,
-              documentotecnicoNombre: it.documentotecnicoNombre,
-            })),
-            pasos: [
-              { id: "p1", numero: 1, nombre: "Solicitud", estado: "COMPLETADO" },
-              { id: "p2", numero: 2, nombre: "Presupuesto", estado: "EN_CURSO" },
-              { id: "p3", numero: 3, nombre: "Recepción", estado: "PENDIENTE" },
-              { id: "p4", numero: 4, nombre: "Completado", estado: "PENDIENTE" },
-            ],
-            tareas: [
-              {
-                id: `t1-${Date.now()}`,
-                pasoId: "p1",
-                nombre: "Formulación de Requerimiento",
-                rolResponsable: "Investigador Principal",
-                usuarioAsignado: "Marcelino Perez",
-                estado: "COMPLETADO",
-                fechaCompletado: new Date().toLocaleString("es-BO"),
-              },
-              {
-                id: `t2-${Date.now()}`,
-                pasoId: "p2",
-                nombre: "Sello Preventivo y Certificación de Saldos",
-                rolResponsable: "Responsable de Presupuestos",
-                usuarioAsignado: "Alan",
-                estado: "EN_CURSO",
-              },
-            ],
-            estado: "Pendiente",
-            requiereAccion: true,
-          };
-
-          tramitesStore.addTramites([newStoreItem]);
+            items: catItems,
+          });
 
           setHeaders((prev) => ({
             ...prev,
             [cat]: {
               ...prev[cat],
               estado: "ENVIADO",
-              codigoSeguimiento: trackingCode,
+              codigoSeguimiento: created.codigoSeguimiento,
               errores: [],
             },
           }));
@@ -589,36 +470,34 @@ export default function FormulacionRequerimientosPage() {
                   registrar el ítem.
                 </div>
               ) : (
-                filteredCatalog.map((item, idx) => (
+                filteredCatalog.map((item) => (
                   <div
-                    key={idx}
-                    onClick={() =>
-                      handleAddFromCatalog(item.ejemploNombre, item.partida)
-                    }
+                    key={item.id}
+                    onClick={() => handleAddFromCatalog(item)}
                     className="p-3 hover:bg-[#f8fafc] cursor-pointer flex items-center justify-between text-xs transition-colors"
                   >
                     <div>
                       <p className="font-bold text-[#001B47]">
-                        {item.ejemploNombre}
+                        {item.nombre}
                       </p>
                       <p className="text-[11px] text-[#6b7280]">
                         Partida 5 dígitos:{" "}
                         <strong className="text-[#BC000C]">
-                          {item.partida.codigo}
+                          {item.partidaCodigo}
                         </strong>{" "}
-                        - {item.partida.denominacion}
+                        - {item.partidaNombre}
                       </p>
                     </div>
                     <span
                       className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        item.partida.categoria === "ACTIVO_FIJO"
+                        item.categoria === "ACTIVO_FIJO"
                           ? "bg-blue-100 text-blue-800"
-                          : item.partida.categoria === "SERVICIO"
+                          : item.categoria === "SERVICIO"
                             ? "bg-red-100 text-red-800"
                             : "bg-emerald-100 text-emerald-800"
                       }`}
                     >
-                      {item.partida.categoria}
+                      {item.categoria}
                     </span>
                   </div>
                 ))
@@ -728,7 +607,9 @@ export default function FormulacionRequerimientosPage() {
                             toggleCategoryCollapse(cat);
                           }}
                           className="p-1 rounded-lg text-slate-500 hover:text-[#002855] hover:bg-slate-100 transition-colors"
-                          title={isCollapsed ? "Desplegar trámite" : "Plegar trámite"}
+                          title={
+                            isCollapsed ? "Desplegar trámite" : "Plegar trámite"
+                          }
                         >
                           {isCollapsed ? (
                             <ChevronDown className="w-5 h-5" />
@@ -955,7 +836,7 @@ export default function FormulacionRequerimientosPage() {
                 <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
                   <div>
                     <h3 className="font-extrabold text-sm text-[#001B47] uppercase tracking-wider">
-                      DETALLE DE {" "}
+                      DETALLE DE{" "}
                       {selectedItem.categoria === "SERVICIO"
                         ? "SERVICIO"
                         : "REQUERIMIENTO"}

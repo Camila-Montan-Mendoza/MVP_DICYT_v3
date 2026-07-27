@@ -70,7 +70,7 @@ export function RequisitionCard({
       } else {
         setLocalErrors(data.errors || ["Error al enviar el trámite"]);
       }
-    } catch (_err) {
+    } catch {
       setLocalErrors(["Error de conexión al enviar el trámite"]);
     } finally {
       setSubmitting(false);
