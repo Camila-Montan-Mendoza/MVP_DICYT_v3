@@ -5,11 +5,12 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { SigefiShell } from "@/components/sigefi-shell";
 import { WorkflowStepper } from "@/components/workflow/workflow-stepper";
-import { PasoWorkflow } from "@/lib/workflow/stepper-service";
+import { PasoWorkflow, TareaWorkflow } from "@/lib/workflow/stepper-service";
 import { TaskTimeline } from "@/components/workflow/task-timeline";
-import { RevisionPreventivaCard } from "@/components/budget/revision-preventiva-card";
+import { WorkflowSharedUI } from "@/components/workflow/workflow-shared-ui";
 import { InteractiveTaskWorkspace } from "@/components/workflow/interactive-task-workspace";
 import { tramiteDBRepository, TramiteDBItem } from "@/lib/db/tramite-repository";
+import { NODOS_COMPRA_MENOR } from "@/lib/workflow/compra-menor-strategy";
 import { ArrowLeft, Layers, CheckCircle2, Clock, Stamp } from "lucide-react";
 
 function TramiteWorkflowDetailContent() {
@@ -66,17 +67,35 @@ function TramiteWorkflowDetailContent() {
   const currentStep = pasosList.find((p) => p.numero === activeTramite.pasoNumero) || pasosList[0];
   const [activeStepId, setActiveStepId] = useState(currentStep.id);
 
+  useEffect(() => {
+    setActiveStepId(`p${activeTramite.pasoNumero}`);
+  }, [activeTramite.pasoNumero]);
+
   const activeStep = pasosList.find((p) => p.id === activeStepId) || currentStep;
-  const tareasDelPaso = [
-    {
-      id: "t1",
-      pasoId: `p${activeTramite.pasoNumero}`,
-      nombre: activeTramite.estadoNombre,
-      rolResponsable: "Responsable de Presupuestos / Compras / Admin",
-      usuarioAsignado: "Usuario Autenticado",
-      estado: "EN_CURSO" as const,
-    },
-  ];
+
+  // Retrieve ALL granular tasks belonging to the active macro step
+  const nodosDelPaso = Object.values(NODOS_COMPRA_MENOR).filter(
+    (n) => n.pasoNumero === activeStep.numero
+  );
+  const currentNodoActual =
+    NODOS_COMPRA_MENOR[activeTramite.currentNodeId] || NODOS_COMPRA_MENOR["node_1_1"];
+
+  const tareasDelPaso: TareaWorkflow[] = nodosDelPaso.map((n) => {
+    const isCurrent = n.id === currentNodoActual.id;
+    const isCompleted =
+      activeTramite.pasoNumero > n.pasoNumero ||
+      (activeTramite.pasoNumero === n.pasoNumero &&
+        parseInt(n.id.split("_")[2], 10) < parseInt(currentNodoActual.id.split("_")[2], 10));
+
+    return {
+      id: n.id,
+      pasoId: `p${n.pasoNumero}`,
+      nombre: n.nombre,
+      rolResponsable: n.actorNombreRol,
+      usuarioAsignado: n.actorNombreRol,
+      estado: isCurrent ? "EN_CURSO" : isCompleted ? "COMPLETADO" : "PENDIENTE",
+    };
+  });
 
   return (
     <SigefiShell>
@@ -171,6 +190,7 @@ function TramiteWorkflowDetailContent() {
               {/* UI Operativa Dinámica: Flujo de Transiciones y Estrategia Compra Menor */}
               <InteractiveTaskWorkspace
                 tramiteId={String(activeTramite.id)}
+                initialNodeId={activeTramite.currentNodeId}
                 onNodeTransition={(nextNode, _log) => {
                   const nuevoPasoId = `p${nextNode.pasoNumero}`;
                   setActiveStepId(nuevoPasoId);
@@ -178,17 +198,17 @@ function TramiteWorkflowDetailContent() {
                 }}
               />
 
-              {/* UI Operativa Dinámica: Revisión Presupuestaria y Sello Preventivo */}
-              <RevisionPreventivaCard
+              {/* UI Operativa Dinámica Compartida por Tipo de Nodo */}
+              <WorkflowSharedUI
+                nodo={currentNodoActual}
                 tramiteId={String(activeTramite.id)}
-                onApproveSuccess={refreshTramite}
-                onRejectSuccess={refreshTramite}
+                onRefresh={refreshTramite}
               />
             </div>
 
             <div className="text-[11px] text-[#9ca3af] border-t border-[#e5e7eb] pt-3 flex items-center justify-between">
               <span>Módulo de Ejecución Operativa SIGEFI DICYT</span>
-              <span className="font-mono text-[#002855] font-bold">Estado Real: Conectado a Store</span>
+              <span className="font-mono text-[#002855] font-bold">Estado Real: Conectado a Postgres DB</span>
             </div>
           </div>
         </div>

@@ -20,6 +20,7 @@ export function WorkflowStepper({
         {pasos.map((paso, idx) => {
           const isCompletado = paso.estado === "COMPLETADO";
           const isEnCurso = paso.estado === "EN_CURSO";
+          const isPendiente = paso.estado === "PENDIENTE";
           const isSelected = paso.id === activeStepId;
           const isLast = idx === pasos.length - 1;
 
@@ -27,8 +28,14 @@ export function WorkflowStepper({
             <div key={paso.id} className="flex-1 flex items-center relative">
               {/* Contenedor del Paso (Círculo + Etiqueta + Badge) */}
               <div
-                onClick={() => onSelectStep(paso.id)}
-                className="flex flex-col items-center gap-2 cursor-pointer z-10 mx-auto group"
+                onClick={() => {
+                  if (!isPendiente) {
+                    onSelectStep(paso.id);
+                  }
+                }}
+                className={`flex flex-col items-center gap-2 z-10 mx-auto group transition-opacity ${
+                  isPendiente ? "cursor-not-allowed opacity-50" : "cursor-pointer opacity-100"
+                }`}
               >
                 {/* Círculo Numerado del Paso */}
                 <div

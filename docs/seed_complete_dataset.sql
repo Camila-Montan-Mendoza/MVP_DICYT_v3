@@ -99,7 +99,7 @@ INSERT INTO "item" ("id", "id_partida_concreta", "nombre") VALUES
   (10, 7, 'Bidones de Diésel Oíl para Equipo de Campo')
 ON CONFLICT ("id") DO NOTHING;
 
--- 7. Proveedores Adjudicados
+-- 7. Proveedores
 INSERT INTO "proveedor" ("id", "nombre", "nit", "telefono", "direccion") VALUES
   (1, 'COMERCIALIZADORA TECH-BOLIVIA S.R.L.', '1029384019', '4458291', 'Av. Heroínas #456, Cochabamba'),
   (2, 'LABORATORIOS & BIOQUÍMICA ANDINA S.A.', '2049182012', '4412093', 'Calle España #123, Cochabamba'),
@@ -107,35 +107,35 @@ INSERT INTO "proveedor" ("id", "nombre", "nit", "telefono", "direccion") VALUES
 ON CONFLICT ("id") DO NOTHING;
 
 -- 8. Trámites Registrados en Diversos Estados del Flujo de Compra Menor
-INSERT INTO "tramite" ("id", "id_proyecto", "id_tipo_tramite", "id_estado_tramite", "id_usuario", "fecha_creacion") VALUES
-  -- Trámite 1: En inicio (Paso 1.1: Revisión presupuestaria)
-  (1, 1, 1, 1, 1, '2026-01-15 10:00:00'),
-  -- Trámite 2: En revisión de Compras (Paso 1.2: Revisión técnica)
-  (2, 2, 1, 2, 2, '2026-01-18 14:30:00'),
-  -- Trámite 3: En cotizaciones y adjudicación (Paso 1.8: Adjudicación formal)
-  (3, 1, 1, 8, 1, '2026-01-20 09:15:00'),
-  -- Trámite 4: En recepción provisional (Paso 2.3: Entrega parcial)
-  (4, 2, 1, 11, 2, '2026-01-22 16:00:00'),
-  -- Trámite 5: En solicitud de pago (Paso 3.1: Pago a proveedor)
-  (5, 4, 1, 13, 1, '2026-01-24 11:20:00'),
-  -- Trámite 6: Trámite completado y archivado (Paso 4.2)
-  (6, 3, 1, 19, 1, '2026-01-25 17:45:00')
-ON CONFLICT ("id") DO NOTHING;
+-- INSERT INTO "tramite" ("id", "id_proyecto", "id_tipo_tramite", "id_estado_tramite", "id_usuario", "fecha_creacion") VALUES
+--   -- Trámite 1: En inicio (Paso 1.1: Revisión presupuestaria)
+--   (1, 1, 1, 1, 1, '2026-01-15 10:00:00'),
+--   -- Trámite 2: En revisión de Compras (Paso 1.2: Revisión técnica)
+--   (2, 2, 1, 2, 2, '2026-01-18 14:30:00'),
+--   -- Trámite 3: En cotizaciones y adjudicación (Paso 1.8: Adjudicación formal)
+--   (3, 1, 1, 8, 1, '2026-01-20 09:15:00'),
+--   -- Trámite 4: En recepción provisional (Paso 2.3: Entrega parcial)
+--   (4, 2, 1, 11, 2, '2026-01-22 16:00:00'),
+--   -- Trámite 5: En solicitud de pago (Paso 3.1: Pago a proveedor)
+--   (5, 4, 1, 13, 1, '2026-01-24 11:20:00'),
+--   -- Trámite 6: Trámite completado y archivado (Paso 4.2)
+--   (6, 3, 1, 19, 1, '2026-01-25 17:45:00')
+-- ON CONFLICT ("id") DO NOTHING;
 
 -- 9. Ítems Solicitados por Trámite ("item_tramite")
-INSERT INTO "item_tramite" ("id", "id_item", "id_tramite", "cantidad_solicitada", "precio", "existe_en_mercado_virtual", "especificacion") VALUES
-  (1, 5, 1, 1, 18500.00, true, 'GPU 24GB VRAM GDDR6X'),
-  (2, 1, 1, 2, 1200.00, false, 'Kit ADN marca Qiagen'),
-  (3, 7, 2, 5, 800.00, true, 'Reactivo analítico 99.8%'),
-  (4, 9, 6, 1, 4500.00, true, 'Proyector 4000 lúmenes 4K')
-ON CONFLICT ("id") DO NOTHING;
+-- INSERT INTO "item_tramite" ("id", "id_item", "id_tramite", "cantidad_solicitada", "precio", "existe_en_mercado_virtual", "especificacion") VALUES
+--   (1, 5, 1, 1, 18500.00, true, 'GPU 24GB VRAM GDDR6X'),
+--   (2, 1, 1, 2, 1200.00, false, 'Kit ADN marca Qiagen'),
+--   (3, 7, 2, 5, 800.00, true, 'Reactivo analítico 99.8%'),
+--   (4, 9, 6, 1, 4500.00, true, 'Proyector 4000 lúmenes 4K')
+-- ON CONFLICT ("id") DO NOTHING;
 
 -- 10. Historial de Auditoría de Transiciones de Estado
-INSERT INTO "historial_estado_tramite" ("id_tramite", "id_estado_anterior", "id_estado_nuevo", "id_usuario_responsable", "observaciones") VALUES
-  (1, 1, 1, 1, 'Trámite iniciado por Dr. Daniel Pérez para investigación en IA'),
-  (2, 1, 2, 3, 'Sello preventivo aprobado por Alan. Derivado a Compras.'),
-  (3, 1, 8, 4, 'Cotizaciones cargadas y proveedor adjudicado por Grober Villarroel'),
-  (4, 8, 11, 1, 'Acta provisional emitida por recepción parcial de laboratorio'),
-  (5, 11, 13, 1, 'Conformidad emitida. Derivado a Tesorería para pago'),
-  (6, 18, 19, 5, 'Expediente digital consolidado y trámite completado')
-ON CONFLICT DO NOTHING;
+-- INSERT INTO "historial_estado_tramite" ("id_tramite", "id_estado_anterior", "id_estado_nuevo", "id_usuario_responsable", "observaciones") VALUES
+--   (1, 1, 1, 1, 'Trámite iniciado por Dr. Daniel Pérez para investigación en IA'),
+--   (2, 1, 2, 3, 'Sello preventivo aprobado por Alan. Derivado a Compras.'),
+--   (3, 1, 8, 4, 'Cotizaciones cargadas y proveedor adjudicado por Grober Villarroel'),
+--   (4, 8, 11, 1, 'Acta provisional emitida por recepción parcial de laboratorio'),
+--   (5, 11, 13, 1, 'Conformidad emitida. Derivado a Tesorería para pago'),
+--   (6, 18, 19, 5, 'Expediente digital consolidado y trámite completado')
+-- ON CONFLICT DO NOTHING;
