@@ -62,18 +62,17 @@ export class TramiteDBRepository {
           rechazado,
           proyecto:proyecto!tramite_id_proyecto_fkey ( nombre, codigo ),
           tipo_tramite:tipo_tramite!tramite_id_tipo_tramite_fkey ( nombre ),
-          estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo ( id, orden, nombre ) )
+          estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre ) )
         `)
         .order("id", { ascending: false });
 
       if (error) {
         console.error("[Supabase Tramites Query Error]:", error.message, error.details, error.hint);
-        return this.getFallbackTramites();
+        return [];
       }
 
       if (!tramites || tramites.length === 0) {
-        console.warn("[Supabase Tramites Warning]: No trámites rows found in database table 'tramite'. Returning fallback item.");
-        return this.getFallbackTramites();
+        return [];
       }
 
       return tramites.map((t: any, idx: number) => {
