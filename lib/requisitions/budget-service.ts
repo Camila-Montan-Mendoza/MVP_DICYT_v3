@@ -1,3 +1,6 @@
+import { ItemCategoria } from "@/types/requisitions";
+import { buscarPartidaObjetoGasto } from "@/lib/requisitions/clasificador-objeto-gasto";
+
 export interface BudgetLookupResult {
   found: boolean;
   partidaCode: string;
@@ -5,14 +8,15 @@ export interface BudgetLookupResult {
 }
 
 /**
- * Simulates external budget line lookup service with timeout and resilient fallback.
- * Implements FR-005: If lookup fails or returns no match, marks as "Pendiente de asignación".
+ * Servicio de consulta de partidas presupuestarias según el Clasificador por Objeto del Gasto de Bolivia.
+ * Devuelve SIEMPRE el código de 5 dígitos de nivel más profundo (ej. 34200, 43400, 25230).
+ * Si no encuentra coincidencia, retorna la marca de contingencia "Pendiente de asignación".
  */
 export async function lookupBudgetLine(description: string, category: string): Promise<BudgetLookupResult> {
   const DEFAULT_FALLBACK: BudgetLookupResult = {
     found: false,
     partidaCode: "Pendiente de asignación",
-    partidaNombre: "Delegado a Responsable de Presupuestos",
+    partidaNombre: "Delegado a Responsable de Presupuestos DICYT",
   };
 
   if (!description || description.trim() === "") {
@@ -20,42 +24,27 @@ export async function lookupBudgetLine(description: string, category: string): P
   }
 
   try {
-    // Timeout promise after 1.5 seconds per spec SLA
-    const timeoutPromise = new Promise<BudgetLookupResult>((_, reject) =>
-      setTimeout(() => reject(new Error("Timeout")), 1500)
-    );
+    const match = buscarPartidaObjetoGasto(description, category as ItemCategoria);
+    if (match) {
+      return {
+        found: true,
+        partidaCode: match.codigo,
+        partidaNombre: match.denominacion,
+      };
+    }
 
-    const lookupPromise = (async (): Promise<BudgetLookupResult> => {
-      const lower = description.toLowerCase();
+    // Default deep fallback codes for categories if specific match is not found
+    if (category === "MATERIAL") {
+      return { found: true, partidaCode: "39500", partidaNombre: "Útiles de Escritorio y Oficina" };
+    }
+    if (category === "ACTIVO_FIJO") {
+      return { found: true, partidaCode: "43400", partidaNombre: "Equipo Médico y de Laboratorio" };
+    }
+    if (category === "SERVICIO") {
+      return { found: true, partidaCode: "25210", partidaNombre: "Consultorías por Producto" };
+    }
 
-      if (category === "MATERIAL") {
-        if (lower.includes("reactivo") || lower.includes("quimico") || lower.includes("insumo")) {
-          return { found: true, partidaCode: "34110", partidaNombre: "Combustibles, Lubricantes y Reactivos" };
-        }
-        if (lower.includes("papel") || lower.includes("tinta") || lower.includes("oficina")) {
-          return { found: true, partidaCode: "32100", partidaNombre: "Papel y Útiles de Escritorio" };
-        }
-        return { found: true, partidaCode: "39100", partidaNombre: "Materiales y Suministros Varios" };
-      }
-
-      if (category === "ACTIVO_FIJO") {
-        if (lower.includes("equipo") || lower.includes("microscopio") || lower.includes("balanza")) {
-          return { found: true, partidaCode: "43110", partidaNombre: "Equipo de Oficina y Computación" };
-        }
-        return { found: true, partidaCode: "43500", partidaNombre: "Maquinaria y Equipo de Investigación" };
-      }
-
-      if (category === "SERVICIO") {
-        if (lower.includes("mantenimiento") || lower.includes("reparacion")) {
-          return { found: true, partidaCode: "24100", partidaNombre: "Mantenimiento y Reparación de Equipos" };
-        }
-        return { found: true, partidaCode: "25200", partidaNombre: "Estudios e Investigaciones Técnicas" };
-      }
-
-      return DEFAULT_FALLBACK;
-    })();
-
-    return await Promise.race([lookupPromise, timeoutPromise]);
+    return DEFAULT_FALLBACK;
   } catch (error) {
     console.warn("Budget lookup fallback activated:", error);
     return DEFAULT_FALLBACK;

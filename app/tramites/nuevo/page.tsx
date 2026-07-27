@@ -17,9 +17,12 @@ import {
   Paperclip,
   UserCheck,
   MapPin,
-  FileText
+  FileText,
+  Plus,
+  Info
 } from "lucide-react";
 import { uploadAttachmentFile } from "@/lib/supabase/storage";
+import { CLASIFICADOR_OBJETO_GASTO, PartidaObjetoGasto } from "@/lib/requisitions/clasificador-objeto-gasto";
 
 interface ItemData {
   id: string;
@@ -31,6 +34,7 @@ interface ItemData {
   precioReferencial: number;
   detalleServicio?: string;
   partidaPresupuestaria: string;
+  partidaNombre?: string;
   documentotecnicoNombre?: string;
   documentotecnicoPath?: string;
 }
@@ -38,58 +42,25 @@ interface ItemData {
 export default function FormulacionRequerimientosPage() {
   const router = useRouter();
 
-  const [proyecto, setProyecto] = useState("Implementacion de IA para la agricultura");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [proyecto, setProyecto] = useState("Implementación de IA para la Agricultura");
 
-  // Toggles for expanding/collapsing category sections
+  // Demo starts EMPTY per user request (items = [])
+  const [items, setItems] = useState<ItemData[]>([]);
+
+  // Search and Catalog Picker state
+  const [catalogSearch, setCatalogSearch] = useState("");
+  const [showCatalogDropdown, setShowCatalogDropdown] = useState(false);
+
+  // Accordion Expand/Collapse States
   const [activosExpanded, setActivosExpanded] = useState(true);
-  const [materialesExpanded, setMaterialesExpanded] = useState(false);
+  const [materialesExpanded, setMaterialesExpanded] = useState(true);
   const [serviciosExpanded, setServiciosExpanded] = useState(true);
 
-  // Items state
-  const [items, setItems] = useState<ItemData[]>([
-    {
-      id: "srv-1",
-      nombre: "SERVICIO 1 | SERVICIO DE AUDITORÍA EXTERNA",
-      categoria: "SERVICIO",
-      cantidad: 1,
-      precioReferencial: 5000,
-      detalleServicio: "Auditoría financiera externa para fondos de investigación DICYT",
-      partidaPresupuestaria: "25200",
-      documentotecnicoNombre: "TDR_Auditoria.pdf",
-      documentotecnicoPath: "mock_storage/tdr/tdr.pdf",
-    },
-    {
-      id: "af-1",
-      nombre: "EQUIPO 1 | SERVIDOR GPU PARA ENTRENAMIENTO IA",
-      categoria: "ACTIVO_FIJO",
-      cantidad: 1,
-      unidad: "Equipo",
-      precioUnitario: 25000,
-      precioReferencial: 25000,
-      partidaPresupuestaria: "43110",
-      documentotecnicoNombre: "ET_ServidorGPU.pdf",
-      documentotecnicoPath: "mock_storage/et/et_gpu.pdf",
-    },
-    {
-      id: "af-2",
-      nombre: "EQUIPO 2 | SENSOR DE HUMEDAD DE SUELO DE ALTA PRECISIÓN",
-      categoria: "ACTIVO_FIJO",
-      cantidad: 2,
-      unidad: "Unidad",
-      precioUnitario: 3500,
-      precioReferencial: 7000,
-      partidaPresupuestaria: "43500",
-    },
-  ]);
-
   // General Headers & Backup files
-  const [justificacion, setJustificacion] = useState("Requerimientos técnicos indispensables para el proyecto de IA agrícola DICYT.");
-  const [proformas, setProformas] = useState<Array<{ id: string; nombre: string }>>([
-    { id: "prof-1", nombre: "Proforma_Cotizacion_Global.pdf" },
-  ]);
-  const [custodioNombre, setCustodioNombre] = useState("Dr. Marcelino Pérez");
-  const [custodioUbicacion, setCustodioUbicacion] = useState("Laboratorio de Inteligencia Artificial - Edificio DICYT");
+  const [justificacion, setJustificacion] = useState("");
+  const [proformas, setProformas] = useState<Array<{ id: string; nombre: string }>>([]);
+  const [custodioNombre, setCustodioNombre] = useState("");
+  const [custodioUbicacion, setCustodioUbicacion] = useState("");
 
   // Modal / Overlay State for item editing
   const [selectedItem, setSelectedItem] = useState<ItemData | null>(null);
@@ -101,6 +72,52 @@ export default function FormulacionRequerimientosPage() {
   const activosItems = items.filter((i) => i.categoria === "ACTIVO_FIJO");
   const materialesItems = items.filter((i) => i.categoria === "MATERIAL");
   const serviciosItems = items.filter((i) => i.categoria === "SERVICIO");
+
+  // Filter catalog items by search string
+  const filteredCatalog = CLASIFICADOR_OBJETO_GASTO.flatMap((p) =>
+    p.ejemplosInsumos
+      .filter((ej) => ej.toLowerCase().includes(catalogSearch.toLowerCase()) || p.denominacion.toLowerCase().includes(catalogSearch.toLowerCase()))
+      .map((ejem) => ({
+        ejemploNombre: ejem,
+        partida: p,
+      }))
+  );
+
+  const handleAddFromCatalog = (ejemploNombre: string, partida: PartidaObjetoGasto) => {
+    const newItem: ItemData = {
+      id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      nombre: `${partida.categoria === "SERVICIO" ? "SERVICIO" : partida.categoria === "ACTIVO_FIJO" ? "EQUIPO" : "MATERIAL"} | ${ejemploNombre.toUpperCase()}`,
+      categoria: partida.categoria,
+      cantidad: 1,
+      unidad: partida.categoria === "SERVICIO" ? "Servicio" : "Unidad",
+      precioUnitario: partida.categoria === "SERVICIO" ? 0 : 500,
+      precioReferencial: partida.categoria === "SERVICIO" ? 0 : 500,
+      partidaPresupuestaria: partida.codigo, // Código de 5 dígitos más profundo del clasificador
+      partidaNombre: partida.denominacion,
+    };
+
+    setItems((prev) => [...prev, newItem]);
+    setCatalogSearch("");
+    setShowCatalogDropdown(false);
+  };
+
+  const handleAddCustomItem = () => {
+    if (!catalogSearch.trim()) return;
+    const newItem: ItemData = {
+      id: `item-${Date.now()}`,
+      nombre: catalogSearch.toUpperCase(),
+      categoria: "MATERIAL",
+      cantidad: 1,
+      unidad: "Unidad",
+      precioUnitario: 100,
+      precioReferencial: 100,
+      partidaPresupuestaria: "39500", // Partida de 5 dígitos de nivel más profundo por defecto
+      partidaNombre: "Útiles de Escritorio y Oficina",
+    };
+    setItems((prev) => [...prev, newItem]);
+    setCatalogSearch("");
+    setShowCatalogDropdown(false);
+  };
 
   const removeItem = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -120,6 +137,15 @@ export default function FormulacionRequerimientosPage() {
   };
 
   const handleEnviarAll = () => {
+    if (!justificacion.trim()) {
+      alert("Por favor ingrese la Justificación del Trámite antes de enviar.");
+      return;
+    }
+    if (activosItems.length > 0 && (!custodioNombre.trim() || !custodioUbicacion.trim())) {
+      alert("Para trámites de Activos Fijos, debe ingresar el Nombre del Custodio y la Ubicación.");
+      return;
+    }
+
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
@@ -132,12 +158,15 @@ export default function FormulacionRequerimientosPage() {
 
   return (
     <SigefiShell>
-      <div className="space-y-6 max-w-4xl mx-auto">
-        {/* Título de Formulación de Requerimientos */}
+      <div className="space-y-6 max-w-4xl mx-auto pb-16">
+        {/* Título */}
         <div className="text-center space-y-1">
           <h1 className="text-2xl md:text-3xl font-extrabold text-[#001B47] tracking-tight">
             Formulación de Requerimientos
           </h1>
+          <p className="text-xs text-[#6b7280]">
+            Agregue los ítems requeridos para su proyecto. El sistema los clasificará automáticamente en trámites separados por tipo de compra (Objeto del Gasto de 5 dígitos).
+          </p>
         </div>
 
         {/* Dropdown de Selección de Proyecto */}
@@ -148,8 +177,8 @@ export default function FormulacionRequerimientosPage() {
             onChange={(e) => setProyecto(e.target.value)}
             className="w-full p-2.5 text-xs bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] font-medium focus:outline-none focus:ring-1 focus:ring-[#002855]"
           >
-            <option value="Implementacion de IA para la agricultura">
-              Implementacion de IA para la agricultura
+            <option value="Implementación de IA para la Agricultura">
+              Implementación de IA para la Agricultura
             </option>
             <option value="Sistema de Riego Inteligente">
               Sistema de Riego Inteligente
@@ -160,17 +189,84 @@ export default function FormulacionRequerimientosPage() {
           </select>
         </div>
 
-        {/* Campo de Búsqueda de Ítem */}
+        {/* Buscador y Selector de Ítems del Clasificador por Objeto del Gasto */}
         <div className="relative">
-          <Search className="w-4 h-4 text-[#9ca3af] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Buscar item..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 text-xs bg-[#eef2f6] border border-[#e5e7eb] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#002855] text-[#2c3e50]"
-          />
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-[#9ca3af] absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Buscar o escribir item (ej: Servidor GPU, Microscopio, Auditoría, Reactivos)..."
+                value={catalogSearch}
+                onFocus={() => setShowCatalogDropdown(true)}
+                onChange={(e) => {
+                  setCatalogSearch(e.target.value);
+                  setShowCatalogDropdown(true);
+                }}
+                className="w-full pl-9 pr-4 py-2.5 text-xs bg-white border border-[#e5e7eb] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#002855] text-[#2c3e50] shadow-2xs"
+              />
+            </div>
+            {catalogSearch && (
+              <button
+                type="button"
+                onClick={handleAddCustomItem}
+                className="px-3 py-2.5 bg-[#002855] text-white text-xs font-bold rounded-lg hover:bg-[#001B47] transition-colors flex items-center gap-1"
+              >
+                <Plus className="w-4 h-4" /> Agregar
+              </button>
+            )}
+          </div>
+
+          {/* Desplegable Autocompletado del Clasificador */}
+          {showCatalogDropdown && catalogSearch && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e5e7eb] rounded-xl shadow-xl z-40 max-h-64 overflow-y-auto divide-y divide-[#e5e7eb]">
+              {filteredCatalog.length === 0 ? (
+                <div className="p-3 text-xs text-[#6b7280] flex justify-between items-center">
+                  <span>No hay coincidencia directa. Presione &quot;Agregar&quot; para registrarlo libremente.</span>
+                </div>
+              ) : (
+                filteredCatalog.map((item, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => handleAddFromCatalog(item.ejemploNombre, item.partida)}
+                    className="p-3 hover:bg-[#f8fafc] cursor-pointer flex items-center justify-between text-xs transition-colors"
+                  >
+                    <div>
+                      <p className="font-bold text-[#001B47]">{item.ejemploNombre}</p>
+                      <p className="text-[11px] text-[#6b7280]">
+                        Partida 5 dígitos: <strong className="text-[#BC000C]">{item.partida.codigo}</strong> - {item.partida.denominacion}
+                      </p>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                        item.partida.categoria === "ACTIVO_FIJO"
+                          ? "bg-blue-100 text-blue-800"
+                          : item.partida.categoria === "SERVICIO"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-emerald-100 text-emerald-800"
+                      }`}
+                    >
+                      {item.partida.categoria}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
+
+        {/* Estado Vacío Informativo para Demo */}
+        {items.length === 0 && (
+          <div className="p-8 border-2 border-dashed border-[#cbd5e1] rounded-2xl bg-white text-center space-y-3">
+            <div className="w-12 h-12 bg-[#002855]/10 text-[#002855] rounded-full flex items-center justify-center mx-auto font-bold text-lg">
+              🛒
+            </div>
+            <h3 className="font-bold text-sm text-[#001B47]">Lista de Requerimientos Vacía</h3>
+            <p className="text-xs text-[#6b7280] max-w-md mx-auto leading-relaxed">
+              Use el buscador de arriba para agregar ítems de prueba (ej: <em>Servidor GPU</em>, <em>Microscopio</em>, <em>Auditoría</em>, <em>Reactivo Químico</em>). El sistema los auto-clasificará automáticamente en partidas de 5 dígitos de la normativa DICYT.
+            </p>
+          </div>
+        )}
 
         {/* Bloque 1: Activos Fijos */}
         <div className="bg-white rounded-xl border border-[#e5e7eb] overflow-hidden shadow-2xs">
@@ -179,7 +275,6 @@ export default function FormulacionRequerimientosPage() {
             className="p-4 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors"
           >
             <div className="flex items-center gap-3">
-              {/* Toggle Switch */}
               <div
                 className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
                   activosExpanded ? "bg-[#002855]" : "bg-[#cbd5e1]"
@@ -193,7 +288,7 @@ export default function FormulacionRequerimientosPage() {
               </div>
               <Monitor className="w-5 h-5 text-[#002855]" />
               <span className="font-bold text-sm text-[#001B47]">Activos Fijos</span>
-              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#f1f5f9] text-[#64748b]">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f1f5f9] text-[#002855]">
                 {activosItems.length}
               </span>
             </div>
@@ -203,7 +298,7 @@ export default function FormulacionRequerimientosPage() {
           {activosExpanded && (
             <div className="p-4 border-t border-[#e5e7eb] space-y-3 bg-[#f8fafc]/50">
               {activosItems.length === 0 ? (
-                <p className="text-xs text-[#9ca3af] italic">No hay ítems de activos fijos agregados.</p>
+                <p className="text-xs text-[#9ca3af] italic">0 ítems agregados en esta categoría.</p>
               ) : (
                 activosItems.map((item) => (
                   <div
@@ -218,8 +313,11 @@ export default function FormulacionRequerimientosPage() {
                           {item.nombre}
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-[11px] text-[#64748b]">
-                          <span className="px-2 py-0.5 bg-[#BC000C]/10 text-[#BC000C] rounded font-bold uppercase">
+                          <span className="px-2 py-0.5 bg-[#BC000C]/10 text-[#BC000C] rounded font-bold uppercase text-[10px]">
                             ACTIVO FIJO
+                          </span>
+                          <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">
+                            Partida: {item.partidaPresupuestaria}
                           </span>
                           <span>Cantidad: {item.cantidad}</span>
                           <span>P. Ref: {item.precioReferencial} Bs</span>
@@ -261,7 +359,7 @@ export default function FormulacionRequerimientosPage() {
               </div>
               <Settings className="w-5 h-5 text-[#002855]" />
               <span className="font-bold text-sm text-[#001B47]">Materiales</span>
-              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#f1f5f9] text-[#64748b]">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f1f5f9] text-[#002855]">
                 {materialesItems.length}
               </span>
             </div>
@@ -271,7 +369,7 @@ export default function FormulacionRequerimientosPage() {
           {materialesExpanded && (
             <div className="p-4 border-t border-[#e5e7eb] space-y-3 bg-[#f8fafc]/50">
               {materialesItems.length === 0 ? (
-                <p className="text-xs text-[#9ca3af] italic">No hay ítems de materiales agregados.</p>
+                <p className="text-xs text-[#9ca3af] italic">0 ítems agregados en esta categoría.</p>
               ) : (
                 materialesItems.map((item) => (
                   <div
@@ -286,10 +384,14 @@ export default function FormulacionRequerimientosPage() {
                           {item.nombre}
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-[11px] text-[#64748b]">
-                          <span className="px-2 py-0.5 bg-[#002855]/10 text-[#002855] rounded font-bold uppercase">
+                          <span className="px-2 py-0.5 bg-[#002855]/10 text-[#002855] rounded font-bold uppercase text-[10px]">
                             MATERIAL
                           </span>
+                          <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">
+                            Partida: {item.partidaPresupuestaria}
+                          </span>
                           <span>Cantidad: {item.cantidad}</span>
+                          <span>P. Ref: {item.precioReferencial} Bs</span>
                         </div>
                       </div>
                     </div>
@@ -328,7 +430,7 @@ export default function FormulacionRequerimientosPage() {
               </div>
               <Package className="w-5 h-5 text-[#002855]" />
               <span className="font-bold text-sm text-[#001B47]">Servicios</span>
-              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#f1f5f9] text-[#64748b]">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f1f5f9] text-[#002855]">
                 {serviciosItems.length}
               </span>
             </div>
@@ -338,7 +440,7 @@ export default function FormulacionRequerimientosPage() {
           {serviciosExpanded && (
             <div className="p-4 border-t border-[#e5e7eb] space-y-3 bg-[#f8fafc]/50">
               {serviciosItems.length === 0 ? (
-                <p className="text-xs text-[#9ca3af] italic">No hay ítems de servicios agregados.</p>
+                <p className="text-xs text-[#9ca3af] italic">0 ítems agregados en esta categoría.</p>
               ) : (
                 serviciosItems.map((item) => (
                   <div
@@ -355,6 +457,9 @@ export default function FormulacionRequerimientosPage() {
                         <div className="flex items-center gap-3 mt-1 text-[11px] text-[#64748b]">
                           <span className="px-2 py-0.5 bg-[#BC000C]/10 text-[#BC000C] rounded font-bold uppercase text-[10px]">
                             SERVICIO
+                          </span>
+                          <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">
+                            Partida: {item.partidaPresupuestaria}
                           </span>
                           <span>Cantidad: {item.cantidad}</span>
                           {item.documentotecnicoNombre && (
@@ -378,7 +483,7 @@ export default function FormulacionRequerimientosPage() {
           )}
         </div>
 
-        {/* Sección de Cabecera General del Trámite & Archivos de Respaldo */}
+        {/* Datos Generales y Proformas */}
         <div className="bg-white p-5 rounded-xl border border-[#e5e7eb] shadow-2xs space-y-4">
           <h3 className="font-bold text-sm text-[#001B47] flex items-center gap-2">
             <FileText className="w-4 h-4 text-[#002855]" />
@@ -389,6 +494,7 @@ export default function FormulacionRequerimientosPage() {
             <label className="text-xs font-semibold text-[#2c3e50]">Justificación del Trámite *</label>
             <textarea
               rows={2}
+              placeholder="Escriba la justificación técnica de la compra para el proyecto de investigación..."
               value={justificacion}
               onChange={(e) => setJustificacion(e.target.value)}
               className="w-full p-2.5 text-xs bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50]"
@@ -404,6 +510,7 @@ export default function FormulacionRequerimientosPage() {
                 </label>
                 <input
                   type="text"
+                  placeholder="Ej: Dr. Marcelino Pérez"
                   value={custodioNombre}
                   onChange={(e) => setCustodioNombre(e.target.value)}
                   className="w-full p-2 text-xs bg-white border border-[#e5e7eb] rounded-lg"
@@ -416,6 +523,7 @@ export default function FormulacionRequerimientosPage() {
                 </label>
                 <input
                   type="text"
+                  placeholder="Ej: Laboratorio de IA - Edificio DICYT"
                   value={custodioUbicacion}
                   onChange={(e) => setCustodioUbicacion(e.target.value)}
                   className="w-full p-2 text-xs bg-white border border-[#e5e7eb] rounded-lg"
@@ -454,7 +562,7 @@ export default function FormulacionRequerimientosPage() {
             disabled={isSubmitting || items.length === 0}
             onClick={handleEnviarAll}
             className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm text-white transition-all shadow-md ${
-              items.length > 0 ? "bg-[#002855] hover:bg-[#001B47]" : "bg-[#64748b] cursor-not-allowed"
+              items.length > 0 ? "bg-[#002855] hover:bg-[#001B47]" : "bg-[#64748b] cursor-not-allowed opacity-80"
             }`}
           >
             {isSubmitting ? "Enviando Trámite..." : "Enviar"}
@@ -473,12 +581,15 @@ export default function FormulacionRequerimientosPage() {
         )}
       </div>
 
-      {/* Modal / Overlay de Detalle del Requerimiento (OVERLAY & MODAL.png) */}
+      {/* Modal / Overlay de Detalle del Requerimiento */}
       {selectedItem && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-[#e5e7eb] overflow-hidden space-y-4 p-6 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
-              <h3 className="font-bold text-base text-[#001B47]">Detalle del Requerimiento</h3>
+              <div>
+                <h3 className="font-bold text-base text-[#001B47]">Detalle del Requerimiento</h3>
+                <p className="text-[11px] text-[#6b7280]">Partida de 5 dígitos: <strong className="text-[#BC000C]">{selectedItem.partidaPresupuestaria}</strong> - {selectedItem.partidaNombre}</p>
+              </div>
               <button
                 type="button"
                 onClick={() => setSelectedItem(null)}

@@ -113,6 +113,8 @@ Como Investigador, quiero acceder a la vista "Lista de Trámites" (`/tramites`) 
 - **FR-006**: Los ítems dentro de cada categoría DEBEN mostrar su código/nombre, badge de tipo, cantidad, opción de eliminar y permitir abrir el modal de detalles para adjuntar ET (para Materiales/Activos Fijos) o TDR (para Servicios).
 - **FR-007**: El botón principal de envío ("Enviar") DEBE destacar en color azul institucional (`#002855` / `#003770`) y procesar la solicitud para registrarla en la lista de trámites.
 - **FR-008**: Toda la interfaz de usuario DEBE incluir la barra lateral fija (Sidebar) con el logo "SIGEFI DICYT SAN SIMON", las opciones de menú "Proyectos", "Trámites" (activa) y "Cerrar Sesión", así como la barra superior con el encabezado "UNIVERSIDAD MAYOR DE SAN SIMON" y el perfil del investigador ("Investigador Marcelino Perez").
+- **FR-009**: La pantalla "Formulación de Requerimientos" DEBE iniciar en estado totalmente VACÍO (`0` ítems) para la demostración con el usuario final, permitiendo buscar y agregar ítems de prueba desde cero.
+- **FR-010**: Las partidas del Objeto del Gasto asignadas a los ítems DEBEN utilizar obligatoriamente el código de 5 dígitos de nivel más profundo según el Clasificador oficial (ej. `34200` Productos Químicos, `43400` Equipo de Laboratorio, `43120` Equipo de Computación, `25230` Auditorías Externas, `39500` Útiles de Escritorio), prohibiendo el uso de códigos generales o truncados.
 
 ---
 
