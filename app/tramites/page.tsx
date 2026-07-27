@@ -16,13 +16,13 @@ import {
   Inbox,
   FilterX
 } from "lucide-react";
-import { tramitesStore, TramiteStoreItem } from "@/lib/store/tramites-store";
+import { tramiteDBRepository, TramiteDBItem } from "@/lib/db/tramite-repository";
 
 export default function ListaTramitesPage() {
   const router = useRouter();
 
-  // Dynamic Store dataset
-  const [tramitesList, setTramitesList] = useState<TramiteStoreItem[]>([]);
+  // Dynamic DB dataset
+  const [tramitesList, setTramitesList] = useState<TramiteDBItem[]>([]);
 
   // 4 Filters from Mockup
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,7 +35,9 @@ export default function ListaTramitesPage() {
   const itemsPerPage = 4;
 
   useEffect(() => {
-    setTramitesList(tramitesStore.getTramites());
+    tramiteDBRepository.getTramites().then((items) => {
+      setTramitesList(items);
+    });
   }, []);
 
   // Dropdown options
@@ -58,21 +60,18 @@ export default function ListaTramitesPage() {
   ];
 
   // Helper to format step badge text & style
-  const getPasoInfo = (item: TramiteStoreItem) => {
-    const pasoActual = item.pasos.find((p) => p.estado === "EN_CURSO") || item.pasos[item.pasos.length - 1];
-    const totalPasos = item.pasos.length;
-    const num = pasoActual?.numero || 1;
-    const nombre = pasoActual?.nombre || "Solicitud";
-
-    let label = `Paso ${num}/${totalPasos}: ${nombre}`;
-    if (num === 2) label = `Paso 2/4: Recepcion de Material`;
+  const getPasoInfo = (item: TramiteDBItem) => {
+    const num = item.pasoNumero || 1;
+    const totalPasos = 4;
+    let label = `Paso ${num}/${totalPasos}: ${item.pasoNombre || "Solicitud"}`;
+    if (num === 2) label = `Paso 2/4: Recepción de Material`;
     if (num === 3) label = `Paso 3/4: Pago a Proveedor`;
-    if (num === 4 || item.estado === "Aprobado") label = `Paso 4/4: Completado`;
+    if (num === 4 || item.currentNodeId === "node_4_2") label = `Paso 4/4: Completado`;
 
     return {
       num,
       label,
-      isCompletado: num === 4 || item.estado === "Aprobado",
+      isCompletado: num === 4 || item.currentNodeId === "node_4_2",
     };
   };
 

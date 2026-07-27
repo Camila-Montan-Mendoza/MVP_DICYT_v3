@@ -16,7 +16,7 @@ import {
   FileCheck,
   Building2,
   XCircle,
-} from "lucide-react";import { tramitesStore } from "@/lib/store/tramites-store";
+} from "lucide-react";
 import { workflowRepository, NODE_ID_TO_DB_ID } from "@/lib/db/workflow-repository";
 
 interface InteractiveTaskWorkspaceProps {
@@ -30,10 +30,7 @@ export function InteractiveTaskWorkspace({
   initialNodeId = "node_1_1",
   onNodeTransition,
 }: InteractiveTaskWorkspaceProps) {
-  const [currentNodeId, setCurrentNodeId] = useState(() => {
-    const item = tramitesStore.getTramiteById(tramiteId);
-    return item?.currentNodeId || initialNodeId;
-  });
+  const [currentNodeId, setCurrentNodeId] = useState(initialNodeId);
   const [actasProvisionalesCount, setActasProvisionalesCount] = useState(0);
   const [historyLog, setHistoryLog] = useState<
     Array<{ nodoNombre: string; accion: string; fecha: string }>
@@ -56,9 +53,6 @@ export function InteractiveTaskWorkspace({
 
     const nextNode = NODOS_COMPRA_MENOR[accion.siguienteNodoId] || nodoActual;
     setCurrentNodeId(accion.siguienteNodoId);
-
-    // Persist to Store
-    tramitesStore.updateWorkflowNode(tramiteId, nextNode.id, nextNode.pasoNumero);
 
     // Persist to Postgres DB Schema (tramite and historial_estado_tramite tables)
     const tramiteIdNum = parseInt(tramiteId.replace(/\D/g, ""), 10) || 1;

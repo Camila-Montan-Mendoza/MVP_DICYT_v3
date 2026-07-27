@@ -1,48 +1,18 @@
 -- ─── SEED DATA FOR COMPRA MENOR (1.001 Bs. a 20.000 Bs. de Material) ──────────────
 
--- 1. Insertar Catálogos Básicos
+-- Insertar Catálogos Básicos
 INSERT INTO "estado_proyecto" ("id", "nombre") VALUES
-  (1, 'Ejecución')
+  (1, 'Pendiente'),
+  (2, 'Rechazado'),
+  (3, 'Observado'),
+  (4, 'Completado'),
 ON CONFLICT ("id") DO NOTHING;
 
 INSERT INTO "tipo_tramite" ("id", "nombre") VALUES
   (1, 'Compra Menor de 1.001 Bs. a 20.000 Bs. de Material')
 ON CONFLICT ("id") DO NOTHING;
 
--- 2. Insertar Roles de Dominio (Coincidentes con las tablas reales del usuario)
-INSERT INTO "rol" ("id", "nombre") VALUES
-  (1, 'Investigador Principal'),
-  (2, 'Investigador de Apoyo'),
-  (3, 'Responsable de Presupuestos'),
-  (4, 'Compras y Contrataciones'),
-  (5, 'Administradora DICYT'),
-  (6, 'Caja Chica y Fondos'),
-  (7, 'Administrador del Sistema SIGEFI')
-ON CONFLICT ("id") DO NOTHING;
-
--- 3. Insertar Usuarios con auth_user_id reales de Supabase Auth
-INSERT INTO "usuario" ("id", "username", "password", "auth_user_id") VALUES
-  (1, 'daniel', NULL, 'cbdf0369-07b2-452e-9a3c-52350f9d510c'),
-  (2, 'winsor', NULL, '944df2d1-7d5e-4b0d-a8e4-7d1614442ab5'),
-  (3, 'alan', NULL, 'e2d08a9f-0fdf-444e-9b47-022fc8a329f4'),
-  (4, 'grober', NULL, '055e0430-e587-4045-99cf-3dffffcabec4'),
-  (5, 'eva', NULL, '022531c9-3ed5-421c-a00f-5e9611e7c1d1'),
-  (6, 'sergio', NULL, '130d2d56-6bac-446c-a994-fbe3664a3b24'),
-  (7, 'carlos', NULL, '526c7df5-cef8-4f04-85f3-2dc9b589bc7d')
-ON CONFLICT ("id") DO UPDATE SET "auth_user_id" = EXCLUDED."auth_user_id";
-
--- Relacionar Usuarios con Roles
-INSERT INTO "rol_usuario" ("id_rol", "id_usuario") VALUES
-  (1, 1), -- Daniel -> Investigador Principal
-  (2, 2), -- Winsor -> Investigador de Apoyo
-  (3, 3), -- Alan -> Responsable de Presupuestos
-  (4, 4), -- Grober -> Compras y Contrataciones
-  (5, 5), -- Eva -> Administradora DICYT
-  (6, 6), -- Sergio -> Caja Chica y Fondos
-  (7, 7)  -- Carlos -> Administrador del Sistema SIGEFI
-ON CONFLICT DO NOTHING;
-
--- 4. Pasos del Flujo de Trámite (Pasos Macro 1 a 4)
+-- Pasos del Flujo de Trámite (Pasos Macro 1 a 4)
 INSERT INTO "paso_flujo" ("id", "id_tipo_tramite", "nombre", "orden") VALUES
   (1, 1, 'PASO 1: Solicitud', 1),
   (2, 1, 'PASO 2: Recepción', 2),
@@ -50,7 +20,7 @@ INSERT INTO "paso_flujo" ("id", "id_tipo_tramite", "nombre", "orden") VALUES
   (4, 1, 'PASO 4: Evidencia', 4)
 ON CONFLICT ("id") DO NOTHING;
 
--- 5. Estados del Paso de Flujo (Nodos Granulares de Tarea Sin Nombres de Roles)
+-- Estados del Paso de Flujo (Nodos Granulares de Tarea Sin Nombres de Roles)
 INSERT INTO "estado_paso_flujo" ("id", "id_paso_flujo", "nombre", "es_inicial", "es_final") VALUES
   -- Paso 1: Solicitud
   (1, 1, 'Revisión de disponibilidad presupuestaria y certificación de fondos', true, false),

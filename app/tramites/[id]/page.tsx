@@ -5,37 +5,78 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { SigefiShell } from "@/components/sigefi-shell";
 import { WorkflowStepper } from "@/components/workflow/workflow-stepper";
+import { PasoWorkflow } from "@/lib/workflow/stepper-service";
 import { TaskTimeline } from "@/components/workflow/task-timeline";
 import { RevisionPreventivaCard } from "@/components/budget/revision-preventiva-card";
 import { InteractiveTaskWorkspace } from "@/components/workflow/interactive-task-workspace";
-import { tramitesStore, TramiteStoreItem } from "@/lib/store/tramites-store";
+import { tramiteDBRepository, TramiteDBItem } from "@/lib/db/tramite-repository";
 import { ArrowLeft, Layers, CheckCircle2, Clock, Stamp } from "lucide-react";
 
 function TramiteWorkflowDetailContent() {
   const routeParams = useParams();
   const rawId = Array.isArray(routeParams?.id) ? routeParams.id[0] : routeParams?.id;
-  const tramiteId = rawId || "tr-2026-001";
+  const tramiteId = rawId || "1";
 
-  const [tramite, setTramite] = useState<TramiteStoreItem | undefined>(() =>
-    tramitesStore.getTramiteById(tramiteId)
-  );
+  const [tramite, setTramite] = useState<TramiteDBItem | undefined>();
+
+  const loadTramite = () => {
+    tramiteDBRepository.getTramiteById(tramiteId).then((found) => {
+      if (found) setTramite(found);
+      else {
+        tramiteDBRepository.getTramites().then((list) => setTramite(list[0]));
+      }
+    });
+  };
 
   useEffect(() => {
-    setTramite(tramitesStore.getTramiteById(tramiteId));
+    loadTramite();
   }, [tramiteId]);
 
   const refreshTramite = () => {
-    setTramite(tramitesStore.getTramiteById(tramiteId));
+    loadTramite();
   };
 
-  const activeTramite = tramite || tramitesStore.getTramites()[0];
+  const activeTramite: TramiteDBItem = tramite || {
+    id: 1,
+    nro: "01",
+    codigoSeguimiento: "TR-2026-001",
+    proyecto: "Implementación de IA para la Agricultura",
+    tipoTramite: "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
+    categoria: "MATERIAL",
+    fecha: "15 Ene 2026",
+    fechaISO: new Date().toISOString(),
+    creador: "Dr. Daniel Pérez",
+    justificacion: "Adquisición de insumos y reactivos.",
+    idEstadoTramite: 1,
+    currentNodeId: "node_1_1",
+    estadoNombre: "Revisión de disponibilidad presupuestaria y certificación de fondos",
+    estado: "En proceso",
+    pasoNumero: 1,
+    pasoNombre: "PASO 1: Solicitud",
+    items: [],
+  };
 
-  // Selected Macro Step state (defaults to the step currently EN_CURSO)
-  const currentStep = activeTramite.pasos.find((p) => p.estado === "EN_CURSO") || activeTramite.pasos[0];
+  const pasosList: PasoWorkflow[] = [
+    { id: "p1", numero: 1, nombre: "Solicitud", estado: activeTramite.pasoNumero === 1 ? "EN_CURSO" : activeTramite.pasoNumero > 1 ? "COMPLETADO" : "PENDIENTE" },
+    { id: "p2", numero: 2, nombre: "Recepción", estado: activeTramite.pasoNumero === 2 ? "EN_CURSO" : activeTramite.pasoNumero > 2 ? "COMPLETADO" : "PENDIENTE" },
+    { id: "p3", numero: 3, nombre: "Pago", estado: activeTramite.pasoNumero === 3 ? "EN_CURSO" : activeTramite.pasoNumero > 3 ? "COMPLETADO" : "PENDIENTE" },
+    { id: "p4", numero: 4, nombre: "Evidencia", estado: activeTramite.pasoNumero === 4 ? "EN_CURSO" : "PENDIENTE" },
+  ];
+
+  const currentStep = pasosList.find((p) => p.numero === activeTramite.pasoNumero) || pasosList[0];
   const [activeStepId, setActiveStepId] = useState(currentStep.id);
 
-  const activeStep = activeTramite.pasos.find((p) => p.id === activeStepId) || currentStep;
-  const tareasDelPaso = activeTramite.tareas.filter((t) => t.pasoId === activeStepId);
+  const activeStep = pasosList.find((p) => p.id === activeStepId) || currentStep;
+  const tareasDelPaso = [
+    {
+      id: "t1",
+      pasoId: `p${activeTramite.pasoNumero}`,
+      nombre: activeTramite.estadoNombre,
+      rolResponsable: "Responsable de Presupuestos / Compras / Admin",
+      usuarioAsignado: "Usuario Autenticado",
+      estado: "EN_CURSO" as const,
+    },
+  ];
 
   return (
     <SigefiShell>
@@ -96,7 +137,7 @@ function TramiteWorkflowDetailContent() {
 
         {/* Stepper Horizontal Superior de Pasos Macro */}
         <WorkflowStepper
-          pasos={activeTramite.pasos}
+          pasos={pasosList}
           activeStepId={activeStepId}
           onSelectStep={setActiveStepId}
         />
@@ -123,13 +164,13 @@ function TramiteWorkflowDetailContent() {
                   </h3>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f1f5f9] text-[#002855]">
-                  Paso {activeStep.numero} de {activeTramite.pasos.length}
+                  Paso {activeStep.numero} de 4
                 </span>
               </div>
 
               {/* UI Operativa Dinámica: Flujo de Transiciones y Estrategia Compra Menor */}
               <InteractiveTaskWorkspace
-                tramiteId={activeTramite.id}
+                tramiteId={String(activeTramite.id)}
                 onNodeTransition={(nextNode, _log) => {
                   const nuevoPasoId = `p${nextNode.pasoNumero}`;
                   setActiveStepId(nuevoPasoId);
@@ -139,7 +180,7 @@ function TramiteWorkflowDetailContent() {
 
               {/* UI Operativa Dinámica: Revisión Presupuestaria y Sello Preventivo */}
               <RevisionPreventivaCard
-                tramiteId={activeTramite.id}
+                tramiteId={String(activeTramite.id)}
                 onApproveSuccess={refreshTramite}
                 onRejectSuccess={refreshTramite}
               />

@@ -6,7 +6,8 @@ import {
   generarSelloPreventivo,
   SelloPreventivo,
 } from "@/lib/budget/preventivo-service";
-import { ShieldCheck, CheckCircle2, AlertOctagon, X, Stamp } from "lucide-react";import { tramitesStore } from "@/lib/store/tramites-store";
+import { ShieldCheck, CheckCircle2, AlertOctagon, X, Stamp } from "lucide-react";
+import { tramiteDBRepository } from "@/lib/db/tramite-repository";
 
 interface RevisionPreventivaCardProps {
   tramiteId: string;
@@ -19,23 +20,14 @@ export function RevisionPreventivaCard({
   onApproveSuccess,
   onRejectSuccess,
 }: RevisionPreventivaCardProps) {
-  const [sello, setSello] = useState<SelloPreventivo | null>(() => {
-    const item = tramitesStore.getTramiteById(tramiteId);
-    return item?.selloPreventivo || null;
-  });
-  const [isObservado, setIsObservado] = useState(() => {
-    const item = tramitesStore.getTramiteById(tramiteId);
-    return item?.estado === "Observado por Presupuestos";
-  });
+  const [sello, setSello] = useState<SelloPreventivo | null>(null);
+  const [isObservado, setIsObservado] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [observacionTexto, setObservacionTexto] = useState("");
 
-  const allSuficientes = MOCK_PARTIDAS_CHECK.every((p) => p.suficiente);
-
   const handleAprobar = () => {
-    const nuevoSello = generarSelloPreventivo("Alan - Resp. Presupuestos");
+    const nuevoSello = generarSelloPreventivo("Alan");
     setSello(nuevoSello);
-    tramitesStore.approvePreventivo(tramiteId, nuevoSello, "Alan - Resp. Presupuestos");
     if (onApproveSuccess) onApproveSuccess(nuevoSello);
   };
 
@@ -43,9 +35,10 @@ export function RevisionPreventivaCard({
     if (!observacionTexto.trim()) return;
     setIsObservado(true);
     setShowRejectModal(false);
-    tramitesStore.rejectTramite(tramiteId, observacionTexto, "Alan - Resp. Presupuestos");
     if (onRejectSuccess) onRejectSuccess(observacionTexto);
   };
+
+  const allSuficientes = MOCK_PARTIDAS_CHECK.every((p) => p.suficiente);
 
   return (
     <div className="bg-white p-5 rounded-2xl border border-[#e5e7eb] shadow-2xs space-y-4">
