@@ -36,7 +36,7 @@ let cachedGrafo: Record<number, NodoWorkflow> | null = null;
 let cachedTipoTramiteId: number | null = null;
 
 /**
- * Determinar la variante del botón según el tipo de transición
+ *? Determinar la variante del botón según el tipo de transición
  */
 function inferVarianteBtn(
   nombreAccion: string,

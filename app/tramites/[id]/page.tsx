@@ -12,19 +12,16 @@ import {
   tramiteDBRepository,
   TramiteDBItem,
 } from "@/lib/db/tramite-repository";
-import {
-  cargarGrafoWorkflow,
-  obtenerNodoPorId,
-} from "@/lib/workflow/workflow-db-service";
+import { cargarGrafoWorkflow } from "@/lib/workflow/workflow-db-service";
 import type { NodoWorkflow } from "@/lib/workflow/compra-menor-strategy";
-import { ArrowLeft, Layers, CheckCircle2, Clock, Stamp } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Clock, Stamp } from "lucide-react";
 
 function TramiteWorkflowDetailContent() {
   const routeParams = useParams();
   const rawId = Array.isArray(routeParams?.id)
     ? routeParams.id[0]
     : routeParams?.id;
-  const tramiteId = rawId || "1";
+  const tramiteId = rawId || "0";
 
   const [tramite, setTramite] = useState<TramiteDBItem | undefined>();
   const [grafo, setGrafo] = useState<Record<number, NodoWorkflow>>({});
@@ -56,19 +53,6 @@ function TramiteWorkflowDetailContent() {
       setNodoActual(nodo);
     }
   }, [tramite, grafo]);
-
-  const refreshTramite = () => {
-    loadTramite();
-  };
-
-  const resolveNextNode = async (
-    destinoDbId: number,
-  ): Promise<NodoWorkflow | null> => {
-    // Primero buscar en el grafo cacheado
-    if (grafo[destinoDbId]) return grafo[destinoDbId];
-    // Fallback: consultar la BD
-    return obtenerNodoPorId(destinoDbId);
-  };
 
   const activeTramite: TramiteDBItem = tramite || {
     id: 0,
@@ -244,7 +228,6 @@ function TramiteWorkflowDetailContent() {
 
         {/* Layout Split de 2 Columnas */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Lado Izquierdo: Cronología Vertical de Tareas (4 columnas) */}
           <div className="lg:col-span-4">
             <TaskTimeline
               pasoNombre={activeStep.nombre}
@@ -256,39 +239,7 @@ function TramiteWorkflowDetailContent() {
           {/* Lado Derecho: Área Operativa Server-Driven (8 columnas) */}
           <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-[#e5e7eb] shadow-2xs space-y-4 flex flex-col justify-between min-h-[420px]">
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
-                <div className="flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-[#002855]" />
-                  <h3 className="font-extrabold text-sm text-[#001B47] uppercase tracking-wider">
-                    Área Operativa — {activeStep.nombre}
-                  </h3>
-                </div>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f1f5f9] text-[#002855]">
-                  Paso {activeStep.numero} de 4
-                </span>
-              </div>
-
-              {/* Server-Driven UI: El componente renderiza lo que la BD dice */}
-              {nodoActualResuelto && (
-                <InteractiveTaskWorkspace
-                  tramiteId={String(activeTramite.id)}
-                  nodoActual={nodoActualResuelto}
-                  onResolveNextNode={resolveNextNode}
-                  onNodeTransition={(nextNode, _log) => {
-                    setNodoActual(nextNode);
-                    const nuevoPasoId = `p${nextNode.pasoNumero}`;
-                    setActiveStepId(nuevoPasoId);
-                    refreshTramite();
-                  }}
-                />
-              )}
-            </div>
-
-            <div className="text-[11px] text-[#9ca3af] border-t border-[#e5e7eb] pt-3 flex items-center justify-between">
-              <span>Módulo de Ejecución Operativa SIGEFI DICYT</span>
-              <span className="font-mono text-[#002855] font-bold">
-                Server-Driven UI · Conectado a Postgres DB
-              </span>
+              <InteractiveTaskWorkspace />
             </div>
           </div>
         </div>
