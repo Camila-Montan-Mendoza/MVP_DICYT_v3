@@ -13,12 +13,12 @@ export async function GET(request: Request) {
         id,
         nombre,
         id_partida_concreta,
-        partida_concreta:partida_concreta!item_id_partida_concreta_fkey (
+        partida_concreta (
           id,
           id_proyecto,
           id_partida,
           presupuesto,
-          partida:partida!partida_concreta_id_partida_fkey ( id, codigo, nombre, descripcion )
+          partida ( id, codigo, nombre, descripcion )
         )
       `)
       .order("id", { ascending: true });
