@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ItemSolicitud, TramiteSolicitud, EnvioLoteResultado } from "@/types/requisitions";
-import { segregateItemsToRequisitions, validateTramite } from "@/lib/requisitions/segregator";
+import { segregateItemsToRequisitions } from "@/lib/requisitions/segregator";
 import { ItemInputForm } from "@/components/requisitions/item-input-form";
 import { RequisitionContainer } from "@/components/requisitions/requisition-container";
 import { ShieldCheck, FileSpreadsheet, ArrowLeft } from "lucide-react";

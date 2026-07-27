@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       estado: "ENVIADO",
       fechaEnvio: new Date().toISOString(),
     });
-  } catch (err: any) {
+  } catch (_err: unknown) {
     return NextResponse.json(
       { success: false, errors: ["Error al procesar el envío del trámite"] },
       { status: 500 }

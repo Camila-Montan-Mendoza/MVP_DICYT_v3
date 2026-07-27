@@ -43,7 +43,7 @@ export async function POST(req: Request) {
       success: true,
       resultado,
     });
-  } catch (err: any) {
+  } catch (_err: unknown) {
     return NextResponse.json(
       { success: false, error: "Error en el procesamiento en lote" },
       { status: 500 }
