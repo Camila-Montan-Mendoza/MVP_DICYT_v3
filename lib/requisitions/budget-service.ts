@@ -1,4 +1,3 @@
-import { ItemCategoria } from "@/types/requisitions";
 import { itemDBRepository } from "@/lib/db/item-repository";
 
 export interface BudgetLookupResult {
