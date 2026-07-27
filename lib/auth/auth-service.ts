@@ -52,32 +52,36 @@ export async function loginWithUsername(
 }
 
 export async function getCurrentUser(): Promise<UsuarioSchema | null> {
-  const supabase = createClient();
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
-  if (!authUser) return null;
+  try {
+    const supabase = createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+    if (!authUser) return null;
 
-  const { data, error } = await supabase
-    .from("usuario")
-    .select("id, username, rol_usuario(rol(id, nombre))")
-    .eq("auth_user_id", authUser.id)
-    .maybeSingle();
+    const { data, error } = await supabase
+      .from("usuario")
+      .select("id, username, rol_usuario(rol(id, nombre))")
+      .eq("auth_user_id", authUser.id)
+      .maybeSingle();
 
-  if (error || !data) return null;
+    if (error || !data) return null;
 
-  const roles: RolSchema[] =
-    (data.rol_usuario as unknown as { rol: RolSchema }[] | null)?.map((ru) => ru.rol) ?? [];
-  const option = LOGIN_OPTIONS.find((o) => o.username === data.username);
+    const roles: RolSchema[] =
+      (data.rol_usuario as unknown as { rol: RolSchema }[] | null)?.map((ru) => ru.rol) ?? [];
+    const option = LOGIN_OPTIONS.find((o) => o.username === data.username);
 
-  return {
-    id: data.id,
-    username: data.username,
-    nombreCompleto: option?.nombreCompleto ?? data.username,
-    email: authUser.email ?? "",
-    roles,
-    rolActivo: roles[0]?.nombre ?? option?.rolLabel ?? "",
-  };
+    return {
+      id: data.id,
+      username: data.username,
+      nombreCompleto: option?.nombreCompleto ?? data.username,
+      email: authUser.email ?? "",
+      roles,
+      rolActivo: roles[0]?.nombre ?? option?.rolLabel ?? "",
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function logoutSession(): Promise<void> {
