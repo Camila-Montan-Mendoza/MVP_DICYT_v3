@@ -37,12 +37,14 @@ const CheckIcon = () => (
 );
 
 export function CodeBlock({ code }: { code: string }) {
-  const [icon, setIcon] = useState(CopyIcon);
+  const [copied, setCopied] = useState(false);
 
   const copy = async () => {
-    await navigator?.clipboard?.writeText(code);
-    setIcon(CheckIcon);
-    setTimeout(() => setIcon(CopyIcon), 2000);
+    if (typeof window !== "undefined" && navigator?.clipboard) {
+      await navigator.clipboard.writeText(code);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -53,7 +55,7 @@ export function CodeBlock({ code }: { code: string }) {
         variant={"outline"}
         className="absolute right-2 top-2"
       >
-        {icon}
+        {copied ? <CheckIcon /> : <CopyIcon />}
       </Button>
       <code className="text-xs p-3">{code}</code>
     </pre>
