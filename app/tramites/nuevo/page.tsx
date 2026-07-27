@@ -39,10 +39,10 @@ interface ItemData {
   id: string;
   nombre: string;
   categoria: ItemCategoria;
-  cantidad: number;
+  cantidad: number | "";
   unidad?: string;
-  precioUnitario?: number;
-  precioReferencial: number;
+  precioUnitario?: number | "";
+  precioReferencial: number | "";
   detalleServicio?: string;
   especificacionesTecnicasTexto?: string; // ET is TEXT for Materiales/Activos Fijos!
   partidaPresupuestaria: string;
@@ -51,7 +51,7 @@ interface ItemData {
   documentotecnicoPath?: string;
 }
 
-// Requisition Draft Model
+// Requisition Draft Model (Each category has its OWN independent header, justification, and submit state)
 interface TramiteBorrador {
   categoria: ItemCategoria;
   titulo: string;
@@ -124,7 +124,7 @@ export default function FormulacionRequerimientosPage() {
     },
   });
 
-  // Modal / Overlay State for item editing
+  // Inline Side-Panel Item Editing State (NO MODAL! Right column side-panel)
   const [selectedItem, setSelectedItem] = useState<ItemData | null>(null);
 
   // Modal Saldo Insuficiente State
@@ -138,6 +138,12 @@ export default function FormulacionRequerimientosPage() {
   const activosItems = items.filter((i) => i.categoria === "ACTIVO_FIJO");
   const materialesItems = items.filter((i) => i.categoria === "MATERIAL");
   const serviciosItems = items.filter((i) => i.categoria === "SERVICIO");
+
+  // Determine active categories (ONLY categories WITH items will be rendered on screen!)
+  const activeCategories: ItemCategoria[] = [];
+  if (activosItems.length > 0) activeCategories.push("ACTIVO_FIJO");
+  if (materialesItems.length > 0) activeCategories.push("MATERIAL");
+  if (serviciosItems.length > 0) activeCategories.push("SERVICIO");
 
   // Filter catalog items for search dropdown
   const filteredCatalog = CLASIFICADOR_OBJETO_GASTO.flatMap((p) =>
@@ -154,20 +160,24 @@ export default function FormulacionRequerimientosPage() {
   );
 
   const handleAddFromCatalog = (ejemploNombre: string, partida: PartidaObjetoGasto) => {
+    // New item fields START BLANK (empty strings "") per user request!
     const newItem: ItemData = {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      nombre: ejemploNombre.toUpperCase(), // Clean item name
+      nombre: ejemploNombre.toUpperCase(),
       categoria: partida.categoria,
       cantidad: 1,
       unidad: partida.categoria === "SERVICIO" ? "Servicio" : "Unidad",
-      precioUnitario: partida.categoria === "SERVICIO" ? 0 : 500,
-      precioReferencial: partida.categoria === "SERVICIO" ? 0 : 500,
-      especificacionesTecnicasTexto: partida.categoria !== "SERVICIO" ? "Especificación técnica detallada del bien según catálogo DICYT." : undefined,
+      precioUnitario: "", // Starts blank!
+      precioReferencial: "", // Starts blank!
+      detalleServicio: "", // Starts blank!
+      especificacionesTecnicasTexto: "", // Starts blank!
       partidaPresupuestaria: partida.codigo, // 5-digit deep code
       partidaNombre: partida.denominacion,
+      documentotecnicoNombre: "", // Starts blank!
     };
 
     setItems((prev) => [...prev, newItem]);
+    setSelectedItem(newItem); // Automatically open in right-side editing panel
     setCatalogSearch("");
     setShowCatalogDropdown(false);
   };
@@ -180,13 +190,15 @@ export default function FormulacionRequerimientosPage() {
       categoria: "MATERIAL",
       cantidad: 1,
       unidad: "Unidad",
-      precioUnitario: 100,
-      precioReferencial: 100,
-      especificacionesTecnicasTexto: "Especificaciones del material.",
+      precioUnitario: "",
+      precioReferencial: "",
+      especificacionesTecnicasTexto: "",
       partidaPresupuestaria: "39500",
       partidaNombre: "Útiles de Escritorio y Oficina",
+      documentotecnicoNombre: "",
     };
     setItems((prev) => [...prev, newItem]);
+    setSelectedItem(newItem);
     setCatalogSearch("");
     setShowCatalogDropdown(false);
   };
@@ -194,9 +206,12 @@ export default function FormulacionRequerimientosPage() {
   const removeItem = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setItems((prev) => prev.filter((i) => i.id !== id));
+    if (selectedItem?.id === id) {
+      setSelectedItem(null);
+    }
   };
 
-  const handleSaveModal = (updated: ItemData) => {
+  const handleSaveInlineItem = (updated: ItemData) => {
     setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
     setSelectedItem(null);
   };
@@ -251,7 +266,7 @@ export default function FormulacionRequerimientosPage() {
   // Submit Single Requisition
   const handleSubmitSingle = (cat: ItemCategoria) => {
     const catItems = items.filter((i) => i.categoria === cat);
-    const totalAmount = catItems.reduce((acc, curr) => acc + (curr.precioReferencial || 0), 0);
+    const totalAmount = catItems.reduce((acc, curr) => acc + (Number(curr.precioReferencial) || 0), 0);
 
     // Simulation of Saldo Insuficiente check (e.g. if category is ACTIVO_FIJO and amount > 5000 Bs)
     if (cat === "ACTIVO_FIJO" && totalAmount > 5000) {
@@ -299,7 +314,7 @@ export default function FormulacionRequerimientosPage() {
   const handleBatchSubmit = async () => {
     setBatchSubmitting(true);
 
-    if (activosItems.length > 0 && activosItems.reduce((acc, curr) => acc + curr.precioReferencial, 0) > 5000) {
+    if (activosItems.length > 0 && activosItems.reduce((acc, curr) => acc + (Number(curr.precioReferencial) || 0), 0) > 5000) {
       setBatchSubmitting(false);
       const firstItem = activosItems[0];
       setSaldoModalData({
@@ -312,13 +327,8 @@ export default function FormulacionRequerimientosPage() {
       return;
     }
 
-    const activeCats: ItemCategoria[] = [];
-    if (activosItems.length > 0) activeCats.push("ACTIVO_FIJO");
-    if (materialesItems.length > 0) activeCats.push("MATERIAL");
-    if (serviciosItems.length > 0) activeCats.push("SERVICIO");
-
     await Promise.allSettled(
-      activeCats.map(async (cat) => {
+      activeCategories.map(async (cat) => {
         if (headers[cat].estado === "ENVIADO") return;
 
         const errs = validateSingleRequisition(cat);
@@ -347,7 +357,7 @@ export default function FormulacionRequerimientosPage() {
 
   return (
     <SigefiShell>
-      <div className="space-y-6 max-w-4xl mx-auto pb-24">
+      <div className="space-y-6 max-w-6xl mx-auto pb-24">
         {/* Título de Formulación de Requerimientos */}
         <div className="text-center space-y-1">
           <h1 className="text-2xl md:text-3xl font-extrabold text-[#001B47] tracking-tight">
@@ -441,261 +451,415 @@ export default function FormulacionRequerimientosPage() {
           )}
         </div>
 
-        {/* Bloque 1: Activos Fijos */}
-        <div className="bg-white rounded-xl border border-[#e5e7eb] overflow-hidden shadow-2xs">
-          <div
-            onClick={() => setActivosExpanded(!activosExpanded)}
-            className="p-4 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
-                  activosExpanded ? "bg-[#002855]" : "bg-[#cbd5e1]"
-                }`}
-              >
-                <div
-                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                    activosExpanded ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </div>
-              <Monitor className="w-5 h-5 text-[#002855]" />
-              <span className="font-bold text-sm text-[#001B47]">Activos Fijos</span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f1f5f9] text-[#002855]">
-                {activosItems.length}
-              </span>
+        {/* Estado Vacío Informativo (NO se muestran tarjetas de trámite antes de agregar ítems!) */}
+        {activeCategories.length === 0 && (
+          <div className="p-10 border-2 border-dashed border-[#cbd5e1] rounded-2xl bg-white text-center space-y-3 shadow-2xs">
+            <div className="w-12 h-12 bg-[#002855]/10 text-[#002855] rounded-full flex items-center justify-center mx-auto font-bold text-lg">
+              ✨
             </div>
-            {activosExpanded ? <ChevronUp className="w-4 h-4 text-[#64748b]" /> : <ChevronDown className="w-4 h-4 text-[#64748b]" />}
+            <h3 className="font-bold text-sm text-[#001B47]">Ningún Trámite Generado Aún</h3>
+            <p className="text-xs text-[#6b7280] max-w-md mx-auto leading-relaxed">
+              Use el buscador para agregar ítems a su pedido inicial. Tan pronto agregue un ítem, el sistema creará dinámicamente la tarjeta de trámite correspondiente a esa categoría.
+            </p>
           </div>
+        )}
 
-          {activosExpanded && (
-            <div className="p-4 border-t border-[#e5e7eb] space-y-3 bg-[#f8fafc]/50">
-              {activosItems.length === 0 ? (
-                <p className="text-xs text-[#9ca3af] italic">0 ítems agregados en Activos Fijos.</p>
-              ) : (
-                activosItems.map((item, idx) => (
+        {/* ========================================================================= */}
+        {/* LAYOUT SPLIT EN PANEL LATERAL (Grid de 2 columnas cuando se edita un ítem) */}
+        {/* ========================================================================= */}
+        {activeCategories.length > 0 && (
+          <div className={`grid grid-cols-1 ${selectedItem ? "lg:grid-cols-12" : "grid-cols-1"} gap-6 transition-all`}>
+            {/* COLUMNA IZQUIERDA: Tarjetas de Trámites por Categoría */}
+            <div className={`space-y-6 ${selectedItem ? "lg:col-span-7" : "w-full"}`}>
+              {activeCategories.map((cat) => {
+                const catHeader = headers[cat];
+                const catItems = items.filter((i) => i.categoria === cat);
+                const isActivo = cat === "ACTIVO_FIJO";
+                const isServicio = cat === "SERVICIO";
+
+                return (
                   <div
-                    key={item.id}
-                    onClick={() => setSelectedItem(item)}
-                    className="p-3.5 bg-white border border-[#002855] rounded-xl flex items-center justify-between cursor-pointer transition-all shadow-2xs group"
+                    key={cat}
+                    className={`bg-white rounded-2xl border transition-all shadow-xs overflow-hidden space-y-4 p-5 ${
+                      catHeader.estado === "ERROR_VALIDACION"
+                        ? "border-red-500 bg-red-50/10"
+                        : catHeader.estado === "ENVIADO"
+                        ? "border-emerald-500 bg-emerald-50/10"
+                        : "border-[#002855]"
+                    }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <ChevronDown className="w-4 h-4 text-[#9ca3af]" />
+                    {/* Encabezado del Trámite Generado */}
+                    <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-[#002855] text-white rounded-lg">
+                          {isActivo ? <Monitor className="w-5 h-5" /> : isServicio ? <Package className="w-5 h-5" /> : <Settings className="w-5 h-5" />}
+                        </div>
+                        <div>
+                          <h2 className="font-bold text-sm text-[#001B47] flex items-center gap-2">
+                            {catHeader.titulo}
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                              {catItems.length}
+                            </span>
+                          </h2>
+                        </div>
+                      </div>
+
+                      {/* Badge de Estado del Trámite */}
                       <div>
-                        <div className="font-bold text-xs text-[#001B47] uppercase">
-                          ITEM {idx + 1} | {item.nombre}
-                        </div>
-                        <div className="flex items-center gap-3 mt-1 text-[11px] text-[#64748b]">
-                          <span className="px-2 py-0.5 bg-[#002855]/10 text-[#002855] rounded font-bold text-[10px] uppercase">
-                            CATÁLOGO
+                        {catHeader.estado === "ENVIADO" ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-full border border-emerald-200">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Enviado ({catHeader.codigoSeguimiento})
                           </span>
-                          <span>Cantidad: {item.cantidad}</span>
-                          <span className="font-mono text-[10px]">Partida: {item.partidaPresupuestaria}</span>
-                        </div>
+                        ) : catHeader.estado === "ERROR_VALIDACION" ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-red-100 text-red-800 text-[11px] font-bold rounded-full border border-red-200">
+                            <AlertCircle className="w-3 h-3" />
+                            Error
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-800 text-[11px] font-bold rounded-full border border-amber-200">
+                            <Clock className="w-3 h-3" />
+                            Borrador
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => removeItem(item.id, e)}
-                      className="text-[#9ca3af] hover:text-[#BC000C] transition-colors p-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
+                    {/* Mensajes de Error de Validación Destacados */}
+                    {catHeader.estado === "ERROR_VALIDACION" && catHeader.errores.length > 0 && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-xl space-y-1 text-xs text-red-700 font-medium">
+                        <p className="font-bold flex items-center gap-1.5 text-red-800">
+                          <AlertCircle className="w-4 h-4 text-red-600" />
+                          Campos obligatorios requeridos:
+                        </p>
+                        <ul className="list-disc pl-5 space-y-0.5 text-[11px]">
+                          {catHeader.errores.map((err, idx) => (
+                            <li key={idx}>{err}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-        {/* Bloque 2: Materiales */}
-        <div className="bg-white rounded-xl border border-[#e5e7eb] overflow-hidden shadow-2xs">
-          <div
-            onClick={() => setMaterialesExpanded(!materialesExpanded)}
-            className="p-4 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
-                  materialesExpanded ? "bg-[#002855]" : "bg-[#cbd5e1]"
-                }`}
-              >
-                <div
-                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                    materialesExpanded ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </div>
-              <Settings className="w-5 h-5 text-[#002855]" />
-              <span className="font-bold text-sm text-[#001B47]">Materiales</span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f1f5f9] text-[#002855]">
-                {materialesItems.length}
-              </span>
-            </div>
-            {materialesExpanded ? <ChevronUp className="w-4 h-4 text-[#64748b]" /> : <ChevronDown className="w-4 h-4 text-[#64748b]" />}
-          </div>
+                    {/* Justificación y Datos Generales ÚNICOS de este Trámite */}
+                    <div className="p-3.5 bg-[#f8fafc] rounded-xl border border-[#e5e7eb] space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-[#2c3e50]">
+                          Justificación del Trámite ({catHeader.titulo}) *
+                        </label>
+                        <textarea
+                          rows={2}
+                          disabled={catHeader.estado === "ENVIADO"}
+                          placeholder="Describa brevemente la justificación y necesidad de este trámite..."
+                          value={catHeader.justificacion}
+                          onChange={(e) =>
+                            setHeaders((prev) => ({
+                              ...prev,
+                              [cat]: { ...prev[cat], justificacion: e.target.value },
+                            }))
+                          }
+                          className={`w-full p-2.5 text-xs bg-white border rounded-lg text-[#2c3e50] ${
+                            catHeader.estado === "ERROR_VALIDACION" && !catHeader.justificacion.trim()
+                              ? "border-red-500 ring-1 ring-red-500"
+                              : "border-[#e5e7eb]"
+                          }`}
+                        />
+                      </div>
 
-          {materialesExpanded && (
-            <div className="p-4 border-t border-[#e5e7eb] space-y-3 bg-[#f8fafc]/50">
-              {materialesItems.length === 0 ? (
-                <p className="text-xs text-[#9ca3af] italic">0 ítems agregados en Materiales.</p>
-              ) : (
-                materialesItems.map((item, idx) => (
-                  <div
-                    key={item.id}
-                    onClick={() => setSelectedItem(item)}
-                    className="p-3.5 bg-white border border-[#e5e7eb] rounded-xl flex items-center justify-between cursor-pointer transition-all shadow-2xs group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <ChevronDown className="w-4 h-4 text-[#9ca3af]" />
-                      <div>
-                        <div className="font-bold text-xs text-[#001B47] uppercase">
-                          ITEM {idx + 1} | {item.nombre}
+                      {/* Campos de Custodio para Activos Fijos */}
+                      {isActivo && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                          <div className="space-y-1">
+                            <label className="text-xs font-semibold text-[#2c3e50] flex items-center gap-1">
+                              <UserCheck className="w-3.5 h-3.5 text-[#002855]" />
+                              Nombre del Custodio *
+                            </label>
+                            <input
+                              type="text"
+                              disabled={catHeader.estado === "ENVIADO"}
+                              placeholder="Ej: Dr. Marcelino Pérez"
+                              value={catHeader.custodioNombre}
+                              onChange={(e) =>
+                                setHeaders((prev) => ({
+                                  ...prev,
+                                  [cat]: { ...prev[cat], custodioNombre: e.target.value },
+                                }))
+                              }
+                              className={`w-full p-2 text-xs bg-white border rounded-lg ${
+                                catHeader.estado === "ERROR_VALIDACION" && !catHeader.custodioNombre.trim()
+                                  ? "border-red-500 ring-1 ring-red-500"
+                                  : "border-[#e5e7eb]"
+                              }`}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-semibold text-[#2c3e50] flex items-center gap-1">
+                              <MapPin className="w-3.5 h-3.5 text-[#002855]" />
+                              Lugar / Laboratorio de Ubicación *
+                            </label>
+                            <input
+                              type="text"
+                              disabled={catHeader.estado === "ENVIADO"}
+                              placeholder="Ej: Lab. de IA - Edificio DICYT"
+                              value={catHeader.custodioUbicacion}
+                              onChange={(e) =>
+                                setHeaders((prev) => ({
+                                  ...prev,
+                                  [cat]: { ...prev[cat], custodioUbicacion: e.target.value },
+                                }))
+                              }
+                              className={`w-full p-2 text-xs bg-white border rounded-lg ${
+                                catHeader.estado === "ERROR_VALIDACION" && !catHeader.custodioUbicacion.trim()
+                                  ? "border-red-500 ring-1 ring-red-500"
+                                  : "border-[#e5e7eb]"
+                              }`}
+                            />
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3 mt-1 text-[11px] text-[#64748b]">
-                          <span className="px-2 py-0.5 bg-[#002855]/10 text-[#002855] rounded font-bold text-[10px] uppercase">
-                            MATERIAL
-                          </span>
-                          <span>Cantidad: {item.cantidad}</span>
-                          <span className="font-mono text-[10px]">Partida: {item.partidaPresupuestaria}</span>
-                        </div>
+                      )}
+
+                      {/* Carga de Proformas / Cotizaciones específicas de este trámite (Imagen o PDF) */}
+                      <div className="space-y-1 pt-1">
+                        <label className="text-xs font-semibold text-[#2c3e50]">
+                          Archivos de Respaldo (Proformas / Cotizaciones en Imagen o PDF) *
+                        </label>
+                        {catHeader.estado !== "ENVIADO" && (
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="file"
+                              accept=".pdf,.png,.jpg,.jpeg,.webp"
+                              onChange={(e) => handleProformaUpload(cat, e)}
+                              className="text-xs text-[#6b7280] file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#002855] file:text-white cursor-pointer"
+                            />
+                          </div>
+                        )}
+                        {catHeader.proformas.length > 0 && (
+                          <div className="flex flex-wrap gap-2 pt-1.5">
+                            {catHeader.proformas.map((p) => (
+                              <span key={p.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs bg-white border border-[#e5e7eb] rounded-md font-medium text-[#001B47]">
+                                <Paperclip className="w-3 h-3 text-[#64748b]" />
+                                {p.nombre}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => removeItem(item.id, e)}
-                      className="text-[#9ca3af] hover:text-[#BC000C] transition-colors p-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
+                    {/* Lista de Ítems dentro del Trámite */}
+                    <div className="space-y-2">
+                      {catItems.map((item, idx) => (
+                        <div
+                          key={item.id}
+                          onClick={() => catHeader.estado !== "ENVIADO" && setSelectedItem(item)}
+                          className={`p-3.5 bg-white border rounded-xl flex items-center justify-between cursor-pointer transition-all shadow-2xs group ${
+                            selectedItem?.id === item.id
+                              ? "border-2 border-[#BC000C] bg-red-50/5"
+                              : "border-[#002855] hover:border-[#001B47]"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <ChevronDown className="w-4 h-4 text-[#9ca3af] group-hover:text-[#002855]" />
+                            <div>
+                              <div className="font-bold text-xs text-[#001B47] uppercase">
+                                {isServicio ? `SERVICIO ${idx + 1}` : `ITEM ${idx + 1}`} | {item.nombre}
+                              </div>
+                              <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-[#64748b]">
+                                <span className="px-2 py-0.5 bg-[#002855]/10 text-[#002855] rounded font-bold text-[10px] uppercase">
+                                  {isServicio ? "SERVICIO" : "CATÁLOGO"}
+                                </span>
+                                <span>Cantidad: {item.cantidad || 1}</span>
+                                {item.precioReferencial !== "" && <span>Total: {item.precioReferencial} Bs</span>}
+                              </div>
+                            </div>
+                          </div>
 
-        {/* Bloque 3: Servicios */}
-        <div className="bg-white rounded-xl border border-[#e5e7eb] overflow-hidden shadow-2xs">
-          <div
-            onClick={() => setServiciosExpanded(!serviciosExpanded)}
-            className="p-4 flex items-center justify-between cursor-pointer hover:bg-[#f8fafc] transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
-                  serviciosExpanded ? "bg-[#002855]" : "bg-[#cbd5e1]"
-                }`}
-              >
-                <div
-                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                    serviciosExpanded ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </div>
-              <Package className="w-5 h-5 text-[#002855]" />
-              <span className="font-bold text-sm text-[#001B47]">Servicios</span>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f1f5f9] text-[#002855]">
-                {serviciosItems.length}
-              </span>
-            </div>
-            {serviciosExpanded ? <ChevronUp className="w-4 h-4 text-[#64748b]" /> : <ChevronDown className="w-4 h-4 text-[#64748b]" />}
-          </div>
-
-          {serviciosExpanded && (
-            <div className="p-4 border-t border-[#e5e7eb] space-y-3 bg-[#f8fafc]/50">
-              {serviciosItems.length === 0 ? (
-                <p className="text-xs text-[#9ca3af] italic">0 ítems agregados en Servicios.</p>
-              ) : (
-                serviciosItems.map((item, idx) => (
-                  <div
-                    key={item.id}
-                    onClick={() => setSelectedItem(item)}
-                    className="p-3.5 bg-white border-2 border-[#BC000C] rounded-xl flex items-center justify-between cursor-pointer shadow-xs transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <ChevronDown className="w-4 h-4 text-[#9ca3af]" />
-                      <div>
-                        <div className="font-bold text-xs text-[#BC000C] uppercase">
-                          SERVICIO {idx + 1} | {item.nombre}
-                        </div>
-                        <div className="flex items-center gap-3 mt-1 text-[11px] text-[#64748b]">
-                          <span className="px-2 py-0.5 bg-[#BC000C]/10 text-[#BC000C] rounded font-bold uppercase text-[10px]">
-                            SERVICIO
-                          </span>
-                          <span>Cantidad: {item.cantidad}</span>
-                          {item.documentotecnicoNombre && (
-                            <span className="text-emerald-700 font-bold">✓ TDR PDF Adjuntado</span>
+                          {catHeader.estado !== "ENVIADO" && (
+                            <button
+                              type="button"
+                              onClick={(e) => removeItem(item.id, e)}
+                              className="text-[#9ca3af] hover:text-[#BC000C] transition-colors p-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           )}
                         </div>
-                      </div>
+                      ))}
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => removeItem(item.id, e)}
-                      className="text-[#9ca3af] hover:text-[#BC000C] transition-colors p-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {/* Botón de Envío INDIVIDUAL por Trámite */}
+                    {catHeader.estado !== "ENVIADO" && (
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => handleSubmitSingle(cat)}
+                          className="px-5 py-2.5 bg-[#002855] text-white text-xs font-bold rounded-xl hover:bg-[#001B47] transition-all flex items-center gap-2 shadow-sm"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          Enviar Trámite ({catHeader.titulo})
+                        </button>
+                      </div>
+                    )}
                   </div>
-                ))
-              )}
+                );
+              })}
             </div>
-          )}
-        </div>
 
-        {/* Sección de Cabecera General del Trámite & Cotizaciones de Respaldo (Acepta Imagen o PDF) */}
-        <div className="bg-white p-5 rounded-xl border border-[#e5e7eb] shadow-2xs space-y-4">
-          <h3 className="font-bold text-sm text-[#001B47] flex items-center gap-2">
-            <FileText className="w-4 h-4 text-[#002855]" />
-            Datos Generales y Cotizaciones de Respaldo (Proformas)
-          </h3>
+            {/* COLUMNA DERECHA: PANEL LATERAL INLINE DE EDICIÓN ("EDITAR SERVICIO" / "EDITAR REQUERIMIENTO") */}
+            {selectedItem && (
+              <div className="lg:col-span-5 bg-white rounded-2xl border-t-4 border-t-[#BC000C] border border-[#e5e7eb] p-5 shadow-lg space-y-4 self-start sticky top-20">
+                <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
+                  <div>
+                    <h3 className="font-extrabold text-sm text-[#001B47] uppercase tracking-wider">
+                      EDITAR {selectedItem.categoria === "SERVICIO" ? "SERVICIO" : "REQUERIMIENTO"}
+                    </h3>
+                    <p className="text-xs text-[#64748b] capitalize">{selectedItem.nombre.toLowerCase()}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedItem(null)}
+                    className="text-[#9ca3af] hover:text-[#2c3e50] p-1"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-[#2c3e50]">Justificación del Trámite *</label>
-            <textarea
-              rows={2}
-              placeholder="Describa brevemente la justificación y necesidad del trámite..."
-              value={headers.ACTIVO_FIJO.justificacion || headers.MATERIAL.justificacion || headers.SERVICIO.justificacion}
-              onChange={(e) => {
-                const val = e.target.value;
-                setHeaders((prev) => ({
-                  ACTIVO_FIJO: { ...prev.ACTIVO_FIJO, justificacion: val },
-                  MATERIAL: { ...prev.MATERIAL, justificacion: val },
-                  SERVICIO: { ...prev.SERVICIO, justificacion: val },
-                }));
-              }}
-              className="w-full p-2.5 text-xs bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50]"
-            />
-          </div>
+                <div className="space-y-4 text-xs">
+                  {/* Campo DETALLE (Nombre del ítem) - SOLO LECTURA INALTERABLE */}
+                  <div>
+                    <label className="font-bold text-xs text-[#2c3e50] block mb-1">DETALLE *</label>
+                    <input
+                      type="text"
+                      readOnly
+                      disabled
+                      value={selectedItem.nombre}
+                      className="w-full p-2.5 bg-[#f8fafc] border border-[#e5e7eb] rounded-lg font-bold text-[#001B47] cursor-not-allowed opacity-90 text-xs"
+                    />
+                  </div>
 
-          <div className="space-y-1 pt-1">
-            <label className="text-xs font-semibold text-[#2c3e50]">
-              Archivos de Respaldo (Proformas / Cotizaciones en Imagen o PDF) *
-            </label>
-            <div className="flex items-center gap-3">
-              <input
-                type="file"
-                accept=".pdf,.png,.jpg,.jpeg,.webp"
-                onChange={(e) => handleProformaUpload("ACTIVO_FIJO", e)}
-                className="text-xs text-[#6b7280] file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#002855] file:text-white cursor-pointer"
-              />
-            </div>
-            {headers.ACTIVO_FIJO.proformas.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-2">
-                {headers.ACTIVO_FIJO.proformas.map((p) => (
-                  <span key={p.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs bg-[#f8fafc] border border-[#e5e7eb] rounded-md font-medium text-[#001B47]">
-                    <Paperclip className="w-3 h-3 text-[#64748b]" />
-                    {p.nombre}
-                  </span>
-                ))}
+                  {/* Fila de Precio Referencial, Cantidad y Total */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="font-bold text-[11px] text-[#2c3e50] block mb-1">PRECIO REFERENCIAL (BS.) *</label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={selectedItem.precioReferencial}
+                        onChange={(e) =>
+                          setSelectedItem({
+                            ...selectedItem,
+                            precioReferencial: e.target.value === "" ? "" : Number(e.target.value),
+                          })
+                        }
+                        className="w-full p-2 bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] text-xs font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-[11px] text-[#2c3e50] block mb-1">CANTIDAD *</label>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="1"
+                        value={selectedItem.cantidad}
+                        onChange={(e) =>
+                          setSelectedItem({
+                            ...selectedItem,
+                            cantidad: e.target.value === "" ? "" : Number(e.target.value),
+                          })
+                        }
+                        className="w-full p-2 bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] text-xs font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-[11px] text-[#2c3e50] block mb-1">TOTAL (BS.)</label>
+                      <input
+                        type="text"
+                        readOnly
+                        disabled
+                        value={`${(
+                          (Number(selectedItem.precioReferencial) || 0) * (Number(selectedItem.cantidad) || 0)
+                        ).toLocaleString("es-BO")},00 Bs.`}
+                        className="w-full p-2 bg-[#f1f5f9] border border-[#e5e7eb] rounded-lg font-bold text-[#001B47] cursor-not-allowed text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* JUSTIFICACIÓN / ESPECIFICACIONES TÉCNICAS (Comienzan EN BLANCO!) */}
+                  {selectedItem.categoria === "SERVICIO" ? (
+                    <>
+                      <div>
+                        <label className="font-bold text-xs text-[#2c3e50] block mb-1">JUSTIFICACIÓN *</label>
+                        <textarea
+                          rows={4}
+                          placeholder="DESCRIBA BREVEMENTE LA JUSTIFICACIÓN Y NECESIDAD DE ESTE SERVICIO..."
+                          value={selectedItem.detalleServicio || ""}
+                          onChange={(e) => setSelectedItem({ ...selectedItem, detalleServicio: e.target.value })}
+                          className="w-full p-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] uppercase text-xs"
+                        />
+                      </div>
+
+                      <div className="pt-2 border-t border-[#e5e7eb] space-y-2">
+                        <label className="font-bold text-xs text-[#2c3e50] block">DOCUMENTO TDR (Términos de Referencia en PDF) *</label>
+                        <div className="flex items-center justify-between bg-[#f8fafc] p-2 border border-[#e5e7eb] rounded-lg">
+                          <span className="text-xs text-[#64748b] truncate max-w-[180px]">
+                            {selectedItem.documentotecnicoNombre || "Ningún archivo TDR adjuntado"}
+                          </span>
+                          <label className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#002855] text-white text-[11px] font-semibold rounded cursor-pointer hover:bg-[#001B47]">
+                            <FileUp className="w-3 h-3" />
+                            Subir TDR PDF
+                            <input
+                              type="file"
+                              accept=".pdf"
+                              onChange={async (e) => {
+                                if (e.target.files && e.target.files.length > 0) {
+                                  const res = await uploadAttachmentFile(e.target.files[0], "docs");
+                                  setSelectedItem({
+                                    ...selectedItem,
+                                    documentotecnicoNombre: res.name,
+                                    documentotecnicoPath: res.path,
+                                  });
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <label className="font-bold text-xs text-[#2c3e50] block mb-1">ESPECIFICACIONES TÉCNICAS (ET) *</label>
+                      <textarea
+                        rows={4}
+                        placeholder="Escriba las especificaciones técnicas del bien o material (dimensiones, marca, modelo)..."
+                        value={selectedItem.especificacionesTecnicasTexto || ""}
+                        onChange={(e) => setSelectedItem({ ...selectedItem, especificacionesTecnicasTexto: e.target.value })}
+                        className="w-full p-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] text-xs"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-[#e5e7eb]">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedItem(null)}
+                    className="px-4 py-2 text-xs font-medium text-[#64748b] bg-white border border-[#e5e7eb] rounded-lg hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSaveInlineItem(selectedItem)}
+                    className="px-5 py-2 text-xs font-bold text-white bg-[#002855] rounded-lg hover:bg-[#001B47]"
+                  >
+                    Guardar Cambios
+                  </button>
+                </div>
               </div>
             )}
           </div>
-        </div>
+        )}
 
         {/* Botón Principal ENVIAR a lo ancho en la parte inferior */}
         <div className="pt-4">
@@ -722,162 +886,6 @@ export default function FormulacionRequerimientosPage() {
           </div>
         )}
       </div>
-
-      {/* Modal EDITAR SERVICIO / ITEM (Fiel al mockup EDITAR SERVICIO) */}
-      {selectedItem && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl border-t-4 border-t-[#BC000C] border-[#e5e7eb] overflow-hidden space-y-4 p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
-              <div>
-                <h3 className="font-bold text-base text-[#001B47] uppercase tracking-wide">
-                  EDITAR {selectedItem.categoria === "SERVICIO" ? "SERVICIO" : "REQUERIMIENTO"}
-                </h3>
-                <p className="text-xs text-[#64748b] capitalize">{selectedItem.nombre.toLowerCase()}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedItem(null)}
-                className="text-[#9ca3af] hover:text-[#2c3e50] p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4 text-xs">
-              {/* Campo Nombre del Ítem - SOLO LECTURA (Inalterable) */}
-              <div>
-                <label className="font-bold text-xs text-[#2c3e50] block mb-1">DETALLE *</label>
-                <input
-                  type="text"
-                  readOnly
-                  disabled
-                  value={selectedItem.nombre}
-                  className="w-full p-2.5 bg-[#f8fafc] border border-[#e5e7eb] rounded-lg font-bold text-[#001B47] cursor-not-allowed opacity-90"
-                />
-                <span className="text-[10px] text-[#6b7280] italic mt-0.5 block">
-                  * El nombre del ítem del catálogo es de solo lectura y no puede modificarse.
-                </span>
-              </div>
-
-              {/* Fila de Cantidad, Precio y Total */}
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="font-bold text-xs text-[#2c3e50] block mb-1">PRECIO REFERENCIAL (BS.) *</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={selectedItem.precioReferencial}
-                    onChange={(e) =>
-                      setSelectedItem({
-                        ...selectedItem,
-                        precioReferencial: Number(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full p-2 bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50]"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-xs text-[#2c3e50] block mb-1">CANTIDAD *</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={selectedItem.cantidad}
-                    onChange={(e) =>
-                      setSelectedItem({
-                        ...selectedItem,
-                        cantidad: Number(e.target.value) || 1,
-                      })
-                    }
-                    className="w-full p-2 bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50]"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-xs text-[#2c3e50] block mb-1">TOTAL (BS.)</label>
-                  <input
-                    type="text"
-                    readOnly
-                    disabled
-                    value={`${(selectedItem.precioReferencial * selectedItem.cantidad).toLocaleString("es-BO")},00 Bs.`}
-                    className="w-full p-2 bg-[#f1f5f9] border border-[#e5e7eb] rounded-lg font-bold text-[#001B47] cursor-not-allowed"
-                  />
-                </div>
-              </div>
-
-              {/* Justificación o Especificaciones Técnicas Texto vs PDF */}
-              {selectedItem.categoria === "SERVICIO" ? (
-                <>
-                  <div>
-                    <label className="font-bold text-xs text-[#2c3e50] block mb-1">JUSTIFICACIÓN *</label>
-                    <textarea
-                      rows={3}
-                      placeholder="DESCRIBA BREVEMENTE LA JUSTIFICACIÓN Y NECESIDAD DE ESTE SERVICIO..."
-                      value={selectedItem.detalleServicio || ""}
-                      onChange={(e) => setSelectedItem({ ...selectedItem, detalleServicio: e.target.value })}
-                      className="w-full p-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] uppercase text-xs"
-                    />
-                  </div>
-
-                  <div className="pt-2 border-t border-[#e5e7eb] space-y-2">
-                    <label className="font-bold text-xs text-[#2c3e50] block">DOCUMENTO TDR (Términos de Referencia en PDF) *</label>
-                    <div className="flex items-center justify-between bg-[#f8fafc] p-2.5 border border-[#e5e7eb] rounded-lg">
-                      <span className="text-xs text-[#64748b] truncate max-w-[260px]">
-                        {selectedItem.documentotecnicoNombre || "Ningún archivo TDR adjuntado"}
-                      </span>
-                      <label className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#002855] text-white text-xs font-semibold rounded cursor-pointer hover:bg-[#001B47]">
-                        <FileUp className="w-3.5 h-3.5" />
-                        Subir TDR PDF
-                        <input
-                          type="file"
-                          accept=".pdf"
-                          onChange={async (e) => {
-                            if (e.target.files && e.target.files.length > 0) {
-                              const res = await uploadAttachmentFile(e.target.files[0], "docs");
-                              setSelectedItem({
-                                ...selectedItem,
-                                documentotecnicoNombre: res.name,
-                                documentotecnicoPath: res.path,
-                              });
-                            }
-                          }}
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div>
-                  <label className="font-bold text-xs text-[#2c3e50] block mb-1">ESPECIFICACIONES TÉCNICAS (ET) *</label>
-                  <textarea
-                    rows={3}
-                    placeholder="Escriba las especificaciones técnicas del bien o material (dimensiones, características)..."
-                    value={selectedItem.especificacionesTecnicasTexto || ""}
-                    onChange={(e) => setSelectedItem({ ...selectedItem, especificacionesTecnicasTexto: e.target.value })}
-                    className="w-full p-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] text-xs"
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end gap-2 pt-3 border-t border-[#e5e7eb]">
-              <button
-                type="button"
-                onClick={() => setSelectedItem(null)}
-                className="px-4 py-2 text-xs font-medium text-[#64748b] bg-white border border-[#e5e7eb] rounded-lg hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSaveModal(selectedItem)}
-                className="px-5 py-2 text-xs font-bold text-white bg-[#002855] rounded-lg hover:bg-[#001B47]"
-              >
-                Guardar Cambios
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal SALDO INSUFICIENTE (Fiel al mockup Saldo Insuficiente) */}
       {saldoModalData && (
