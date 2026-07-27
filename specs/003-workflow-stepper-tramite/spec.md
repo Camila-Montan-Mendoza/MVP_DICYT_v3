@@ -26,12 +26,12 @@ Como usuario del sistema, quiero ingresar a la vista de detalle de un trámite (
 
 **Why this priority**: Proporciona visibilidad macro inmediata de la fase actual del flujo de aprobación.
 
-**Independent Test**: Ingresar a `/tramites/tr-001` y verificar que el encabezado muestre `Trámite Nº TR-2026-001` y que el Stepper Horizontal renderice los 4 pasos marcando el paso 1 como COMPLETADO y el paso 2 como EN CURSO.
+**Independent Test**: Ingresar a `/tramites/tr-001` y verificar que el encabezado muestre `Trámite Nº TR-2026-001` y que el Stepper Horizontal renderice los 4 pasos marcando el paso 1 como COMPLETADO y el paso 2 como EN_CURSO.
 
 **Acceptance Scenarios**:
 
 1. **Given** que el usuario ingresa al detalle de un trámite `/tramites/[id]`, **When** la página carga, **Then** visualiza el encabezado con `Trámite Nº <Numero>`, `Proyecto: <PROYECTO>` y `Solicitante: <Nombre Solicitante>`.
-2. **Given** la barra de progreso horizontal superior, **When** se evalúa el estado del trámite, **Then** cada paso muestra su número en un círculo estilizado, su nombre y su badge de estado (`COMPLETADO`, `EN CURSO`, `PENDIENTE`).
+2. **Given** la barra de progreso horizontal superior, **When** se evalúa el estado del trámite, **Then** cada paso muestra su número en un círculo estilizado, su nombre y su badge de estado (`COMPLETADO`, `EN_CURSO`, `PENDIENTE`).
 
 ---
 
@@ -89,7 +89,7 @@ Como usuario del sistema, quiero que el área de trabajo contigua a la cronolog�
 
 - **FR-001**: El sistema DEBE ofrecer la ruta de detalle del trámite en `/tramites/[id]` (y alias `/tramites/detalle`).
 - **FR-002**: El encabezado DEBE exhibir: `Trámite Nº <Numero>`, `Proyecto: <PROYECTO>` y `Solicitante: <Nombre Solicitante>`.
-- **FR-003**: El Stepper Horizontal Macro DEBE renderizar la secuencia de pasos con círculos numerados, líneas conectoras y badges de estado (`COMPLETADO`, `EN CURSO`, `PENDIENTE`).
+- **FR-003**: El Stepper Horizontal Macro DEBE renderizar la secuencia de pasos con círculos numerados, líneas conectoras y badges de estado (`COMPLETADO`, `EN_CURSO`, `PENDIENTE`).
 - **FR-004**: La estructura de dominio DEBE modelarse sin un estado global único, derivando el avance a partir de Pasos (Nivel Macro) y Tareas (Nivel Granular).
 - **FR-005**: Cada Tarea DEBE especificar: Nombre de la Tarea, Rol Responsable, Usuario Asignado y Estado (`Completado`, `En Curso`, `Pendiente`).
 - **FR-006**: Para toda Tarea con estado `Completado`, el sistema DEBE exhibir obligatoriamente la fecha y hora exacta de finalización (ej: `11 Ene 2026 - 09:15`).

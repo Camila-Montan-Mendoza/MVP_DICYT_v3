@@ -12,37 +12,66 @@ import {
   tramiteDBRepository,
   TramiteDBItem,
 } from "@/lib/db/tramite-repository";
-import {
-  cargarGrafoWorkflow,
-  obtenerNodoPorId,
-} from "@/lib/workflow/workflow-db-service";
+import { cargarGrafoWorkflow } from "@/lib/workflow/workflow-db-service";
 import type { NodoWorkflow } from "@/lib/workflow/compra-menor-strategy";
-import { ArrowLeft, Layers, CheckCircle2, Clock, Stamp } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Clock, Stamp } from "lucide-react";
 
 function TramiteWorkflowDetailContent() {
   const routeParams = useParams();
   const rawId = Array.isArray(routeParams?.id)
     ? routeParams.id[0]
     : routeParams?.id;
-  const tramiteId = rawId || "1";
+  const tramiteId = rawId!;
 
   const [tramite, setTramite] = useState<TramiteDBItem | undefined>();
   const [grafo, setGrafo] = useState<Record<number, NodoWorkflow>>({});
   const [nodoActual, setNodoActual] = useState<NodoWorkflow | null>(null);
+  const [pasosList, setPasosList] = useState<PasoWorkflow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Cargar el grafo del workflow desde la BD (con cache en memoria)
   useEffect(() => {
     cargarGrafoWorkflow(1).then(setGrafo);
   }, []);
 
-  const loadTramite = useCallback(() => {
-    tramiteDBRepository.getTramiteById(tramiteId).then((found) => {
-      if (found) {
-        setTramite(found);
-      } else {
-        tramiteDBRepository.getTramites().then((list) => setTramite(list[0]));
+  const loadTramite = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const tramiteIdNum = parseInt(tramiteId, 10) || 0;
+      const found = await tramiteDBRepository.getTramiteById(tramiteId);
+      let targetTramite = found;
+
+      if (!targetTramite) {
+        const list = await tramiteDBRepository.getTramites();
+        targetTramite = list.length > 0 ? list[0] : undefined;
       }
-    });
+
+      if (!targetTramite) {
+        setLoadError(
+          `No se encontró ningún trámite registrado en la base de datos.`,
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      setTramite(targetTramite);
+
+      const pasos = await tramiteDBRepository.getPasosTramite(
+        targetTramite.id || tramiteIdNum,
+      );
+      if (pasos && pasos.length > 0) {
+        setPasosList(pasos);
+      } else {
+        setLoadError(
+          "No se encontraron pasos de flujo registrados en la base de datos.",
+        );
+      }
+    } catch (e: any) {
+      setLoadError(e?.message || "Error al conectar con la base de datos.");
+    } finally {
+      setIsLoading(false);
+    }
   }, [tramiteId]);
 
   useEffect(() => {
@@ -57,94 +86,58 @@ function TramiteWorkflowDetailContent() {
     }
   }, [tramite, grafo]);
 
-  const refreshTramite = () => {
-    loadTramite();
-  };
-
-  const resolveNextNode = async (
-    destinoDbId: number,
-  ): Promise<NodoWorkflow | null> => {
-    // Primero buscar en el grafo cacheado
-    if (grafo[destinoDbId]) return grafo[destinoDbId];
-    // Fallback: consultar la BD
-    return obtenerNodoPorId(destinoDbId);
-  };
-
-  const activeTramite: TramiteDBItem = tramite || {
-    id: 0,
-    nro: "00",
-    codigoSeguimiento: "Cargando...",
-    proyecto: "Cargando...",
-    tipoTramite: "Cargando...",
-    categoria: "MATERIAL",
-    fecha: "",
-    fechaISO: new Date().toISOString(),
-    creador: "",
-    justificacion: "",
-    idEstadoTramite: 1,
-    estadoNombre: "Cargando...",
-    estado: "En proceso",
-    pasoNumero: 1,
-    pasoNombre: "Solicitud",
-    items: [],
-  };
-
-  // Construir pasos macro dinámicamente
-  const pasosList: PasoWorkflow[] = [
-    {
-      id: "p1",
-      numero: 1,
-      nombre: "Solicitud",
-      estado:
-        activeTramite.pasoNumero === 1
-          ? "EN_CURSO"
-          : activeTramite.pasoNumero > 1
-            ? "COMPLETADO"
-            : "PENDIENTE",
-    },
-    {
-      id: "p2",
-      numero: 2,
-      nombre: "Recepción",
-      estado:
-        activeTramite.pasoNumero === 2
-          ? "EN_CURSO"
-          : activeTramite.pasoNumero > 2
-            ? "COMPLETADO"
-            : "PENDIENTE",
-    },
-    {
-      id: "p3",
-      numero: 3,
-      nombre: "Pago",
-      estado:
-        activeTramite.pasoNumero === 3
-          ? "EN_CURSO"
-          : activeTramite.pasoNumero > 3
-            ? "COMPLETADO"
-            : "PENDIENTE",
-    },
-    {
-      id: "p4",
-      numero: 4,
-      nombre: "Evidencia",
-      estado: activeTramite.pasoNumero === 4 ? "EN_CURSO" : "PENDIENTE",
-    },
-  ];
-
   const currentStep =
-    pasosList.find((p) => p.numero === activeTramite.pasoNumero) ||
-    pasosList[0];
-  const [activeStepId, setActiveStepId] = useState(currentStep.id);
+    pasosList.find((p) => p.numero === tramite?.pasoNumero) || pasosList[0];
+  const [activeStepId, setActiveStepId] = useState<string>("");
 
   useEffect(() => {
-    setActiveStepId(`p${activeTramite.pasoNumero}`);
-  }, [activeTramite.pasoNumero]);
+    if (currentStep) {
+      setActiveStepId(currentStep.id);
+    }
+  }, [currentStep]);
 
   const activeStep =
     pasosList.find((p) => p.id === activeStepId) || currentStep;
 
-  // Recuperar TODAS las tareas granulares del paso activo desde el grafo de la BD
+  if (isLoading) {
+    return (
+      <SigefiShell>
+        <div className="max-w-6xl mx-auto py-20 text-center text-xs font-bold text-[#64748b]">
+          Cargando flujo del trámite desde la base de datos...
+        </div>
+      </SigefiShell>
+    );
+  }
+
+  if (loadError || !tramite || pasosList.length === 0) {
+    return (
+      <SigefiShell>
+        <div className="max-w-3xl mx-auto my-12 p-8 bg-white border border-red-200 rounded-2xl text-center space-y-4 shadow-xs">
+          <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-lg font-bold">
+            ⚠️
+          </div>
+          <h3 className="font-extrabold text-base text-red-900">
+            Error al consultar los Pasos del Trámite desde la BD
+          </h3>
+          <p className="text-xs text-red-700 max-w-md mx-auto leading-relaxed">
+            {loadError ||
+              "No se encontraron pasos de flujo configurados para este trámite en Supabase."}
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/tramites"
+              className="px-5 py-2.5 bg-[#002855] text-white font-bold text-xs rounded-xl hover:bg-[#001B47] transition-colors inline-block"
+            >
+              Volver a la Lista de Trámites
+            </Link>
+          </div>
+        </div>
+      </SigefiShell>
+    );
+  }
+
+  const activeTramite = tramite;
+
   const nodosDelPaso = Object.values(grafo).filter(
     (n) => n.pasoNumero === activeStep.numero,
   );
@@ -244,51 +237,17 @@ function TramiteWorkflowDetailContent() {
 
         {/* Layout Split de 2 Columnas */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Lado Izquierdo: Cronología Vertical de Tareas (4 columnas) */}
           <div className="lg:col-span-4">
             <TaskTimeline
               pasoNombre={activeStep.nombre}
               tareas={tareasDelPaso}
-              currentUser="Marcelino Perez"
             />
           </div>
 
           {/* Lado Derecho: Área Operativa Server-Driven (8 columnas) */}
           <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-[#e5e7eb] shadow-2xs space-y-4 flex flex-col justify-between min-h-[420px]">
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-3">
-                <div className="flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-[#002855]" />
-                  <h3 className="font-extrabold text-sm text-[#001B47] uppercase tracking-wider">
-                    Área Operativa — {activeStep.nombre}
-                  </h3>
-                </div>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f1f5f9] text-[#002855]">
-                  Paso {activeStep.numero} de 4
-                </span>
-              </div>
-
-              {/* Server-Driven UI: El componente renderiza lo que la BD dice */}
-              {nodoActualResuelto && (
-                <InteractiveTaskWorkspace
-                  tramiteId={String(activeTramite.id)}
-                  nodoActual={nodoActualResuelto}
-                  onResolveNextNode={resolveNextNode}
-                  onNodeTransition={(nextNode, _log) => {
-                    setNodoActual(nextNode);
-                    const nuevoPasoId = `p${nextNode.pasoNumero}`;
-                    setActiveStepId(nuevoPasoId);
-                    refreshTramite();
-                  }}
-                />
-              )}
-            </div>
-
-            <div className="text-[11px] text-[#9ca3af] border-t border-[#e5e7eb] pt-3 flex items-center justify-between">
-              <span>Módulo de Ejecución Operativa SIGEFI DICYT</span>
-              <span className="font-mono text-[#002855] font-bold">
-                Server-Driven UI · Conectado a Postgres DB
-              </span>
+              <InteractiveTaskWorkspace />
             </div>
           </div>
         </div>

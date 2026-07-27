@@ -25,18 +25,12 @@ interface TransicionFlujoRow {
   nombre_accion: string;
 }
 
-interface RolEstadoRow {
-  id_rol: number;
-  id_estado_paso_flujo: number;
-  rol?: { id: number; nombre: string };
-}
-
 // ─── Cache en memoria ────────────────────────────────────────────
 let cachedGrafo: Record<number, NodoWorkflow> | null = null;
 let cachedTipoTramiteId: number | null = null;
 
 /**
- * Determinar la variante del botón según el tipo de transición
+ *? Determinar la variante del botón según el tipo de transición
  */
 function inferVarianteBtn(
   nombreAccion: string,
@@ -121,18 +115,18 @@ export async function cargarGrafoWorkflow(
   const pasoIds = pasos.map((p) => p.id);
 
   // 2. Cargar estados (nodos) del flujo con relación a paso_flujo
-  const { data: estados } = await supabase
+  const { data: tareas } = await supabase
     .from("estado_paso_flujo")
     .select("id, id_paso_flujo, nombre, es_inicial, es_final")
     .in("id_paso_flujo", pasoIds)
     .order("id", { ascending: true });
 
-  if (!estados || estados.length === 0) {
+  if (!tareas || tareas.length === 0) {
     console.warn("[workflow-db-service] No se encontraron estados para pasos:", pasoIds);
     return {};
   }
 
-  const estadoIds = estados.map((e) => e.id);
+  const estadoIds = tareas.map((e) => e.id);
 
   // 3. Cargar transiciones entre nodos
   const { data: transiciones } = await supabase
@@ -172,19 +166,19 @@ export async function cargarGrafoWorkflow(
 
   // Mapa: estadoId -> EstadoPasoFlujoRow (para resolver destinos)
   const estadosMap = new Map<number, EstadoPasoFlujoRow>();
-  for (const e of estados) {
+  for (const e of tareas) {
     estadosMap.set(e.id, e as EstadoPasoFlujoRow);
   }
 
   // ─── Construir el grafo de NodoWorkflow ────────────────────────
   const grafo: Record<number, NodoWorkflow> = {};
 
-  for (const estado of estados as EstadoPasoFlujoRow[]) {
-    const paso = pasosMap.get(estado.id_paso_flujo);
+  for (const tarea of tareas as EstadoPasoFlujoRow[]) {
+    const paso = pasosMap.get(tarea.id_paso_flujo);
     if (!paso) continue;
 
-    const rolInfo = rolPorEstado.get(estado.id) || { rolNombre: "Sin rol asignado", rolCode: "I" };
-    const transicionesSalientes = transicionesPorEstado.get(estado.id) || [];
+    const rolInfo = rolPorEstado.get(tarea.id) || { rolNombre: "Sin rol asignado", rolCode: "I" };
+    const transicionesSalientes = transicionesPorEstado.get(tarea.id) || [];
 
     // Construir acciones de transición
     const acciones: AccionTransicion[] = transicionesSalientes.map((t) => {
@@ -196,7 +190,7 @@ export async function cargarGrafoWorkflow(
         paso.orden,
         destinoPaso?.orden || paso.orden,
         destinoEstado?.es_final || false,
-        estado.id,
+        tarea.id,
         t.id_estado_destino
       );
 
@@ -209,14 +203,14 @@ export async function cargarGrafoWorkflow(
       };
     });
 
-    grafo[estado.id] = {
-      id: String(estado.id),
+    grafo[tarea.id] = {
+      id: String(tarea.id),
       pasoNumero: paso.orden as 1 | 2 | 3 | 4,
       pasoNombre: paso.nombre,
-      nombre: estado.nombre,
+      nombre: tarea.nombre,
       actorRol: rolInfo.rolCode as any,
       actorNombreRol: rolInfo.rolNombre,
-      instruccion: estado.nombre, // La instrucción es el mismo nombre del estado
+      instruccion: tarea.nombre, // La instrucción es el mismo nombre del estado
       acciones,
     };
   }

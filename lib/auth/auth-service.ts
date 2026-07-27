@@ -94,8 +94,6 @@ export async function getCurrentUser(): Promise<UsuarioSchema | null> {
     } = await supabase.auth.getUser();
     if (!authUser) return null;
 
-    console.log("dataaa", authUser.id);
-
     const { data, error } = await supabase
       .from("usuario")
       .select(
