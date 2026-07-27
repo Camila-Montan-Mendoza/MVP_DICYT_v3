@@ -7,109 +7,164 @@ import { SigefiShell } from "@/components/sigefi-shell";
 import {
   Search,
   Plus,
-  FilterX,
   ChevronLeft,
   ChevronRight,
-  CheckCircle2,
-  Clock,
   AlertCircle,
-  Inbox
+  MessageSquare,
+  CheckCircle2,
+  CreditCard,
+  Inbox,
+  FilterX
 } from "lucide-react";
 import { tramitesStore, TramiteStoreItem } from "@/lib/store/tramites-store";
 
 export default function ListaTramitesPage() {
   const router = useRouter();
 
-  // Load store items dynamically
+  // Dynamic Store dataset
   const [tramitesList, setTramitesList] = useState<TramiteStoreItem[]>([]);
-  const [searchProyecto, setSearchProyecto] = useState("");
+
+  // 4 Filters from Mockup
+  const [searchTerm, setSearchTerm] = useState("");
   const [tipoTramiteFilter, setTipoTramiteFilter] = useState("Todos los tipos");
+  const [proyectoFilter, setProyectoFilter] = useState("Todos los proyectos");
+  const [pasoActualFilter, setPasoActualFilter] = useState("Cualquier paso");
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 4;
 
   useEffect(() => {
     setTramitesList(tramitesStore.getTramites());
   }, []);
 
-  // Extract unique tipos for dropdown options
+  // Dropdown options
   const uniqueTipos = useMemo(() => {
     const tipos = Array.from(new Set(tramitesList.map((t) => t.tipoTramite)));
     return ["Todos los tipos", ...tipos];
   }, [tramitesList]);
 
-  // Filter dataset by project search and tipo de trámite
+  const uniqueProyectos = useMemo(() => {
+    const proyectos = Array.from(new Set(tramitesList.map((t) => t.proyecto)));
+    return ["Todos los proyectos", ...proyectos];
+  }, [tramitesList]);
+
+  const uniquePasos = [
+    "Cualquier paso",
+    "Paso 1/4: Solicitud",
+    "Paso 2/4: Recepcion de Material",
+    "Paso 3/4: Pago a Proveedor",
+    "Paso 4/4: Completado",
+  ];
+
+  // Helper to format step badge text & style
+  const getPasoInfo = (item: TramiteStoreItem) => {
+    const pasoActual = item.pasos.find((p) => p.estado === "EN_CURSO") || item.pasos[item.pasos.length - 1];
+    const totalPasos = item.pasos.length;
+    const num = pasoActual?.numero || 1;
+    const nombre = pasoActual?.nombre || "Solicitud";
+
+    let label = `Paso ${num}/${totalPasos}: ${nombre}`;
+    if (num === 2) label = `Paso 2/4: Recepcion de Material`;
+    if (num === 3) label = `Paso 3/4: Pago a Proveedor`;
+    if (num === 4 || item.estado === "Aprobado") label = `Paso 4/4: Completado`;
+
+    return {
+      num,
+      label,
+      isCompletado: num === 4 || item.estado === "Aprobado",
+    };
+  };
+
+  // Filtering Logic
   const filteredData = useMemo(() => {
     return tramitesList.filter((t) => {
-      if (searchProyecto.trim()) {
-        const q = searchProyecto.toLowerCase().trim();
-        if (!t.proyecto.toLowerCase().includes(q) && !t.codigoSeguimiento.toLowerCase().includes(q)) {
-          return false;
-        }
+      // Filter 1: Buscar (Proyecto o Código)
+      if (searchTerm.trim()) {
+        const q = searchTerm.toLowerCase().trim();
+        const matchesProyecto = t.proyecto.toLowerCase().includes(q);
+        const matchesCodigo = t.codigoSeguimiento.toLowerCase().includes(q);
+        const matchesCreador = t.creador.toLowerCase().includes(q);
+        if (!matchesProyecto && !matchesCodigo && !matchesCreador) return false;
       }
+
+      // Filter 2: Tipo de Trámite
       if (tipoTramiteFilter !== "Todos los tipos") {
-        if (t.tipoTramite.toLowerCase() !== tipoTramiteFilter.toLowerCase()) {
-          return false;
-        }
+        if (t.tipoTramite.toLowerCase() !== tipoTramiteFilter.toLowerCase()) return false;
       }
+
+      // Filter 3: Proyecto
+      if (proyectoFilter !== "Todos los proyectos") {
+        if (t.proyecto.toLowerCase() !== proyectoFilter.toLowerCase()) return false;
+      }
+
+      // Filter 4: Paso Actual
+      if (pasoActualFilter !== "Cualquier paso") {
+        const pasoInfo = getPasoInfo(t);
+        if (pasoActualFilter === "Paso 1/4: Solicitud" && pasoInfo.num !== 1) return false;
+        if (pasoActualFilter === "Paso 2/4: Recepcion de Material" && pasoInfo.num !== 2) return false;
+        if (pasoActualFilter === "Paso 3/4: Pago a Proveedor" && pasoInfo.num !== 3) return false;
+        if (pasoActualFilter === "Paso 4/4: Completado" && !pasoInfo.isCompletado) return false;
+      }
+
       return true;
     });
-  }, [tramitesList, searchProyecto, tipoTramiteFilter]);
+  }, [tramitesList, searchTerm, tipoTramiteFilter, proyectoFilter, pasoActualFilter]);
 
-  // Paginated items
+  // Pagination bounds
   const totalItems = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
-  const isFilterActive = searchProyecto.trim() !== "" || tipoTramiteFilter !== "Todos los tipos";
+  const isFilterActive =
+    searchTerm.trim() !== "" ||
+    tipoTramiteFilter !== "Todos los tipos" ||
+    proyectoFilter !== "Todos los proyectos" ||
+    pasoActualFilter !== "Cualquier paso";
 
   const handleResetFilters = () => {
-    setSearchProyecto("");
+    setSearchTerm("");
     setTipoTramiteFilter("Todos los tipos");
+    setProyectoFilter("Todos los proyectos");
+    setPasoActualFilter("Cualquier paso");
     setCurrentPage(1);
   };
 
   return (
     <SigefiShell>
       <div className="space-y-6 pb-12">
-        {/* Cabecera Principal y Botón de Crear Trámite */}
+        {/* Cabecera Principal (Título y Botón "+ Agregar tramite" Fiel al Mockup) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-[#001B47] tracking-tight">
-              Lista de Trámites
-            </h1>
-            <p className="text-xs text-[#64748b] mt-0.5">
-              Bandeja consolidada en tiempo real de todas las solicitudes registradas.
-            </p>
-          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#001B47] tracking-tight">
+            Lista de Trámites
+          </h1>
 
           <Link
             href="/tramites/nuevo"
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#002855] text-white font-bold text-xs rounded-full hover:bg-[#001B47] transition-all shadow-md"
           >
             <Plus className="w-4 h-4" />
-            + Crear trámite
+            Agregar tramite
           </Link>
         </div>
 
-        {/* Barra de Filtros Minimalista (Buscar por proyecto y Tipo de trámite) */}
+        {/* Barra de Filtros en Fila (BUSCAR, TIPO DE TRÁMITE, PROYECTO, PASO ACTUAL) */}
         <div className="bg-white p-4 rounded-xl border border-[#e5e7eb] shadow-2xs space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            {/* Buscador de Texto (Buscar por proyecto) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            {/* 1. BUSCAR */}
             <div className="space-y-1">
               <label className="font-bold text-[11px] text-[#6b7280] uppercase tracking-wider block">
-                BUSCAR POR PROYECTO
+                BUSCAR
               </label>
               <div className="relative">
                 <Search className="w-3.5 h-3.5 text-[#9ca3af] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Buscar por proyecto..."
-                  value={searchProyecto}
+                  placeholder="Proyecto, código..."
+                  value={searchTerm}
                   onChange={(e) => {
-                    setSearchProyecto(e.target.value);
+                    setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
                   className="w-full pl-8 pr-3 py-2 text-xs bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] focus:outline-none focus:ring-1 focus:ring-[#002855]"
@@ -117,7 +172,7 @@ export default function ListaTramitesPage() {
               </div>
             </div>
 
-            {/* Selector de TIPO DE TRÁMITE */}
+            {/* 2. TIPO DE TRÁMITE */}
             <div className="space-y-1">
               <label className="font-bold text-[11px] text-[#6b7280] uppercase tracking-wider block">
                 TIPO DE TRÁMITE
@@ -137,9 +192,51 @@ export default function ListaTramitesPage() {
                 ))}
               </select>
             </div>
+
+            {/* 3. PROYECTO */}
+            <div className="space-y-1">
+              <label className="font-bold text-[11px] text-[#6b7280] uppercase tracking-wider block">
+                PROYECTO
+              </label>
+              <select
+                value={proyectoFilter}
+                onChange={(e) => {
+                  setProyectoFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full p-2 text-xs bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] font-medium focus:outline-none focus:ring-1 focus:ring-[#002855]"
+              >
+                {uniqueProyectos.map((p, idx) => (
+                  <option key={idx} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 4. PASO ACTUAL */}
+            <div className="space-y-1">
+              <label className="font-bold text-[11px] text-[#6b7280] uppercase tracking-wider block">
+                PASO ACTUAL
+              </label>
+              <select
+                value={pasoActualFilter}
+                onChange={(e) => {
+                  setPasoActualFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full p-2 text-xs bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] font-medium focus:outline-none focus:ring-1 focus:ring-[#002855]"
+              >
+                {uniquePasos.map((paso, idx) => (
+                  <option key={idx} value={paso}>
+                    {paso}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* Botón para Limpiar Filtros */}
+          {/* Limpiar Filtros si hay alguno activo */}
           {isFilterActive && (
             <div className="flex justify-end pt-1">
               <button
@@ -154,18 +251,16 @@ export default function ListaTramitesPage() {
           )}
         </div>
 
-        {/* Tabla Consolidada de 3 Columnas (PROYECTO, TIPO DE TRÁMITE, ESTADO) */}
+        {/* Tabla Fiel al Mockup (7 Columnas: Nº, PROYECTO, TIPO DE TRÁMITE, FECHA, PASO ACTUAL, CREADOR, ACCIÓN) */}
         <div className="bg-white rounded-2xl border border-[#e5e7eb] shadow-2xs overflow-hidden">
           {totalItems === 0 ? (
             <div className="p-12 text-center space-y-3">
               <div className="w-14 h-14 bg-slate-100 text-[#64748b] rounded-full flex items-center justify-center mx-auto">
                 <Inbox className="w-7 h-7" />
               </div>
-              <h3 className="font-bold text-base text-[#001B47]">No hay trámites registrados</h3>
+              <h3 className="font-bold text-base text-[#001B47]">No se encontraron trámites</h3>
               <p className="text-xs text-[#6b7280] max-w-sm mx-auto leading-relaxed">
-                {isFilterActive
-                  ? "No se encontraron trámites coincidentes con los filtros de búsqueda."
-                  : "Presione '+ Crear trámite' para iniciar su primera solicitud."}
+                Pruebe ajustando o limpiando los filtros de búsqueda.
               </p>
               {isFilterActive && (
                 <button
@@ -183,56 +278,98 @@ export default function ListaTramitesPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-[#f8fafc] border-b border-[#e5e7eb] text-[11px] font-bold text-[#6b7280] uppercase tracking-wider">
+                      <th className="py-3.5 px-4 w-12 text-center">Nº</th>
                       <th className="py-3.5 px-5">PROYECTO</th>
                       <th className="py-3.5 px-5">TIPO DE TRÁMITE</th>
-                      <th className="py-3.5 px-5 text-right">ESTADO</th>
+                      <th className="py-3.5 px-5">FECHA</th>
+                      <th className="py-3.5 px-5">PASO ACTUAL</th>
+                      <th className="py-3.5 px-5">CREADOR</th>
+                      <th className="py-3.5 px-5 text-center">ACCIÓN</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e5e7eb] text-xs">
-                    {currentItems.map((tramite) => {
-                      const isAprobado = tramite.estado === "Aprobado";
-                      const isObservado = tramite.estado === "Observado por Presupuestos" || tramite.estado === "Rechazado";
+                    {currentItems.map((tramite, index) => {
+                      const pasoInfo = getPasoInfo(tramite);
+                      const isAtender = tramite.requiereAccion || pasoInfo.num === 2;
 
                       return (
                         <tr
                           key={tramite.id}
-                          onClick={() => router.push(`/tramites/${tramite.id}`)}
-                          className="hover:bg-[#f8fafc] transition-colors cursor-pointer group"
+                          className="hover:bg-[#f8fafc] transition-colors"
                         >
-                          {/* Columna 1: PROYECTO */}
-                          <td className="py-4 px-5">
-                            <div className="font-extrabold text-[#001B47] text-sm group-hover:text-[#BC000C] transition-colors">
+                          {/* 1. Nº */}
+                          <td className="py-4 px-4 text-center font-mono font-semibold text-[#64748b]">
+                            {tramite.nro || `${index + 1}`.padStart(2, "0")}
+                          </td>
+
+                          {/* 2. PROYECTO */}
+                          <td className="py-4 px-5 max-w-xs">
+                            <div className="font-extrabold text-[#001B47] text-sm leading-snug">
                               {tramite.proyecto}
                             </div>
-                            <div className="text-[11px] text-[#64748b] font-mono mt-0.5 flex items-center gap-2">
-                              <span>Código: <strong>{tramite.codigoSeguimiento}</strong></span>
-                              <span>•</span>
-                              <span>Solicitante: {tramite.creador}</span>
+                            <div className="text-[11px] text-[#9ca3af] font-mono mt-0.5">
+                              {tramite.codigoSeguimiento}
                             </div>
                           </td>
 
-                          {/* Columna 2: TIPO DE TRÁMITE */}
-                          <td className="py-4 px-5 text-[#2c3e50] font-semibold text-xs">
+                          {/* 3. TIPO DE TRÁMITE */}
+                          <td className="py-4 px-5 text-[#2c3e50] font-medium text-xs">
                             {tramite.tipoTramite}
                           </td>
 
-                          {/* Columna 3: ESTADO */}
-                          <td className="py-4 px-5 text-right whitespace-nowrap">
-                            {isAprobado ? (
+                          {/* 4. FECHA */}
+                          <td className="py-4 px-5 text-[#2c3e50] text-xs whitespace-nowrap font-mono">
+                            {tramite.fecha}
+                          </td>
+
+                          {/* 5. PASO ACTUAL (Badges Pill según Mockup) */}
+                          <td className="py-4 px-5 whitespace-nowrap">
+                            {pasoInfo.isCompletado ? (
                               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-full border border-emerald-200 shadow-2xs">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                                {tramite.estado}
+                                {pasoInfo.label}
                               </span>
-                            ) : isObservado ? (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-800 text-[11px] font-bold rounded-full border border-red-200 shadow-2xs">
-                                <AlertCircle className="w-3.5 h-3.5 text-red-600" />
-                                {tramite.estado}
+                            ) : pasoInfo.num === 1 ? (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-900 text-[11px] font-bold rounded-full border border-amber-300 shadow-2xs">
+                                <AlertCircle className="w-3.5 h-3.5 text-amber-700" />
+                                {pasoInfo.label}
+                              </span>
+                            ) : pasoInfo.num === 2 ? (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-100 text-orange-900 text-[11px] font-bold rounded-full border border-orange-200 shadow-2xs">
+                                <MessageSquare className="w-3.5 h-3.5 text-orange-700" />
+                                {pasoInfo.label}
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100/90 text-amber-900 text-[11px] font-semibold rounded-full border border-amber-200 shadow-2xs">
-                                <Clock className="w-3.5 h-3.5 text-amber-700" />
-                                {tramite.estado}
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-100 text-orange-900 text-[11px] font-bold rounded-full border border-orange-200 shadow-2xs">
+                                <CreditCard className="w-3.5 h-3.5 text-orange-700" />
+                                {pasoInfo.label}
                               </span>
+                            )}
+                          </td>
+
+                          {/* 6. CREADOR */}
+                          <td className="py-4 px-5 text-[#2c3e50] font-medium text-xs">
+                            {tramite.creador}
+                          </td>
+
+                          {/* 7. ACCIÓN (Botón ATENDER vs VER DETALLE) */}
+                          <td className="py-4 px-5 text-center whitespace-nowrap">
+                            {isAtender ? (
+                              <button
+                                type="button"
+                                onClick={() => router.push(`/tramites/${tramite.id}`)}
+                                className="px-4 py-1.5 bg-[#002855] text-white text-xs font-bold rounded-lg hover:bg-[#001B47] transition-all shadow-xs"
+                              >
+                                ATENDER
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => router.push(`/tramites/${tramite.id}`)}
+                                className="px-3 py-1.5 bg-white border border-[#cbd5e1] text-[#002855] text-xs font-bold rounded-lg hover:bg-slate-50 transition-all shadow-2xs"
+                              >
+                                VER DETALLE
+                              </button>
                             )}
                           </td>
                         </tr>
@@ -242,8 +379,8 @@ export default function ListaTramitesPage() {
                 </table>
               </div>
 
-              {/* Pie de Tabla con Paginación y Contador */}
-              <div className="p-4 bg-[#f8fafc] border-t border-[#e5e7eb] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#6b7280]">
+              {/* Pie de Tabla Fiel al Mockup ("Mostrando 1-4 de 24 trámites") */}
+              <div className="p-4 bg-[#f8fafc] border-t border-[#e5e7eb] flex items-center justify-between text-xs text-[#6b7280]">
                 <div>
                   Mostrando <strong className="text-[#001B47]">{startIndex + 1}</strong>-
                   <strong className="text-[#001B47]">{Math.min(startIndex + itemsPerPage, totalItems)}</strong> de{" "}
@@ -263,10 +400,6 @@ export default function ListaTramitesPage() {
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-
-                  <span className="px-3 py-1 font-bold text-xs text-[#001B47]">
-                    Página {currentPage} de {totalPages}
-                  </span>
 
                   <button
                     type="button"
