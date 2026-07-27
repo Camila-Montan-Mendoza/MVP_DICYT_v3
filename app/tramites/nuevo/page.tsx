@@ -556,17 +556,17 @@ export default function FormulacionRequerimientosPage() {
         <div className="relative">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-[#9ca3af] absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#6b7280] absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Buscar item..."
+                placeholder="Buscar ítem o servicio..."
                 value={catalogSearch}
                 onFocus={() => setShowCatalogDropdown(true)}
                 onChange={(e) => {
                   setCatalogSearch(e.target.value);
                   setShowCatalogDropdown(true);
                 }}
-                className="w-full pl-9 pr-4 py-2.5 text-xs bg-[#eef2f6] border border-[#e5e7eb] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#002855] text-[#2c3e50]"
+                className="w-full pl-11 pr-4 py-3 text-sm bg-white border border-[#e5e7eb] rounded-3xl shadow-md focus:outline-none focus:ring-2 focus:ring-[#2c3e50] text-[#2c3e50] placeholder:text-[#9ca3af]"
               />
             </div>
             {catalogSearch && (
