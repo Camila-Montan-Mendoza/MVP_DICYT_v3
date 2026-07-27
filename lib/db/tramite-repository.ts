@@ -66,7 +66,13 @@ export class TramiteDBRepository {
         `)
         .order("id", { ascending: false });
 
-      if (error || !tramites || tramites.length === 0) {
+      if (error) {
+        console.error("[Supabase Tramites Query Error]:", error.message, error.details, error.hint);
+        return this.getFallbackTramites();
+      }
+
+      if (!tramites || tramites.length === 0) {
+        console.warn("[Supabase Tramites Warning]: No trámites rows found in database table 'tramite'. Returning fallback item.");
         return this.getFallbackTramites();
       }
 

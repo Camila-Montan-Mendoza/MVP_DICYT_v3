@@ -99,11 +99,15 @@ export async function cargarGrafoWorkflow(
   const supabase = createClient();
 
   // 1. Cargar pasos del flujo
-  const { data: pasos } = await supabase
+  const { data: pasos, error: errorPasos } = await supabase
     .from("paso_flujo")
     .select("id, id_tipo_tramite, nombre, orden")
     .eq("id_tipo_tramite", tipoTramiteId)
     .order("orden", { ascending: true });
+
+  if (errorPasos) {
+    console.error("[Supabase Workflow Error - paso_flujo]:", errorPasos.message, errorPasos.details);
+  }
 
   if (!pasos || pasos.length === 0) {
     console.warn("[workflow-db-service] No se encontraron pasos de flujo para tipo_tramite:", tipoTramiteId);
