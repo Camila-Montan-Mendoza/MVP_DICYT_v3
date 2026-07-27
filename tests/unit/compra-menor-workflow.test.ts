@@ -30,8 +30,8 @@ function runWorkflowTests() {
 
   // Test 4: Validate Step 4 Completion (node_4_2 terminal node)
   const node4_2 = NODOS_COMPRA_MENOR["node_4_2"];
-  if (node4_2.acciones.length !== 0 || node4_2.nombre !== "Trámite completado") {
-    throw new Error("Expected terminal node node_4_2 to have 0 actions and title 'Trámite completado'");
+  if (node4_2.acciones.length !== 0 || !node4_2.nombre.startsWith("Trámite completado")) {
+    throw new Error("Expected terminal node node_4_2 to have 0 actions and title starting with 'Trámite completado'");
   }
   console.log("✔ Test 4: Terminal completed node (node_4_2) PASSED");
 

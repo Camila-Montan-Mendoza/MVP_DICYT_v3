@@ -50,67 +50,67 @@ INSERT INTO "paso_flujo" ("id", "id_tipo_tramite", "nombre", "orden") VALUES
   (4, 1, 'PASO 4: Evidencia', 4)
 ON CONFLICT ("id") DO NOTHING;
 
--- 5. Estados del Paso de Flujo (Nodos Granulares de Tarea)
+-- 5. Estados del Paso de Flujo (Nodos Granulares de Tarea Sin Nombres de Roles)
 INSERT INTO "estado_paso_flujo" ("id", "id_paso_flujo", "nombre", "es_inicial", "es_final") VALUES
   -- Paso 1: Solicitud
-  (1, 1, 'Revisión de presupuesto y fondos (Resp. Presupuesto)', true, false),
-  (2, 1, 'Revisión inicial (Resp. Compras)', false, false),
-  (3, 1, 'Realizar correcciones (Investigador)', false, false),
-  (4, 1, 'Rechazar solicitud (Resp. Compras)', false, true),
-  (5, 1, 'Aprobar solicitud (Administrador DICyT)', false, false),
-  (6, 1, 'Revisar ítems mercado virtual y adjudicar provisional (Resp. Compras)', false, false),
-  (7, 1, 'Subir 3 cotizaciones (Investigador)', false, false),
-  (8, 1, 'Adjudicar proveedores (Investigador)', false, false),
+  (1, 1, 'Revisión de disponibilidad presupuestaria y certificación de fondos', true, false),
+  (2, 1, 'Revisión técnica inicial de solicitud', false, false),
+  (3, 1, 'Subsanación y realización de correcciones', false, false),
+  (4, 1, 'Rechazo definitivo de la solicitud', false, true),
+  (5, 1, 'Aprobación institucional de la solicitud', false, false),
+  (6, 1, 'Verificación en Mercado Virtual y adjudicación provisional', false, false),
+  (7, 1, 'Carga de 3 cotizaciones de proveedores', false, false),
+  (8, 1, 'Adjudicación formal de proveedores', false, false),
 
   -- Paso 2: Recepción
-  (9, 2, 'Emitir orden de compra o contrato (Resp. Compras)', false, false),
-  (10, 2, 'Imprimir y efectuar orden de compra o contrato, hacer firmar (Investigador)', false, false),
-  (11, 2, 'Realizar acta de recepción provisional (Investigador)', false, false),
-  (12, 2, 'Realizar acta de recepción definitiva (Investigador)', false, false),
+  (9, 2, 'Emisión de orden de compra o contrato', false, false),
+  (10, 2, 'Firma y formalización de orden de compra o contrato', false, false),
+  (11, 2, 'Emisión de acta de recepción provisional', false, false),
+  (12, 2, 'Emisión de acta de recepción definitiva', false, false),
 
   -- Paso 3: Pago
-  (13, 3, 'Solicitar pago a proveedor (Investigador)', false, false),
-  (14, 3, 'Generar memorándum (Administrador DICyT)', false, false),
-  (15, 3, 'Emisión de comprobante C-31 (Contabilidad DICyT)', false, false),
-  (16, 3, 'Emitir cheque o transferencia (Administrador DICyT)', false, false),
-  (17, 3, 'Subir registro de ejecución de gasto (Resp. Presupuesto)', false, false),
+  (13, 3, 'Solicitud de pago a proveedor', false, false),
+  (14, 3, 'Generación de memorándum de autorización de pago', false, false),
+  (15, 3, 'Emisión de comprobante C-31 de devengado', false, false),
+  (16, 3, 'Emisión de cheque o transferencia bancaria', false, false),
+  (17, 3, 'Registro de ejecución presupuestaria del gasto', false, false),
 
   -- Paso 4: Evidencia
-  (18, 4, 'Subir documento PDF de evidencia (Investigador)', false, false),
-  (19, 4, 'Trámite completado', false, true)
+  (18, 4, 'Carga de expediente digital de evidencia PDF', false, false),
+  (19, 4, 'Trámite completado y archivado', false, true)
 ON CONFLICT ("id") DO NOTHING;
 
--- 6. Transiciones de Flujo (Acciones de Avanzar / Rebotar)
+-- 6. Transiciones de Flujo (Nombres Limpios de Acciones de Administración Pública)
 INSERT INTO "transicion_flujo" ("id", "id_estado_origen", "id_estado_destino", "nombre_accion") VALUES
   -- Paso 1
-  (1, 1, 2, 'Fondos Suficientes -> Enviar a Compras'),
-  (2, 1, 3, 'Solicitar Correcciones a Investigador'),
-  (3, 2, 5, 'Aprobar -> Enviar a Admin DICYT'),
-  (4, 2, 3, 'Solicitar Correcciones a Investigador'),
+  (1, 1, 2, 'Aprobar Presupuesto'),
+  (2, 1, 3, 'Observar y Solicitar Corrección'),
+  (3, 2, 5, 'Aprobar Revisión Inicial'),
+  (4, 2, 3, 'Observar Solicitud'),
   (5, 2, 4, 'Rechazar Solicitud'),
-  (6, 3, 1, 'Reenviar a Presupuestos'),
-  (7, 3, 2, 'Reenviar a Compras'),
-  (8, 5, 6, 'Aprobar -> Derivar a Mercado Virtual'),
-  (9, 6, 7, 'Avanzar a Carga de 3 Cotizaciones'),
-  (10, 7, 8, 'Cotizaciones Cargadas -> Adjudicar'),
-  (11, 8, 9, 'Finalizar Adjudicación -> Paso 2 Recepción'),
+  (6, 3, 1, 'Subsanar a Presupuestos'),
+  (7, 3, 2, 'Subsanar a Compras'),
+  (8, 5, 6, 'Aprobar y Derivar a Compras'),
+  (9, 6, 7, 'Habilitar Carga de Cotizaciones'),
+  (10, 7, 8, 'Completar Cotizaciones y Adjudicar'),
+  (11, 8, 9, 'Finalizar Adjudicación e Iniciar Recepción'),
 
   -- Paso 2
-  (12, 9, 10, 'Orden Emitida -> Enviar a Firma'),
-  (13, 10, 11, 'Documento Firmado -> Iniciar Recepción'),
-  (14, 11, 11, 'Cargar Otra Acta Provisional (Bucle)'),
-  (15, 11, 12, 'Conformidad Definitiva -> Crear Acta Definitiva'),
-  (16, 12, 13, 'Conformidad Definitiva -> Paso 3 Pago'),
+  (12, 9, 10, 'Emitir Orden de Compra'),
+  (13, 10, 11, 'Registrar Firmas e Iniciar Recepción'),
+  (14, 11, 11, 'Registrar Entrega Parcial'),
+  (15, 11, 12, 'Emitir Acta Definitiva'),
+  (16, 12, 13, 'Concluir Recepción e Iniciar Pago'),
 
   -- Paso 3
-  (17, 13, 14, 'Solicitar Pago -> Admin DICYT'),
-  (18, 14, 15, 'Memorándum Generado -> Contabilidad C-31'),
-  (19, 15, 16, 'Comprobante C-31 Emitido -> Pago'),
-  (20, 16, 17, 'Desembolso Realizado -> Registro Gasto'),
-  (21, 17, 18, 'Gasto Registrado -> Paso 4 Evidencia'),
+  (17, 13, 14, 'Solicitar Pago a Proveedor'),
+  (18, 14, 15, 'Emitir Memorándum de Pago'),
+  (19, 15, 16, 'Registrar Comprobante C-31'),
+  (20, 16, 17, 'Efectuar Desembolso'),
+  (21, 17, 18, 'Registrar Ejecución de Gasto'),
 
   -- Paso 4
-  (22, 18, 19, 'Cargar Evidencia Final -> Completar Trámite')
+  (22, 18, 19, 'Consolidar Expediente y Finalizar Trámite')
 ON CONFLICT ("id") DO NOTHING;
 
 -- 7. Asignación de Roles por Estado de Paso
