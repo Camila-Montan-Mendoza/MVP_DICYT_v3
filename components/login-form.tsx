@@ -2,42 +2,43 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginWithUsername, MOCK_USUARIOS } from "@/lib/auth/auth-service";
+import { loginWithUsername, LOGIN_OPTIONS } from "@/lib/auth/auth-service";
 import { UserCheck, Lock, LogIn, AlertCircle, Shield } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
-  const [username, setUsername] = useState("marcelino");
+  const [username, setUsername] = useState("daniel");
   const [password, setPassword] = useState("123456");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    setTimeout(() => {
-      const user = loginWithUsername(username);
-      if (!user) {
-        setError(`Usuario '${username}' no encontrado. Pruebe 'marcelino', 'alan', 'grober' o 'admin'.`);
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(false);
-      router.push("/tramites");
-    }, 500);
+    const loginError = await loginWithUsername(username, password);
+    setIsLoading(false);
+    if (loginError) {
+      setError(loginError);
+      return;
+    }
+    router.push("/tramites");
   };
 
-  const handleQuickLogin = (presetUsername: string) => {
+  const handleQuickLogin = async (presetUsername: string) => {
     setUsername(presetUsername);
     setPassword("123456");
     setError(null);
-    const user = loginWithUsername(presetUsername);
-    if (user) {
-      router.push("/tramites");
+    setIsLoading(true);
+
+    const loginError = await loginWithUsername(presetUsername, "123456");
+    setIsLoading(false);
+    if (loginError) {
+      setError(loginError);
+      return;
     }
+    router.push("/tramites");
   };
 
   return (
@@ -60,9 +61,9 @@ export function LoginForm() {
             ACCESO RÁPIDO PARA VALIDACIÓN DEL MVP:
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold">
-            {MOCK_USUARIOS.map((u) => (
+            {LOGIN_OPTIONS.map((u) => (
               <button
-                key={u.id}
+                key={u.username}
                 type="button"
                 onClick={() => handleQuickLogin(u.username)}
                 className="p-2.5 bg-[#f8fafc] border border-[#e5e7eb] rounded-xl hover:bg-blue-50 hover:border-blue-300 text-left transition-all flex items-center gap-2 group"
@@ -75,7 +76,7 @@ export function LoginForm() {
                     {u.nombreCompleto.split(" ")[1] || u.nombreCompleto}
                   </p>
                   <p className="text-[10px] text-[#6b7280] truncate font-mono">
-                    {u.rolActivo}
+                    {u.rolLabel}
                   </p>
                 </div>
               </button>
@@ -102,7 +103,7 @@ export function LoginForm() {
               <input
                 type="text"
                 required
-                placeholder="Ej: marcelino, alan, grober"
+                placeholder="Ej: daniel, alan, grober"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full pl-9 pr-3 py-2.5 text-xs bg-white border border-[#e5e7eb] rounded-xl text-[#2c3e50] font-medium focus:outline-none focus:ring-2 focus:ring-[#002855]"

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Folder, FileText, LogOut, Bell, User, Menu, LayoutDashboard, Settings } from "lucide-react";
-import { getStoredUser, logoutSession, MOCK_USUARIOS, UsuarioSchema } from "@/lib/auth/auth-service";
+import { getCurrentUser, logoutSession, UsuarioSchema } from "@/lib/auth/auth-service";
 
 interface SigefiShellProps {
   children: React.ReactNode;
@@ -17,7 +17,7 @@ export function SigefiShell({ children }: SigefiShellProps) {
   const [user, setUser] = useState<UsuarioSchema | null>(null);
 
   useEffect(() => {
-    setUser(getStoredUser());
+    getCurrentUser().then(setUser);
   }, []);
 
   const isDashboardActive = pathname === "/dashboard";
@@ -25,12 +25,15 @@ export function SigefiShell({ children }: SigefiShellProps) {
   const isTramitesActive = pathname.startsWith("/tramites");
   const isConfigActive = pathname.startsWith("/configuracion");
 
-  const handleLogout = () => {
-    logoutSession();
+  const handleLogout = async () => {
+    await logoutSession();
     router.push("/auth/login");
   };
 
-  const currentUser = user || MOCK_USUARIOS[0];
+  const currentUser = user ?? {
+    nombreCompleto: "Cargando...",
+    rolActivo: "",
+  };
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] flex flex-col text-[#2c3e50]">
@@ -65,15 +68,6 @@ export function SigefiShell({ children }: SigefiShellProps) {
             <div className="w-8 h-8 rounded-full bg-[#002855] text-white flex items-center justify-center font-bold text-xs shadow-xs">
               <User className="w-4 h-4" />
             </div>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              title="Cerrar Sesión"
-              className="p-1.5 text-[#6b7280] hover:text-[#BC000C] hover:bg-red-50 rounded-lg transition-colors ml-1"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </header>
@@ -166,11 +160,6 @@ export function SigefiShell({ children }: SigefiShellProps) {
         {/* Content Area */}
         <main className="flex-1 p-4 md:p-8 flex flex-col justify-between min-h-[calc(100vh-3.5rem)]">
           <div className="max-w-6xl mx-auto w-full">{children}</div>
-
-          {/* Footer del contenido */}
-          <footer className="mt-12 pt-4 border-t border-[#e5e7eb]/80 text-center text-[11px] text-[#9ca3af]">
-            © 2024 UNIVERSIDAD MAYOR DE SAN SIMÓN • DPA - SISTEMA DE GESTIÓN
-          </footer>
         </main>
       </div>
     </div>
