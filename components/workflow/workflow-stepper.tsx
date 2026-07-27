@@ -19,7 +19,7 @@ export function WorkflowStepper({
       <div className="flex items-center justify-between relative max-w-4xl mx-auto">
         {pasos.map((paso, idx) => {
           const isCompletado = paso.estado === "COMPLETADO";
-          const isEnCurso = paso.estado === "EN_CURSO";
+          const isEnCurso = paso.estado === "EN_CURSO" || (paso.estado as string) === "EN CURSO";
           const isPendiente = paso.estado === "PENDIENTE";
           const isSelected = paso.id === activeStepId;
           const isLast = idx === pasos.length - 1;

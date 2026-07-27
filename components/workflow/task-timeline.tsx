@@ -1,19 +1,25 @@
 "use client";
 
 import { TareaWorkflow } from "@/lib/workflow/stepper-service";
-import { Check, RefreshCw, Clock, UserCheck, ShieldAlert, ListFilter } from "lucide-react";
+import { useAuth } from "@/lib/auth/auth-context";
+import {
+  Check,
+  RefreshCw,
+  Clock,
+  UserCheck,
+  ShieldAlert,
+  ListFilter,
+} from "lucide-react";
 
 interface TaskTimelineProps {
   pasoNombre: string;
   tareas: TareaWorkflow[];
-  currentUser?: string;
 }
 
-export function TaskTimeline({
-  pasoNombre,
-  tareas,
-  currentUser = "Marcelino Perez",
-}: TaskTimelineProps) {
+export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
+  const { user } = useAuth();
+  const currentUser = user?.nombreCompleto || user?.username || "";
+
   return (
     <div className="bg-white p-5 rounded-2xl border border-[#e5e7eb] shadow-2xs space-y-4">
       {/* Título de la Cronología Vertical de Tareas */}
@@ -31,7 +37,12 @@ export function TaskTimeline({
           {tareas.map((tarea) => {
             const isCompletado = tarea.estado === "COMPLETADO";
             const isEnCurso = tarea.estado === "EN_CURSO";
-            const isMeAction = isEnCurso && tarea.usuarioAsignado.toLowerCase().includes(currentUser.toLowerCase());
+            const isMeAction =
+              isEnCurso &&
+              Boolean(currentUser) &&
+              tarea.usuarioAsignado
+                .toLowerCase()
+                .includes(currentUser.toLowerCase());
 
             return (
               <div key={tarea.id} className="relative flex items-start gap-3">
@@ -41,8 +52,8 @@ export function TaskTimeline({
                     isCompletado
                       ? "bg-[#002855]"
                       : isEnCurso
-                      ? "bg-emerald-600 ring-4 ring-emerald-100 animate-pulse"
-                      : "bg-[#94a3b8]"
+                        ? "bg-emerald-600 ring-4 ring-emerald-100 animate-pulse"
+                        : "bg-[#94a3b8]"
                   }`}
                 >
                   {isCompletado ? (
@@ -92,7 +103,8 @@ export function TaskTimeline({
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-900 font-bold text-[10px] rounded-md border border-amber-300">
                             <Clock className="w-3 h-3 text-amber-700" />
-                            En espera de acción por parte de {tarea.usuarioAsignado} ({tarea.rolResponsable})
+                            En espera de acción por parte de{" "}
+                            {tarea.usuarioAsignado} ({tarea.rolResponsable})
                           </span>
                         )}
                       </div>

@@ -1,28 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Folder, FileText, LogOut, Bell, User, Menu } from "lucide-react";
-import {
-  getCurrentUser,
-  logoutSession,
-  UsuarioSchema,
-} from "@/lib/auth/auth-service";
+import { logoutSession } from "@/lib/auth/auth-service";
+import { AuthProvider, useAuth } from "@/lib/auth/auth-context";
 
 interface SigefiShellProps {
   children: React.ReactNode;
 }
 
-export function SigefiShell({ children }: SigefiShellProps) {
+function SigefiShellInner({ children }: SigefiShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-
-  const [user, setUser] = useState<UsuarioSchema | null>(null);
-
-  useEffect(() => {
-    getCurrentUser().then(setUser);
-  }, []);
+  const { user } = useAuth();
 
   const isProyectosActive = pathname.startsWith("/proyectos");
   const isTramitesActive = pathname.startsWith("/tramites");
@@ -144,5 +135,13 @@ export function SigefiShell({ children }: SigefiShellProps) {
         </main>
       </div>
     </div>
+  );
+}
+
+export function SigefiShell({ children }: SigefiShellProps) {
+  return (
+    <AuthProvider>
+      <SigefiShellInner>{children}</SigefiShellInner>
+    </AuthProvider>
   );
 }

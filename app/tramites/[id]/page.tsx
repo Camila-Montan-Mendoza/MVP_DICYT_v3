@@ -21,25 +21,57 @@ function TramiteWorkflowDetailContent() {
   const rawId = Array.isArray(routeParams?.id)
     ? routeParams.id[0]
     : routeParams?.id;
-  const tramiteId = rawId || "0";
+  const tramiteId = rawId!;
 
   const [tramite, setTramite] = useState<TramiteDBItem | undefined>();
   const [grafo, setGrafo] = useState<Record<number, NodoWorkflow>>({});
   const [nodoActual, setNodoActual] = useState<NodoWorkflow | null>(null);
+  const [pasosList, setPasosList] = useState<PasoWorkflow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Cargar el grafo del workflow desde la BD (con cache en memoria)
   useEffect(() => {
     cargarGrafoWorkflow(1).then(setGrafo);
   }, []);
 
-  const loadTramite = useCallback(() => {
-    tramiteDBRepository.getTramiteById(tramiteId).then((found) => {
-      if (found) {
-        setTramite(found);
-      } else {
-        tramiteDBRepository.getTramites().then((list) => setTramite(list[0]));
+  const loadTramite = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const tramiteIdNum = parseInt(tramiteId, 10) || 0;
+      const found = await tramiteDBRepository.getTramiteById(tramiteId);
+      let targetTramite = found;
+
+      if (!targetTramite) {
+        const list = await tramiteDBRepository.getTramites();
+        targetTramite = list.length > 0 ? list[0] : undefined;
       }
-    });
+
+      if (!targetTramite) {
+        setLoadError(
+          `No se encontró ningún trámite registrado en la base de datos.`,
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      setTramite(targetTramite);
+
+      const pasos = await tramiteDBRepository.getPasosTramite(
+        targetTramite.id || tramiteIdNum,
+      );
+      if (pasos && pasos.length > 0) {
+        setPasosList(pasos);
+      } else {
+        setLoadError(
+          "No se encontraron pasos de flujo registrados en la base de datos.",
+        );
+      }
+    } catch (e: any) {
+      setLoadError(e?.message || "Error al conectar con la base de datos.");
+    } finally {
+      setIsLoading(false);
+    }
   }, [tramiteId]);
 
   useEffect(() => {
@@ -54,81 +86,58 @@ function TramiteWorkflowDetailContent() {
     }
   }, [tramite, grafo]);
 
-  const activeTramite: TramiteDBItem = tramite || {
-    id: 0,
-    nro: "00",
-    codigoSeguimiento: "Cargando...",
-    proyecto: "Cargando...",
-    tipoTramite: "Cargando...",
-    categoria: "MATERIAL",
-    fecha: "",
-    fechaISO: new Date().toISOString(),
-    creador: "",
-    justificacion: "",
-    idEstadoTramite: 1,
-    estadoNombre: "Cargando...",
-    estado: "En proceso",
-    pasoNumero: 1,
-    pasoNombre: "Solicitud",
-    items: [],
-  };
-
-  // Construir pasos macro dinámicamente
-  const pasosList: PasoWorkflow[] = [
-    {
-      id: "p1",
-      numero: 1,
-      nombre: "Solicitud",
-      estado:
-        activeTramite.pasoNumero === 1
-          ? "EN_CURSO"
-          : activeTramite.pasoNumero > 1
-            ? "COMPLETADO"
-            : "PENDIENTE",
-    },
-    {
-      id: "p2",
-      numero: 2,
-      nombre: "Recepción",
-      estado:
-        activeTramite.pasoNumero === 2
-          ? "EN_CURSO"
-          : activeTramite.pasoNumero > 2
-            ? "COMPLETADO"
-            : "PENDIENTE",
-    },
-    {
-      id: "p3",
-      numero: 3,
-      nombre: "Pago",
-      estado:
-        activeTramite.pasoNumero === 3
-          ? "EN_CURSO"
-          : activeTramite.pasoNumero > 3
-            ? "COMPLETADO"
-            : "PENDIENTE",
-    },
-    {
-      id: "p4",
-      numero: 4,
-      nombre: "Evidencia",
-      estado: activeTramite.pasoNumero === 4 ? "EN_CURSO" : "PENDIENTE",
-    },
-  ];
-
   const currentStep =
-    pasosList.find((p) => p.numero === activeTramite.pasoNumero) ||
-    pasosList[0];
-  const [activeStepId, setActiveStepId] = useState(currentStep.id);
+    pasosList.find((p) => p.numero === tramite?.pasoNumero) || pasosList[0];
+  const [activeStepId, setActiveStepId] = useState<string>("");
 
   useEffect(() => {
-    setActiveStepId(`p${activeTramite.pasoNumero}`);
-  }, [activeTramite.pasoNumero]);
+    if (currentStep) {
+      setActiveStepId(currentStep.id);
+    }
+  }, [currentStep]);
 
   const activeStep =
     pasosList.find((p) => p.id === activeStepId) || currentStep;
 
-  // Recuperar TODAS las tareas granulares del paso activo desde el grafo de la BD
+  if (isLoading) {
+    return (
+      <SigefiShell>
+        <div className="max-w-6xl mx-auto py-20 text-center text-xs font-bold text-[#64748b]">
+          Cargando flujo del trámite desde la base de datos...
+        </div>
+      </SigefiShell>
+    );
+  }
+
+  if (loadError || !tramite || pasosList.length === 0) {
+    return (
+      <SigefiShell>
+        <div className="max-w-3xl mx-auto my-12 p-8 bg-white border border-red-200 rounded-2xl text-center space-y-4 shadow-xs">
+          <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-lg font-bold">
+            ⚠️
+          </div>
+          <h3 className="font-extrabold text-base text-red-900">
+            Error al consultar los Pasos del Trámite desde la BD
+          </h3>
+          <p className="text-xs text-red-700 max-w-md mx-auto leading-relaxed">
+            {loadError ||
+              "No se encontraron pasos de flujo configurados para este trámite en Supabase."}
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/tramites"
+              className="px-5 py-2.5 bg-[#002855] text-white font-bold text-xs rounded-xl hover:bg-[#001B47] transition-colors inline-block"
+            >
+              Volver a la Lista de Trámites
+            </Link>
+          </div>
+        </div>
+      </SigefiShell>
+    );
+  }
+
+  const activeTramite = tramite;
+
   const nodosDelPaso = Object.values(grafo).filter(
     (n) => n.pasoNumero === activeStep.numero,
   );
@@ -232,7 +241,6 @@ function TramiteWorkflowDetailContent() {
             <TaskTimeline
               pasoNombre={activeStep.nombre}
               tareas={tareasDelPaso}
-              currentUser="Marcelino Perez"
             />
           </div>
 

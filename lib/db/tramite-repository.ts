@@ -115,6 +115,90 @@ export class TramiteDBRepository {
   }
 
   /**
+   * Obtener los Pasos Macro de un Trámite según su tipo desde la BD
+   * (Opción 1: Consulta directa con Supabase JS Client sin funciones almacenadas)
+   */
+  public async getPasosTramite(tramiteIdNum: number): Promise<
+    Array<{
+      id: string;
+      numero: number;
+      nombre: string;
+      estado: "COMPLETADO" | "EN_CURSO" | "PENDIENTE";
+    }>
+  > {
+    try {
+      // 1. Consulta la información del trámite actual y su paso activo
+      const { data: tramiteData, error: tramiteErr } = await this.supabase
+        .from("tramite")
+        .select(`
+          id,
+          id_tipo_tramite,
+          rechazado,
+          estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey (
+            id,
+            id_paso_flujo,
+            paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre )
+          )
+        `)
+        .eq("id", tramiteIdNum)
+        .maybeSingle();
+
+      if (tramiteErr || !tramiteData) {
+        return this.getFallbackPasos();
+      }
+
+      const idTipoTramite = tramiteData.id_tipo_tramite || 1;
+      const estadoObj = (tramiteData as any).estado_paso_flujo || {};
+      const pasoObj = estadoObj.paso_flujo || {};
+      const ordenActual = pasoObj.orden || 1;
+
+      // 2. Consulta todos los pasos del tipo de trámite ordenados por su campo 'orden'
+      const { data: pasosDB, error: pasosErr } = await this.supabase
+        .from("paso_flujo")
+        .select("id, orden, nombre")
+        .eq("id_tipo_tramite", idTipoTramite)
+        .order("orden", { ascending: true });
+
+      if (pasosErr || !pasosDB || pasosDB.length === 0) {
+        return this.getFallbackPasos();
+      }
+
+      // 3. Mapea el estado dinámicamente para cada paso macro
+      return pasosDB.map((pf: any) => {
+        const estado: "COMPLETADO" | "EN_CURSO" | "PENDIENTE" =
+          pf.orden < ordenActual
+            ? "COMPLETADO"
+            : pf.orden === ordenActual
+            ? "EN_CURSO"
+            : "PENDIENTE";
+
+        return {
+          id: `p${pf.id}`,
+          numero: pf.orden,
+          nombre: pf.nombre,
+          estado,
+        };
+      });
+    } catch {
+      return this.getFallbackPasos();
+    }
+  }
+
+  private getFallbackPasos(): Array<{
+    id: string;
+    numero: number;
+    nombre: string;
+    estado: "COMPLETADO" | "EN_CURSO" | "PENDIENTE";
+  }> {
+    return [
+      { id: "p1", numero: 1, nombre: "Solicitud", estado: "EN_CURSO" },
+      { id: "p2", numero: 2, nombre: "Recepción", estado: "PENDIENTE" },
+      { id: "p3", numero: 3, nombre: "Pago", estado: "PENDIENTE" },
+      { id: "p4", numero: 4, nombre: "Evidencia", estado: "PENDIENTE" },
+    ];
+  }
+
+  /**
    * Fetch single trámite by string ID or numeric ID
    */
   public async getTramiteById(idOrCode: string): Promise<TramiteDBItem | undefined> {
