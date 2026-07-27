@@ -7,6 +7,7 @@ import { SigefiShell } from "@/components/sigefi-shell";
 import { WorkflowStepper } from "@/components/workflow/workflow-stepper";
 import { TaskTimeline } from "@/components/workflow/task-timeline";
 import { RevisionPreventivaCard } from "@/components/budget/revision-preventiva-card";
+import { InteractiveTaskWorkspace } from "@/components/workflow/interactive-task-workspace";
 import { tramitesStore, TramiteStoreItem } from "@/lib/store/tramites-store";
 import { ArrowLeft, Layers, CheckCircle2, Clock, Stamp } from "lucide-react";
 
@@ -125,6 +126,16 @@ function TramiteWorkflowDetailContent() {
                   Paso {activeStep.numero} de {activeTramite.pasos.length}
                 </span>
               </div>
+
+              {/* UI Operativa Dinámica: Flujo de Transiciones y Estrategia Compra Menor */}
+              <InteractiveTaskWorkspace
+                tramiteId={activeTramite.id}
+                onNodeTransition={(nextNode, _log) => {
+                  // Update macro step if changed
+                  const nuevoPasoId = `p${nextNode.pasoNumero}`;
+                  setActiveStepId(nuevoPasoId);
+                }}
+              />
 
               {/* UI Operativa Dinámica: Revisión Presupuestaria y Sello Preventivo */}
               <RevisionPreventivaCard
