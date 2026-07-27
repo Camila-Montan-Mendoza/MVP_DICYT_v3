@@ -56,10 +56,12 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 1. **Setup**: Run `.specify/scripts/powershell/setup-plan.ps1 -Json` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
-2. **Load context**: Read FEATURE_SPEC and `.specify/memory/constitution.md`. Load IMPL_PLAN template (already copied).
+2. **Load context**: Read FEATURE_SPEC, `.specify/memory/constitution.md`, and `DESIGN.md` (if present in repo root). Load IMPL_PLAN template (already copied).
 
 3. **Execute plan workflow**: Follow the structure in IMPL_PLAN template to:
    - Fill Technical Context (mark unknowns as "NEEDS CLARIFICATION")
+   - Enforce **MVP & Testing Strategy**: Clarify that this is an MVP for fast validation. Testing should be limited ONLY to targeted unit tests (`pruebas unitarias bien puntuales`) for critical logic; do NOT plan complex integration/E2E test pipelines.
+   - Enforce **Design System Alignment**: Read `DESIGN.md` and enforce institutional color tokens (UMSS Primary `#003770`, Secondary `#BC000C`), shadcn/ui component mappings (`@/shared/ui`), minimalist UI layout guidelines, and responsive sidebar rules.
    - Fill Constitution Check section from constitution
    - Evaluate gates (ERROR if violations unjustified)
    - Phase 0: Generate research.md (resolve all NEEDS CLARIFICATION)
@@ -159,6 +161,8 @@ Command ends after Phase 2 planning. Report branch, IMPL_PLAN path, and generate
 
 - Use absolute paths for filesystem operations; use project-relative paths for references in documentation
 - ERROR on gate failures or unresolved clarifications
+- **MVP Validation Focus**: Remember this is an MVP designed for rapid iteration. Testing strategy must prioritize speed: only include essential unit tests for core logic (`pruebas unitarias bien puntuales`), avoiding heavy test overhead.
+- **Design Tokens & UI**: Strictly align all visual/frontend architecture with `DESIGN.md` in the project root.
 
 ## Done When
 

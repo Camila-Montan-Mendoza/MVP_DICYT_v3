@@ -15,6 +15,10 @@
   Each user story/journey must be INDEPENDENTLY TESTABLE - meaning if you implement just ONE of them,
   you should still have a viable MVP (Minimum Viable Product) that delivers value.
 
+  MVP & TESTING NOTE: This project is an MVP for fast validation. DO NOT request complex/exhaustive test suites.
+  Limit testing to essential, targeted unit tests ("pruebas unitarias bien puntuales") for critical core logic.
+  DESIGN SYSTEM NOTE: All UI user stories and mockups MUST strictly adhere to DESIGN.md (colors, shadcn/ui setup, minimalism).
+
   Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
   Think of each story as a standalone slice of functionality that can be:
   - Developed independently
@@ -26,6 +30,8 @@
 ### User Story 1 - [Brief Title] (Priority: P1)
 
 [Describe this user journey in plain language]
+
+**Mockup**: ![User Story 1 Mockup](mockups/hu1-[title].png)
 
 **Why this priority**: [Explain the value and why it has this priority level]
 
@@ -42,6 +48,8 @@
 
 [Describe this user journey in plain language]
 
+**Mockup**: ![User Story 2 Mockup](mockups/hu2-[title].png)
+
 **Why this priority**: [Explain the value and why it has this priority level]
 
 **Independent Test**: [Describe how this can be tested independently]
@@ -55,6 +63,8 @@
 ### User Story 3 - [Brief Title] (Priority: P3)
 
 [Describe this user journey in plain language]
+
+**Mockup**: ![User Story 3 Mockup](mockups/hu3-[title].png)
 
 **Why this priority**: [Explain the value and why it has this priority level]
 

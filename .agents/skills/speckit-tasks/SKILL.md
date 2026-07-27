@@ -60,6 +60,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **Required**: plan.md (tech stack, libraries, structure), spec.md (user stories with priorities)
    - **Optional**: data-model.md (entities), contracts/ (interface contracts), research.md (decisions), quickstart.md (test scenarios)
    - **IF EXISTS**: Load `.specify/memory/constitution.md` for project principles and governance constraints
+   - **IF EXISTS**: Load `DESIGN.md` from the repo root for UI guidelines, color tokens, and component mappings
    - Note: Not all projects have all documents. Generate tasks based on what's available.
 
 3. **Execute task generation workflow**:
@@ -139,7 +140,10 @@ The tasks.md should be immediately executable - each task must be specific enoug
 
 **CRITICAL**: Tasks MUST be organized by user story to enable independent implementation and testing.
 
-**Tests are OPTIONAL**: Only generate test tasks if explicitly requested in the feature specification or if user requests TDD approach.
+**MVP & Tests Guidelines**:
+- This project is an **MVP for rapid validation**. Speed of development is the main objective.
+- Tests are strictly OPTIONAL and limited: DO NOT create tasks for exhaustive test suites or complex E2E tests. Create tasks ONLY for essential, highly targeted unit tests (`pruebas unitarias bien puntuales`) for core logic when strictly needed.
+- All UI and component tasks MUST adhere to `DESIGN.md` (colors, shadcn `@/shared/ui` structure, minimalist layout, responsive sidebar).
 
 ### Checklist Format (REQUIRED)
 

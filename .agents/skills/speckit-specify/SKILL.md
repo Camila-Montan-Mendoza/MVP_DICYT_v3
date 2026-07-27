@@ -90,8 +90,8 @@ Given that feature description, do this:
       - Set `SPECIFY_FEATURE_DIRECTORY` to `specs/<directory-name>`
       - If `branch_numbering` was used (and `feature_numbering` was absent), emit a one-line warning: "⚠️ `branch_numbering` in init-options.json is deprecated. Rename to `feature_numbering`."
 
-   **Create the directory and spec file**:
-   - `mkdir -p SPECIFY_FEATURE_DIRECTORY`
+   **Create the directory, mockups folder, and spec file**:
+   - `mkdir -p SPECIFY_FEATURE_DIRECTORY/mockups`
    - Resolve the active `spec-template` through the Spec Kit preset/template resolution stack (equivalent to `specify preset resolve spec-template`)
    - Copy the resolved `spec-template` file to `SPECIFY_FEATURE_DIRECTORY/spec.md` as the starting point
    - Set `SPEC_FILE` to `SPECIFY_FEATURE_DIRECTORY/spec.md`
@@ -112,6 +112,7 @@ Given that feature description, do this:
 4. Load the resolved active `spec-template` file to understand required sections.
 
 5. **IF EXISTS**: Load `.specify/memory/constitution.md` for project principles and governance constraints.
+   **IF EXISTS**: Load `DESIGN.md` from project root for UI design tokens (UMSS Primary `#003770`, Secondary `#BC000C`), shadcn/ui component rules (`@/shared/ui`), minimalist layout guidelines, and responsive sidebar constraints. All UI mockups and user stories MUST adhere to `DESIGN.md`.
 
 6. Follow this execution flow:
     1. Parse user description from arguments
@@ -128,6 +129,11 @@ Given that feature description, do this:
        - Prioritize clarifications by impact: scope > security/privacy > user experience > technical details
     4. Fill User Scenarios & Testing section
        If no clear user flow: ERROR "Cannot determine user scenarios"
+       **MVP & Testing Rule**: Remember this is an **MVP for rapid validation**. Keep testing requirements minimal—do NOT specify heavy/exhaustive test suites or complex E2E pipelines. Limit tests to essential, targeted unit tests (`pruebas unitarias bien puntuales`) only for critical core logic.
+       For EACH User Story (HU / User Scenario):
+       - Generate a visual UI mockup image using image generation tools (`generate_image`) representing the interface/flow for that User Story, strictly matching `DESIGN.md` colors, minimalism, and layout rules.
+       - Save the image inside `SPECIFY_FEATURE_DIRECTORY/mockups/` (e.g. `mockups/hu1-login-screen.png` or `mockups/HU01-[title].png`)
+       - Include the mockup image reference in `spec.md` under the User Story: `![Mockup HU[N]](mockups/hu[N]-[title].png)`
     5. Generate Functional Requirements
        Each requirement must be testable
        Use reasonable defaults for unspecified details (document assumptions in Assumptions section)
@@ -138,7 +144,7 @@ Given that feature description, do this:
     7. Identify Key Entities (if data involved)
     8. Return: SUCCESS (spec ready for planning)
 
-6. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
+6. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings, ensuring each User Story (HU) includes its corresponding mockup image link (`![Mockup HU-N](mockups/huN-[title].png)`).
 
 7. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
 
@@ -173,6 +179,8 @@ Given that feature description, do this:
       
       - [ ] All functional requirements have clear acceptance criteria
       - [ ] User scenarios cover primary flows
+      - [ ] `mockups/` folder exists and contains visual UI mockup images for each User Story (HU)
+      - [ ] All User Stories (HUs) in `spec.md` include markdown links to their respective mockup images
       - [ ] Feature meets measurable outcomes defined in Success Criteria
       - [ ] No implementation details leak into specification
       
@@ -283,6 +291,8 @@ Report completion to the user with:
 - Avoid HOW to implement (no tech stack, APIs, code structure).
 - Written for business stakeholders, not developers.
 - DO NOT create any checklists that are embedded in the spec. That will be a separate command.
+- **MVP Validation Focus**: This project is an MVP for fast validation. Testing requirements should be lightweight (only targeted unit tests for critical logic).
+- **Design System Alignment**: Read and enforce `DESIGN.md` for all UI elements, layout guidelines, color tokens, and shadcn/ui components.
 
 ### Section Requirements
 
@@ -341,5 +351,6 @@ Success criteria must be:
 ## Done When
 
 - [ ] Specification written to `SPEC_FILE` and validated against quality checklist
+- [ ] `mockups/` directory created with generated visual mockup images for each User Story (HU) embedded in `SPEC_FILE`
 - [ ] Extension hooks dispatched or skipped according to the rules in Mandatory Post-Execution Hooks above
 - [ ] Completion reported to user with feature directory, spec file path, and checklist results
