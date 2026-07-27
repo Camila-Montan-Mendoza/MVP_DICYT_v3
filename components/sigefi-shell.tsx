@@ -14,9 +14,8 @@ import {
   Settings,
 } from "lucide-react";
 import {
-  getStoredUser,
+  getCurrentUser,
   logoutSession,
-  MOCK_USUARIOS,
   UsuarioSchema,
 } from "@/lib/auth/auth-service";
 
