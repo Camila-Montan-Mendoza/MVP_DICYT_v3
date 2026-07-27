@@ -60,9 +60,9 @@ export class TramiteDBRepository {
           fecha_creacion,
           fecha_actualizacion,
           rechazado,
-          proyecto ( nombre, codigo ),
-          tipo_tramite ( nombre ),
-          estado_paso_flujo ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo ( id, orden, nombre ) )
+          proyecto:proyecto!id_proyecto ( nombre, codigo ),
+          tipo_tramite:tipo_tramite!id_tipo_tramite ( nombre ),
+          estado_paso_flujo:estado_paso_flujo!id_estado_tramite ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!id_paso_flujo ( id, orden, nombre ) )
         `)
         .order("id", { ascending: false });
 
