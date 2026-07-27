@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-  MOCK_PARTIDAS_CHECK,
+  obtenerCertificacionPartidas,
   generarSelloPreventivo,
   SelloPreventivo,
 } from "@/lib/budget/preventivo-service";
@@ -38,7 +38,8 @@ export function RevisionPreventivaCard({
     if (onRejectSuccess) onRejectSuccess(observacionTexto);
   };
 
-  const allSuficientes = MOCK_PARTIDAS_CHECK.every((p) => p.suficiente);
+  const partidasList = obtenerCertificacionPartidas();
+  const allSuficientes = partidasList.every((p) => p.suficiente);
 
   return (
     <div className="bg-white p-5 rounded-2xl border border-[#e5e7eb] shadow-2xs space-y-4">
@@ -95,7 +96,7 @@ export function RevisionPreventivaCard({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e5e7eb]">
-                  {MOCK_PARTIDAS_CHECK.map((p, idx) => (
+                  {partidasList.map((p, idx) => (
                     <tr key={idx} className="hover:bg-slate-50">
                       <td className="py-2.5 px-3">
                         <p className="font-bold text-[#001B47] font-mono">{p.codigo}</p>
