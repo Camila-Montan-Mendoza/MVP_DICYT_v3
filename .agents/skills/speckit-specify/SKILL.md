@@ -131,9 +131,9 @@ Given that feature description, do this:
        If no clear user flow: ERROR "Cannot determine user scenarios"
        **MVP & Testing Rule**: Remember this is an **MVP for rapid validation**. Keep testing requirements minimal—do NOT specify heavy/exhaustive test suites or complex E2E pipelines. Limit tests to essential, targeted unit tests (`pruebas unitarias bien puntuales`) only for critical core logic.
        For EACH User Story (HU / User Scenario):
-       - Generate a visual UI mockup image using image generation tools (`generate_image`) representing the interface/flow for that User Story, strictly matching `DESIGN.md` colors, minimalism, and layout rules.
-       - Save the image inside `SPECIFY_FEATURE_DIRECTORY/mockups/` (e.g. `mockups/hu1-login-screen.png` or `mockups/HU01-[title].png`)
-       - Include the mockup image reference in `spec.md` under the User Story: `![Mockup HU[N]](mockups/hu[N]-[title].png)`
+       - DO NOT generate AI/Gemini images. The user will provide/upload the mockup images manually.
+       - Ensure `SPECIFY_FEATURE_DIRECTORY/mockups/` folder exists for the user to place their mockup images.
+       - Include the mockup image reference in `spec.md` under the User Story: `![Mockup HU[N]](mockups/hu[N]-[title].png)` ready to link the user-provided image.
     5. Generate Functional Requirements
        Each requirement must be testable
        Use reasonable defaults for unspecified details (document assumptions in Assumptions section)
@@ -179,8 +179,8 @@ Given that feature description, do this:
       
       - [ ] All functional requirements have clear acceptance criteria
       - [ ] User scenarios cover primary flows
-      - [ ] `mockups/` folder exists and contains visual UI mockup images for each User Story (HU)
-      - [ ] All User Stories (HUs) in `spec.md` include markdown links to their respective mockup images
+      - [ ] `mockups/` folder exists for user-provided mockup images
+      - [ ] All User Stories (HUs) in `spec.md` include markdown links ready for their respective mockup images
       - [ ] Feature meets measurable outcomes defined in Success Criteria
       - [ ] No implementation details leak into specification
       
@@ -351,6 +351,6 @@ Success criteria must be:
 ## Done When
 
 - [ ] Specification written to `SPEC_FILE` and validated against quality checklist
-- [ ] `mockups/` directory created with generated visual mockup images for each User Story (HU) embedded in `SPEC_FILE`
+- [ ] `mockups/` directory created and mockup image placeholders embedded in `SPEC_FILE` for user-provided mockups
 - [ ] Extension hooks dispatched or skipped according to the rules in Mandatory Post-Execution Hooks above
 - [ ] Completion reported to user with feature directory, spec file path, and checklist results
