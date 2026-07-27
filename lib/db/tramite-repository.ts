@@ -132,6 +132,8 @@ export class TramiteDBRepository {
           id_proyecto: data.proyectoId || 1,
           id_tipo_tramite: data.tipoTramiteId || 1,
           id_estado_tramite: 1, // Start at node_1_1
+          id_usuario: 1, // Dr. Daniel Pérez
+          justificacion: data.justificacion || "Solicitud de compra menor",
           fecha_creacion: new Date().toISOString(),
           fecha_actualizacion: new Date().toISOString(),
           rechazado: false,
