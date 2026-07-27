@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Folder, FileText, LogOut, Bell, User, Menu, LayoutDashboard, Settings } from "lucide-react";
+import { getStoredUser, logoutSession, setSessionUser, MOCK_USUARIOS, UsuarioSchema } from "@/lib/auth/auth-service";
 
 interface SigefiShellProps {
   children: React.ReactNode;
@@ -11,13 +12,33 @@ interface SigefiShellProps {
 
 export function SigefiShell({ children }: SigefiShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const [user, setUser] = useState<UsuarioSchema | null>(null);
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
 
   const isDashboardActive = pathname === "/dashboard";
   const isProyectosActive = pathname.startsWith("/proyectos");
   const isTramitesActive = pathname.startsWith("/tramites");
   const isConfigActive = pathname.startsWith("/configuracion");
 
-  const [activeRole, setActiveRole] = useState("INVESTIGADOR");
+  const handleRoleChange = (username: string) => {
+    const found = MOCK_USUARIOS.find((u) => u.username === username);
+    if (found) {
+      setSessionUser(found);
+      setUser(found);
+    }
+  };
+
+  const handleLogout = () => {
+    logoutSession();
+    router.push("/auth/login");
+  };
+
+  const currentUser = user || MOCK_USUARIOS[0];
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] flex flex-col text-[#2c3e50]">
@@ -38,16 +59,29 @@ export function SigefiShell({ children }: SigefiShellProps) {
             <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[#BC000C] rounded-full" />
           </button>
 
-          {/* Selector de Rol de Usuario (Investigador vs Resp. Presupuestos) */}
+          {/* Selector de Rol y Usuario Autenticado */}
           <div className="flex items-center gap-2 pl-3 border-l border-[#e5e7eb]">
+            <div className="text-right hidden md:block">
+              <p className="text-xs font-bold text-[#001B47] leading-none">
+                {currentUser.nombreCompleto}
+              </p>
+              <p className="text-[10px] text-[#6b7280] font-mono mt-0.5">
+                {currentUser.rolActivo}
+              </p>
+            </div>
+
             <select
-              value={activeRole}
-              onChange={(e) => setActiveRole(e.target.value)}
+              value={currentUser.username}
+              onChange={(e) => handleRoleChange(e.target.value)}
               className="text-xs bg-[#f8fafc] border border-[#e5e7eb] rounded-lg p-1.5 font-bold text-[#001B47] focus:outline-none"
             >
-              <option value="INVESTIGADOR">Investigador: Marcelino Pérez</option>
-              <option value="PRESUPUESTOS">Resp. Presupuestos: Alan</option>
+              {MOCK_USUARIOS.map((u) => (
+                <option key={u.id} value={u.username}>
+                  {u.rolActivo}: {u.nombreCompleto.split(" ")[1] || u.nombreCompleto}
+                </option>
+              ))}
             </select>
+
             <div className="w-8 h-8 rounded-full bg-[#002855] text-white flex items-center justify-center font-bold text-xs shadow-xs">
               <User className="w-4 h-4" />
             </div>
@@ -55,30 +89,34 @@ export function SigefiShell({ children }: SigefiShellProps) {
         </div>
       </header>
 
-      {/* Main Body con Sidebar Izquierdo */}
-      <div className="flex-1 flex">
-        {/* Sidebar Izquierdo */}
-        <aside className="w-64 bg-white border-r border-[#e5e7eb] flex flex-col justify-between p-4 hidden md:flex">
+      {/* Main Body with Sidebar and Content */}
+      <div className="flex flex-1">
+        {/* Sidebar Left Navigation */}
+        <aside className="w-64 bg-white border-r border-[#e5e7eb] hidden lg:flex flex-col justify-between p-4 min-h-[calc(100vh-3.5rem)]">
           <div className="space-y-6">
-            {/* Logo DICYT */}
+            {/* Logo Marca DICYT */}
             <div className="flex items-center gap-3 px-2 py-1">
-              <div className="w-10 h-10 rounded-full bg-[#002855]/10 flex items-center justify-center text-[#BC000C] font-black text-xs border border-[#002855]/20">
-                ⚛️
+              <div className="w-9 h-9 rounded-full bg-[#002855] text-white flex items-center justify-center font-extrabold text-xs tracking-tighter border-2 border-[#BC000C]">
+                DICYT
               </div>
               <div>
-                <h2 className="font-extrabold text-sm text-[#001B47] leading-none">SIGEFI DICYT</h2>
-                <p className="text-[10px] font-bold text-[#BC000C] tracking-wider uppercase">SAN SIMON</p>
+                <h2 className="font-extrabold text-sm text-[#001B47] tracking-tight leading-none">
+                  SIGEFI DICYT
+                </h2>
+                <span className="text-[10px] text-[#BC000C] font-bold tracking-widest uppercase">
+                  SAN SIMÓN
+                </span>
               </div>
             </div>
 
-            {/* Menú de Navegación */}
-            <nav className="space-y-1.5">
+            {/* Menú Principal de Navegación */}
+            <nav className="space-y-1 text-xs">
               <Link
-                href="/"
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                href="/tramites"
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
                   isDashboardActive
                     ? "bg-[#002855] text-white shadow-xs"
-                    : "text-[#6b7280] hover:bg-[#f0f4f8] hover:text-[#002855]"
+                    : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
                 }`}
               >
                 <LayoutDashboard className="w-4 h-4" />
@@ -86,11 +124,11 @@ export function SigefiShell({ children }: SigefiShellProps) {
               </Link>
 
               <Link
-                href="/proyectos"
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                href="/tramites"
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
                   isProyectosActive
                     ? "bg-[#002855] text-white shadow-xs"
-                    : "text-[#6b7280] hover:bg-[#f0f4f8] hover:text-[#002855]"
+                    : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
                 }`}
               >
                 <Folder className="w-4 h-4" />
@@ -99,10 +137,10 @@ export function SigefiShell({ children }: SigefiShellProps) {
 
               <Link
                 href="/tramites"
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
                   isTramitesActive
                     ? "bg-[#002855] text-white shadow-xs"
-                    : "text-[#6b7280] hover:bg-[#f0f4f8] hover:text-[#002855]"
+                    : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
                 }`}
               >
                 <FileText className="w-4 h-4" />
@@ -110,11 +148,11 @@ export function SigefiShell({ children }: SigefiShellProps) {
               </Link>
 
               <Link
-                href="/configuracion"
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                href="/tramites"
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
                   isConfigActive
                     ? "bg-[#002855] text-white shadow-xs"
-                    : "text-[#6b7280] hover:bg-[#f0f4f8] hover:text-[#002855]"
+                    : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
                 }`}
               >
                 <Settings className="w-4 h-4" />
@@ -125,13 +163,14 @@ export function SigefiShell({ children }: SigefiShellProps) {
 
           {/* Bottom Sidebar Logout */}
           <div className="pt-4 border-t border-[#e5e7eb]">
-            <Link
-              href="/"
-              className="flex items-center gap-3 px-3 py-2 text-xs font-medium text-[#6b7280] hover:text-[#BC000C] transition-colors"
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-[#6b7280] hover:text-[#BC000C] transition-colors text-left"
             >
               <LogOut className="w-4 h-4" />
               Cerrar Sesión
-            </Link>
+            </button>
           </div>
         </aside>
 
