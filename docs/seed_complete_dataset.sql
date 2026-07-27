@@ -26,9 +26,9 @@ ON CONFLICT DO NOTHING;
 
 -- 3. Estructura Financiera Completa (Fuentes, Convenios, Programas y Proyectos)
 INSERT INTO "fuente_financiamiento" ("id", "nombre") VALUES
-  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'TGN - Recursos Propios DICYT'),
-  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'Cooperación Internacional VLIR-UOS'),
-  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', 'Fondo de Apoyo a la Investigación Doctoral')
+  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'ASDI'),
+  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'ARES'),
+  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', 'AECID')
 ON CONFLICT ("id") DO NOTHING;
 
 INSERT INTO "convenio" ("id", "id_fuente_financiamiento", "nombre", "presupuesto") VALUES
@@ -43,8 +43,6 @@ INSERT INTO "programa" ("id", "id_convenio", "id_programa_padre", "nombre", "pre
   (3, 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', NULL, 'Programa Doctoral Sandwich en Ciencia Agrícola', 450000.00)
 ON CONFLICT ("id") DO NOTHING;
 
-ALTER TABLE "partida_concreta" ALTER COLUMN "codigo" TYPE INTEGER;
-
 INSERT INTO "proyecto" ("id", "id_estado_proyecto", "id_programa", "nombre", "codigo", "presupuesto", "fecha_inicio", "fecha_fin") VALUES
   (1, 1, 1, 'Implementación de IA para la Agricultura', 'PROY-2026-001', 250000.00, '2026-01-01', '2026-12-31'),
   (2, 1, 2, 'VLIR RAWSAYTA AWANACHEJ', 'PROY-2026-002', 450000.00, '2026-01-15', '2027-01-15'),
@@ -52,7 +50,34 @@ INSERT INTO "proyecto" ("id", "id_estado_proyecto", "id_programa", "nombre", "co
   (4, 1, 1, 'Investigación Forestal Tropical', 'PROY-2026-004', 310000.00, '2026-03-01', '2026-12-31')
 ON CONFLICT ("id") DO NOTHING;
 
--- 4. Partidas Concretas de Objeto del Gasto (5 Dígitos)
+-- 4. Catálogo General de Partidas (Partida Maestra del Clasificador por Objeto del Gasto)
+CREATE TABLE IF NOT EXISTS "partida" (
+	"id" SERIAL NOT NULL,
+	"codigo" INTEGER NOT NULL,
+	"nombre" VARCHAR(255) NOT NULL,
+	"descripcion" TEXT,
+	CONSTRAINT "partida_pkey" PRIMARY KEY("id")
+);
+
+INSERT INTO "partida" ("id", "codigo", "nombre", "descripcion") VALUES
+  (1, 34200, 'Productos Químicos y Farmacéuticos', 'Reactivos de laboratorio, compuestos químicos y fármacos'),
+  (2, 39500, 'Útiles de Escritorio y Oficina', 'Papelería, tóners, bolígrafos y suministros de oficina'),
+  (3, 31100, 'Alimentos y Bebidas para Personas', 'Servicios de catering, refrigerios y alimentos de trabajo'),
+  (4, 39700, 'Útiles y Materiales Eléctricos', 'Cables de red, conectores, baterías y repuestos eléctricos'),
+  (5, 39100, 'Material de Limpieza e Higiene', 'Detergentes, alcohol etílico y productos de bioseguridad'),
+  (6, 34110, 'Combustibles, Lubricantes y Derivados', 'Diésel, gasolina y aceites para vehículos e instrumental'),
+  (7, 43120, 'Equipo de Computación', 'Servidores, GPUs, laptops, monitores y almacenamiento NAS'),
+  (8, 43110, 'Equipo de Oficina y Muebles', 'Escritorios, sillas ergonómicas, estantes y armarios'),
+  (9, 43400, 'Equipo Médico y de Laboratorio', 'Microscopios, balanzas analíticas y espectrofotómetros'),
+  (10, 43500, 'Equipo de Comunicación', 'Access Points, routers, antenas GPS y centrales telefónicas'),
+  (11, 21600, 'Internet y Telecomunicaciones', 'Enlaces de fibra óptica y servicios de transmisión de datos'),
+  (12, 24120, 'Mantenimiento y Reparación de Equipos', 'Servicios de reparación y mantenimiento de maquinaria y activos'),
+  (13, 25600, 'Servicios de Imprenta, Fotocopiado y Fotográficos', 'Empastado, impresión de libros y memorias institucionales')
+ON CONFLICT ("id") DO NOTHING;
+
+-- 5. Partidas Concretas Asignadas por Proyecto (5 Dígitos)
+ALTER TABLE "partida_concreta" ALTER COLUMN "codigo" TYPE INTEGER;
+
 INSERT INTO "partida_concreta" ("id", "id_proyecto", "codigo", "presupuesto") VALUES
   (1, 1, 34200, 45000.00), -- Productos Químicos y Farmacéuticos
   (2, 1, 39500, 15000.00), -- Útiles de Escritorio y Oficina
@@ -63,7 +88,7 @@ INSERT INTO "partida_concreta" ("id", "id_proyecto", "codigo", "presupuesto") VA
   (7, 4, 34110, 30000.00)  -- Combustibles y Lubricantes
 ON CONFLICT ("id") DO NOTHING;
 
--- 5. Catálogo de Ítems Disponibles
+-- 6. Catálogo de Ítems Disponibles
 INSERT INTO "item" ("id", "id_partida", "nombre") VALUES
   (1, 1, 'Kit de Reactivos para Extracción de ADN Vegetal'),
   (2, 1, 'Frascos de Alcohol Etílico al 96% (1 Litro)'),
@@ -77,14 +102,14 @@ INSERT INTO "item" ("id", "id_partida", "nombre") VALUES
   (10, 7, 'Bidones de Diésel Oíl para Equipo de Campo')
 ON CONFLICT ("id") DO NOTHING;
 
--- 6. Proveedores Adjudicados
+-- 7. Proveedores Adjudicados
 INSERT INTO "proveedor" ("id", "nombre", "nit", "telefono", "direccion") VALUES
   (1, 'COMERCIALIZADORA TECH-BOLIVIA S.R.L.', '1029384019', '4458291', 'Av. Heroínas #456, Cochabamba'),
   (2, 'LABORATORIOS & BIOQUÍMICA ANDINA S.A.', '2049182012', '4412093', 'Calle España #123, Cochabamba'),
   (3, 'IMPRENTAS Y PAPELERÍA CENTRAL SRL', '3019284029', '4482910', 'Av. Ayacucho #789, Cochabamba')
 ON CONFLICT ("id") DO NOTHING;
 
--- 7. Trámites Registrados en Diversos Estados del Flujo de Compra Menor
+-- 8. Trámites Registrados en Diversos Estados del Flujo de Compra Menor
 INSERT INTO "tramite" ("id", "id_proyecto", "id_tipo_tramite", "id_estado_tramite", "id_proveedor_adjudicado", "fecha_creacion") VALUES
   -- Trámite 1: En inicio (Paso 1.1: Revisión presupuestaria)
   (1, 1, 1, 1, NULL, '2026-01-15 10:00:00'),
@@ -100,7 +125,7 @@ INSERT INTO "tramite" ("id", "id_proyecto", "id_tipo_tramite", "id_estado_tramit
   (6, 3, 1, 19, 1, '2026-01-25 17:45:00')
 ON CONFLICT ("id") DO NOTHING;
 
--- 8. Ítems Solicitados por Trámite
+-- 9. Ítems Solicitados por Trámite
 INSERT INTO "tramite_item" ("id", "id_item", "id_tramite", "existe_en_mercado_virtual") VALUES
   (1, 5, 1, true),  -- GPU RTX 4090 en Trámite 1
   (2, 1, 1, false), -- Kit ADN en Trámite 1
@@ -108,7 +133,7 @@ INSERT INTO "tramite_item" ("id", "id_item", "id_tramite", "existe_en_mercado_vi
   (4, 9, 6, true)   -- Proyector en Trámite 6
 ON CONFLICT ("id") DO NOTHING;
 
--- 9. Historial de Auditoría de Transiciones de Estado
+-- 10. Historial de Auditoría de Transiciones de Estado
 INSERT INTO "historial_estado_tramite" ("id_tramite", "id_estado_anterior", "id_estado_nuevo", "id_usuario_responsable", "observaciones") VALUES
   (1, 1, 1, 1, 'Trámite iniciado por Dr. Daniel Pérez para investigación en IA'),
   (2, 1, 2, 3, 'Sello preventivo aprobado por Alan. Derivado a Compras.'),
