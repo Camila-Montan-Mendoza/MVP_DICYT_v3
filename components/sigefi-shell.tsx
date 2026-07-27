@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Folder, FileText, LogOut, Bell, User, Menu, LayoutDashboard, Settings } from "lucide-react";
-import { getStoredUser, logoutSession, setSessionUser, MOCK_USUARIOS, UsuarioSchema } from "@/lib/auth/auth-service";
+import { getStoredUser, logoutSession, MOCK_USUARIOS, UsuarioSchema } from "@/lib/auth/auth-service";
 
 interface SigefiShellProps {
   children: React.ReactNode;
@@ -24,14 +24,6 @@ export function SigefiShell({ children }: SigefiShellProps) {
   const isProyectosActive = pathname.startsWith("/proyectos");
   const isTramitesActive = pathname.startsWith("/tramites");
   const isConfigActive = pathname.startsWith("/configuracion");
-
-  const handleRoleChange = (username: string) => {
-    const found = MOCK_USUARIOS.find((u) => u.username === username);
-    if (found) {
-      setSessionUser(found);
-      setUser(found);
-    }
-  };
 
   const handleLogout = () => {
     logoutSession();
@@ -59,32 +51,29 @@ export function SigefiShell({ children }: SigefiShellProps) {
             <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[#BC000C] rounded-full" />
           </button>
 
-          {/* Selector de Rol y Usuario Autenticado */}
-          <div className="flex items-center gap-2 pl-3 border-l border-[#e5e7eb]">
-            <div className="text-right hidden md:block">
-              <p className="text-xs font-bold text-[#001B47] leading-none">
+          {/* Perfil Fijo del Usuario Autenticado */}
+          <div className="flex items-center gap-3 pl-3 border-l border-[#e5e7eb]">
+            <div className="text-right">
+              <p className="text-xs font-extrabold text-[#001B47] leading-none">
                 {currentUser.nombreCompleto}
               </p>
               <p className="text-[10px] text-[#6b7280] font-mono mt-0.5">
-                {currentUser.rolActivo}
+                Rol: <strong className="text-[#002855]">{currentUser.rolActivo}</strong>
               </p>
             </div>
-
-            <select
-              value={currentUser.username}
-              onChange={(e) => handleRoleChange(e.target.value)}
-              className="text-xs bg-[#f8fafc] border border-[#e5e7eb] rounded-lg p-1.5 font-bold text-[#001B47] focus:outline-none"
-            >
-              {MOCK_USUARIOS.map((u) => (
-                <option key={u.id} value={u.username}>
-                  {u.rolActivo}: {u.nombreCompleto.split(" ")[1] || u.nombreCompleto}
-                </option>
-              ))}
-            </select>
 
             <div className="w-8 h-8 rounded-full bg-[#002855] text-white flex items-center justify-center font-bold text-xs shadow-xs">
               <User className="w-4 h-4" />
             </div>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Cerrar Sesión"
+              className="p-1.5 text-[#6b7280] hover:text-[#BC000C] hover:bg-red-50 rounded-lg transition-colors ml-1"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>
