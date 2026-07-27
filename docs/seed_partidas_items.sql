@@ -19,12 +19,14 @@ ON CONFLICT ("id") DO NOTHING;
 
 -- 2. Tabla Catálogo General de Partidas ("partida")
 CREATE TABLE IF NOT EXISTS "partida" (
-	"id" SERIAL NOT NULL,
+	"id" SMALLSERIAL NOT NULL,
 	"codigo" INTEGER NOT NULL,
 	"nombre" VARCHAR(255) NOT NULL,
 	"descripcion" TEXT,
 	CONSTRAINT "partida_pkey" PRIMARY KEY("id")
 );
+
+ALTER TABLE "partida" ALTER COLUMN "codigo" TYPE INTEGER;
 
 INSERT INTO "partida" ("id", "codigo", "nombre", "descripcion") VALUES
   (1, 34200, 'Productos Químicos y Farmacéuticos', 'Reactivos de laboratorio, compuestos químicos y fármacos'),
@@ -42,26 +44,32 @@ INSERT INTO "partida" ("id", "codigo", "nombre", "descripcion") VALUES
   (13, 25600, 'Servicios de Imprenta, Fotocopiado y Fotográficos', 'Empastado, impresión de libros y memorias institucionales')
 ON CONFLICT ("id") DO NOTHING;
 
--- 3. Partidas Concretas del Proyecto ("partida_concreta")
-ALTER TABLE "partida_concreta" ALTER COLUMN "codigo" TYPE INTEGER;
+-- 3. Partidas Concretas del Proyecto ("partida_concreta" relacionando id_proyecto con id_partida)
+CREATE TABLE IF NOT EXISTS "partida_concreta" (
+	"id" SERIAL NOT NULL,
+	"id_proyecto" INTEGER NOT NULL,
+	"id_partida" SMALLINT NOT NULL,
+	"presupuesto" DECIMAL(15,2) NOT NULL CHECK ("presupuesto" >= 0),
+	CONSTRAINT "partida_concreta_pkey" PRIMARY KEY("id")
+);
 
-INSERT INTO "partida_concreta" ("id", "id_proyecto", "codigo", "presupuesto") VALUES
-  (1, 1, 34200, 45000.00), -- Productos Químicos y Farmacéuticos
-  (2, 1, 39500, 15000.00), -- Útiles de Escritorio y Oficina
-  (3, 1, 31100, 10000.00), -- Alimentos y Bebidas para Personas
-  (4, 1, 39700, 12000.00), -- Útiles y Materiales Eléctricos
-  (5, 1, 39100, 8000.00),  -- Material de Limpieza e Higiene
-  (6, 1, 34110, 20000.00), -- Combustibles, Lubricantes y Derivados
-  (7, 1, 43120, 60000.00), -- Equipo de Computación
-  (8, 1, 43110, 25000.00), -- Equipo de Oficina y Muebles
-  (9, 1, 43400, 35000.00), -- Equipo Médico y de Laboratorio
-  (10, 1, 43500, 20000.00),-- Equipo de Comunicación
-  (11, 1, 21600, 18000.00),-- Internet y Telecomunicaciones
-  (12, 1, 24120, 15000.00),-- Mantenimiento y Reparación de Equipos
-  (13, 1, 25600, 7000.00)  -- Servicios de Imprenta
+INSERT INTO "partida_concreta" ("id", "id_proyecto", "id_partida", "presupuesto") VALUES
+  (1, 1, 1, 45000.00), -- Proyecto 1, Partida 1 (34200: Productos Químicos)
+  (2, 1, 2, 15000.00), -- Proyecto 1, Partida 2 (39500: Útiles de Escritorio)
+  (3, 1, 3, 10000.00), -- Proyecto 1, Partida 3 (31100: Alimentos y Bebidas)
+  (4, 1, 4, 12000.00), -- Proyecto 1, Partida 4 (39700: Útiles Eléctricos)
+  (5, 1, 5, 8000.00),  -- Proyecto 1, Partida 5 (39100: Material de Limpieza)
+  (6, 1, 6, 20000.00), -- Proyecto 1, Partida 6 (34110: Combustibles)
+  (7, 1, 7, 60000.00), -- Proyecto 1, Partida 7 (43120: Equipo de Computación)
+  (8, 1, 8, 25000.00), -- Proyecto 1, Partida 8 (43110: Equipo de Oficina)
+  (9, 1, 9, 35000.00), -- Proyecto 1, Partida 9 (43400: Equipo Médico y Laboratorio)
+  (10, 1, 10, 20000.00),-- Proyecto 1, Partida 10 (43500: Equipo de Comunicación)
+  (11, 1, 11, 18000.00),-- Proyecto 1, Partida 11 (21600: Internet)
+  (12, 1, 12, 15000.00),-- Proyecto 1, Partida 12 (24120: Mantenimiento)
+  (13, 1, 13, 7000.00)  -- Proyecto 1, Partida 13 (25600: Imprenta)
 ON CONFLICT ("id") DO NOTHING;
 
--- 4. Catálogo de Ítems Disponibles ("item")
+-- 4. Catálogo de Ítems Disponibles ("item" relacionando id_partida)
 INSERT INTO "item" ("id", "id_partida", "nombre") VALUES
   (1, 1, 'Kit de Reactivos para Extracción de ADN Vegetal'),
   (2, 1, 'Frascos de Alcohol Etílico al 96% (1 Litro)'),

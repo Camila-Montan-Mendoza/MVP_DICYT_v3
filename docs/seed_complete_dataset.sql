@@ -50,14 +50,16 @@ INSERT INTO "proyecto" ("id", "id_estado_proyecto", "id_programa", "nombre", "co
   (4, 1, 1, 'Investigación Forestal Tropical', 'PROY-2026-004', 310000.00, '2026-03-01', '2026-12-31')
 ON CONFLICT ("id") DO NOTHING;
 
--- 4. Catálogo General de Partidas (Partida Maestra del Clasificador por Objeto del Gasto)
+-- 4. Catálogo General de Partidas ("partida")
 CREATE TABLE IF NOT EXISTS "partida" (
-	"id" SERIAL NOT NULL,
+	"id" SMALLSERIAL NOT NULL,
 	"codigo" INTEGER NOT NULL,
 	"nombre" VARCHAR(255) NOT NULL,
 	"descripcion" TEXT,
 	CONSTRAINT "partida_pkey" PRIMARY KEY("id")
 );
+
+ALTER TABLE "partida" ALTER COLUMN "codigo" TYPE INTEGER;
 
 INSERT INTO "partida" ("id", "codigo", "nombre", "descripcion") VALUES
   (1, 34200, 'Productos Químicos y Farmacéuticos', 'Reactivos de laboratorio, compuestos químicos y fármacos'),
@@ -75,31 +77,37 @@ INSERT INTO "partida" ("id", "codigo", "nombre", "descripcion") VALUES
   (13, 25600, 'Servicios de Imprenta, Fotocopiado y Fotográficos', 'Empastado, impresión de libros y memorias institucionales')
 ON CONFLICT ("id") DO NOTHING;
 
--- 5. Partidas Concretas Asignadas por Proyecto (5 Dígitos)
-ALTER TABLE "partida_concreta" ALTER COLUMN "codigo" TYPE INTEGER;
+-- 5. Partidas Concretas del Proyecto ("partida_concreta" relacionando id_proyecto con id_partida)
+CREATE TABLE IF NOT EXISTS "partida_concreta" (
+	"id" SERIAL NOT NULL,
+	"id_proyecto" INTEGER NOT NULL,
+	"id_partida" SMALLINT NOT NULL,
+	"presupuesto" DECIMAL(15,2) NOT NULL CHECK ("presupuesto" >= 0),
+	CONSTRAINT "partida_concreta_pkey" PRIMARY KEY("id")
+);
 
-INSERT INTO "partida_concreta" ("id", "id_proyecto", "codigo", "presupuesto") VALUES
-  (1, 1, 34200, 45000.00), -- Productos Químicos y Farmacéuticos
-  (2, 1, 39500, 15000.00), -- Útiles de Escritorio y Oficina
-  (3, 1, 43120, 60000.00), -- Equipo de Computación
-  (4, 2, 34200, 80000.00), -- Productos Químicos para VLIR
-  (5, 2, 43400, 95000.00), -- Equipo Médico y de Laboratorio
-  (6, 3, 43110, 40000.00), -- Equipo de Oficina y Muebles
-  (7, 4, 34110, 30000.00)  -- Combustibles y Lubricantes
+INSERT INTO "partida_concreta" ("id", "id_proyecto", "id_partida", "presupuesto") VALUES
+  (1, 1, 1, 45000.00), -- Proyecto 1, Partida 1 (34200: Productos Químicos)
+  (2, 1, 2, 15000.00), -- Proyecto 1, Partida 2 (39500: Útiles de Escritorio)
+  (3, 1, 7, 60000.00), -- Proyecto 1, Partida 7 (43120: Equipo de Computación)
+  (4, 2, 1, 80000.00), -- Proyecto 2, Partida 1 (34200: Productos Químicos para VLIR)
+  (5, 2, 9, 95000.00), -- Proyecto 2, Partida 9 (43400: Equipo Médico y Laboratorio)
+  (6, 3, 8, 40000.00), -- Proyecto 3, Partida 8 (43110: Equipo de Oficina y Muebles)
+  (7, 4, 6, 30000.00)  -- Proyecto 4, Partida 6 (34110: Combustibles)
 ON CONFLICT ("id") DO NOTHING;
 
--- 6. Catálogo de Ítems Disponibles
+-- 6. Catálogo de Ítems Disponibles ("item" relacionando id_partida)
 INSERT INTO "item" ("id", "id_partida", "nombre") VALUES
   (1, 1, 'Kit de Reactivos para Extracción de ADN Vegetal'),
   (2, 1, 'Frascos de Alcohol Etílico al 96% (1 Litro)'),
   (3, 2, 'Tóner HP LaserJet Pro Negro Original'),
   (4, 2, 'Cajas de Papel Bond Tamaño Carta 75g'),
-  (5, 3, 'Tarjeta Gráfica GPU NVIDIA RTX 4090 24GB'),
-  (6, 3, 'Computadora Portátil Intel Core i9 32GB RAM'),
-  (7, 4, 'Reactivos de Extracto Botánico Bioquímico'),
-  (8, 5, 'Microscopio Binocular Biológico LED'),
-  (9, 6, 'Proyector Multimedia 4K y Ecran Retráctil'),
-  (10, 7, 'Bidones de Diésel Oíl para Equipo de Campo')
+  (5, 7, 'Tarjeta Gráfica GPU NVIDIA RTX 4090 24GB'),
+  (6, 7, 'Computadora Portátil Intel Core i9 32GB RAM'),
+  (7, 1, 'Reactivos de Extracto Botánico Bioquímico'),
+  (8, 9, 'Microscopio Binocular Biológico LED'),
+  (9, 8, 'Proyector Multimedia 4K y Ecran Retráctil'),
+  (10, 6, 'Bidones de Diésel Oíl para Equipo de Campo')
 ON CONFLICT ("id") DO NOTHING;
 
 -- 7. Proveedores Adjudicados
