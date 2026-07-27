@@ -73,11 +73,6 @@ export default function Home() {
           </Link>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-[#e5e7eb] bg-white py-4 text-center text-xs text-[#6b7280]">
-        © 2024 UNIVERSIDAD MAYOR DE SAN SIMÓN • DPA - SISTEMA DE GESTIÓN
-      </footer>
     </div>
   );
 }

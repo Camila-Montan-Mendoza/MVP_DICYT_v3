@@ -1,3 +1,5 @@
+import { createClient } from "@/lib/supabase/client";
+
 export interface RolSchema {
   id: number;
   nombre: string;
@@ -12,102 +14,73 @@ export interface UsuarioSchema {
   rolActivo: string;
 }
 
-const AUTH_STORAGE_KEY = "sigefi_dicyt_auth_user_v1";
+interface LoginOption {
+  username: string;
+  email: string;
+  nombreCompleto: string;
+  rolLabel: string;
+}
 
-// 7 Operational Actors mapped to official DICYT SIGEFI definition
-export const MOCK_USUARIOS: UsuarioSchema[] = [
-  {
-    id: 1,
-    username: "daniel",
-    nombreCompleto: "Dr. Daniel Pérez (Investigador Principal)",
-    email: "daniel.perez@umss.edu.bo",
-    roles: [{ id: 1, nombre: "Investigador Principal" }],
-    rolActivo: "Investigador Principal",
-  },
-  {
-    id: 2,
-    username: "winsor",
-    nombreCompleto: "Ing. Winsor (Investigador de Apoyo)",
-    email: "winsor@umss.edu.bo",
-    roles: [{ id: 2, nombre: "Investigador de Apoyo" }],
-    rolActivo: "Investigador de Apoyo",
-  },
-  {
-    id: 3,
-    username: "alan",
-    nombreCompleto: "Lic. Alan Salazar (Resp. Presupuestos)",
-    email: "alan.salazar@umss.edu.bo",
-    roles: [{ id: 3, nombre: "Responsable de Presupuestos" }],
-    rolActivo: "Responsable de Presupuestos",
-  },
-  {
-    id: 4,
-    username: "grober",
-    nombreCompleto: "Ing. Grover Villarroel (Compras y Contrataciones)",
-    email: "grover.villarroel@umss.edu.bo",
-    roles: [{ id: 4, nombre: "Compras y Contrataciones" }],
-    rolActivo: "Compras y Contrataciones",
-  },
-  {
-    id: 5,
-    username: "eva",
-    nombreCompleto: "Dra. Eva (Administradora DICYT)",
-    email: "eva.dicyt@umss.edu.bo",
-    roles: [{ id: 5, nombre: "Administradora DICYT" }],
-    rolActivo: "Administradora DICYT",
-  },
-  {
-    id: 6,
-    username: "sergio",
-    nombreCompleto: "Lic. Sergio (Caja Chica y Fondos)",
-    email: "sergio.fondos@umss.edu.bo",
-    roles: [{ id: 6, nombre: "Caja Chica y Fondos" }],
-    rolActivo: "Caja Chica y Fondos",
-  },
-  {
-    id: 7,
-    username: "carlos",
-    nombreCompleto: "Ing. Carlos (Administrador del Sistema)",
-    email: "carlos.admin@umss.edu.bo",
-    roles: [{ id: 7, nombre: "Administrador del Sistema SIGEFI" }],
-    rolActivo: "Administrador del Sistema SIGEFI",
-  },
+// Directorio de acceso rápido para el MVP (SIGEFI DICYT, 7 actores operativos).
+// Solo resuelve username -> email y aporta el nombre para mostrar en la UI;
+// la identidad y el rol reales se leen siempre de Supabase (auth.users +
+// usuario/rol_usuario) después de iniciar sesión.
+export const LOGIN_OPTIONS: LoginOption[] = [
+  { username: "daniel", email: "daniel.perez@umss.edu.bo", nombreCompleto: "Dr. Daniel Pérez", rolLabel: "Investigador Principal" },
+  { username: "winsor", email: "winsor@umss.edu.bo", nombreCompleto: "Ing. Winsor", rolLabel: "Investigador de Apoyo" },
+  { username: "alan", email: "alan.salazar@umss.edu.bo", nombreCompleto: "Lic. Alan Salazar", rolLabel: "Responsable de Presupuestos" },
+  { username: "grober", email: "grover.villarroel@umss.edu.bo", nombreCompleto: "Ing. Grover Villarroel", rolLabel: "Compras y Contrataciones" },
+  { username: "eva", email: "eva.dicyt@umss.edu.bo", nombreCompleto: "Dra. Eva", rolLabel: "Administradora DICYT" },
+  { username: "sergio", email: "sergio.fondos@umss.edu.bo", nombreCompleto: "Lic. Sergio", rolLabel: "Caja Chica y Fondos" },
+  { username: "carlos", email: "carlos.admin@umss.edu.bo", nombreCompleto: "Ing. Carlos", rolLabel: "Administrador del Sistema SIGEFI" },
 ];
 
-export function getStoredUser(): UsuarioSchema | null {
-  if (typeof window === "undefined") return MOCK_USUARIOS[0];
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(MOCK_USUARIOS[0]));
-      return MOCK_USUARIOS[0];
-    }
-    return JSON.parse(raw);
-  } catch {
-    return MOCK_USUARIOS[0];
-  }
+function resolveLoginEmail(usernameOrEmail: string): string {
+  const trimmed = usernameOrEmail.trim().toLowerCase();
+  const match = LOGIN_OPTIONS.find((o) => o.username === trimmed);
+  return match ? match.email : usernameOrEmail.trim();
 }
 
-export function loginWithUsername(username: string): UsuarioSchema | null {
-  const found = MOCK_USUARIOS.find(
-    (u) => u.username.toLowerCase() === username.toLowerCase().trim()
-  );
-  if (!found) return null;
-
-  if (typeof window !== "undefined") {
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(found));
-  }
-  return found;
+export async function loginWithUsername(
+  usernameOrEmail: string,
+  password: string
+): Promise<string | null> {
+  const supabase = createClient();
+  const email = resolveLoginEmail(usernameOrEmail);
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  return error ? error.message : null;
 }
 
-export function logoutSession(): void {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-  }
+export async function getCurrentUser(): Promise<UsuarioSchema | null> {
+  const supabase = createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  if (!authUser) return null;
+
+  const { data, error } = await supabase
+    .from("usuario")
+    .select("id, username, rol_usuario(rol(id, nombre))")
+    .eq("auth_user_id", authUser.id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  const roles: RolSchema[] =
+    (data.rol_usuario as unknown as { rol: RolSchema }[] | null)?.map((ru) => ru.rol) ?? [];
+  const option = LOGIN_OPTIONS.find((o) => o.username === data.username);
+
+  return {
+    id: data.id,
+    username: data.username,
+    nombreCompleto: option?.nombreCompleto ?? data.username,
+    email: authUser.email ?? "",
+    roles,
+    rolActivo: roles[0]?.nombre ?? option?.rolLabel ?? "",
+  };
 }
 
-export function setSessionUser(user: UsuarioSchema): void {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-  }
+export async function logoutSession(): Promise<void> {
+  const supabase = createClient();
+  await supabase.auth.signOut();
 }

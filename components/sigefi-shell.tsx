@@ -31,7 +31,7 @@ export function SigefiShell({ children }: SigefiShellProps) {
   const [user, setUser] = useState<UsuarioSchema | null>(null);
 
   useEffect(() => {
-    setUser(getStoredUser());
+    getCurrentUser().then(setUser);
   }, []);
 
   const isDashboardActive = pathname === "/dashboard";
@@ -39,12 +39,15 @@ export function SigefiShell({ children }: SigefiShellProps) {
   const isTramitesActive = pathname.startsWith("/tramites");
   const isConfigActive = pathname.startsWith("/configuracion");
 
-  const handleLogout = () => {
-    logoutSession();
+  const handleLogout = async () => {
+    await logoutSession();
     router.push("/auth/login");
   };
 
-  const currentUser = user || MOCK_USUARIOS[0];
+  const currentUser = user ?? {
+    nombreCompleto: "Cargando...",
+    rolActivo: "",
+  };
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] flex flex-col text-[#2c3e50]">
