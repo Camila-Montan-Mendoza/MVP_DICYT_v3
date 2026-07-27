@@ -1,13 +1,15 @@
 import {
-  MOCK_PARTIDAS_CHECK,
+  obtenerCertificacionPartidas,
   generarSelloPreventivo,
+  PartidaPresupuestariaCheck,
 } from "../../lib/budget/preventivo-service";
 
 function runTests() {
   console.log("=== Running Unit Tests: Sello Preventivo & Revision Presupuestaria ===");
 
   // Test 1: Budget sufficiency check per 5-digit partida
-  const allSuficientes = MOCK_PARTIDAS_CHECK.every((p) => p.suficiente);
+  const partidas = obtenerCertificacionPartidas();
+  const allSuficientes = partidas.every((p: PartidaPresupuestariaCheck) => p.suficiente);
   if (!allSuficientes) {
     throw new Error("Expected all partidas to have sufficient budget");
   }

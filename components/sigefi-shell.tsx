@@ -10,8 +10,6 @@ import {
   Bell,
   User,
   Menu,
-  LayoutDashboard,
-  Settings,
 } from "lucide-react";
 import {
   getCurrentUser,
@@ -33,10 +31,8 @@ export function SigefiShell({ children }: SigefiShellProps) {
     getCurrentUser().then(setUser);
   }, []);
 
-  const isDashboardActive = pathname === "/dashboard";
   const isProyectosActive = pathname.startsWith("/proyectos");
   const isTramitesActive = pathname.startsWith("/tramites");
-  const isConfigActive = pathname.startsWith("/configuracion");
 
   const handleLogout = async () => {
     await logoutSession();
