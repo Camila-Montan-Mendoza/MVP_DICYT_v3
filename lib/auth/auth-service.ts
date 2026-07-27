@@ -59,25 +59,49 @@ export async function getCurrentUser(): Promise<UsuarioSchema | null> {
     } = await supabase.auth.getUser();
     if (!authUser) return null;
 
+    console.log("dataaa", authUser.id);
+
     const { data, error } = await supabase
       .from("usuario")
-      .select("id, username, rol_usuario(rol(id, nombre))")
+      .select("id, username, rol_usuario:rol_usuario!rol_usuario_id_usuario_fkey(rol(id, nombre))")
       .eq("auth_user_id", authUser.id)
       .maybeSingle();
 
-    if (error || !data) return null;
+    let userRow = data;
+    if (error || !userRow) {
+      // Fallback lookup by username matching email prefix if auth_user_id not mapped yet
+      const usernamePrefix = authUser.email?.split("@")[0].split(".")[0] || "";
+      const { data: fallbackData } = await supabase
+        .from("usuario")
+        .select("id, username, rol_usuario:rol_usuario!rol_usuario_id_usuario_fkey(rol(id, nombre))")
+        .ilike("username", `%${usernamePrefix}%`)
+        .maybeSingle();
+      userRow = fallbackData;
+    }
+
+    const option = LOGIN_OPTIONS.find(
+      (o) => o.username === userRow?.username || o.email === authUser.email
+    );
 
     const roles: RolSchema[] =
-      (data.rol_usuario as unknown as { rol: RolSchema }[] | null)?.map((ru) => ru.rol) ?? [];
-    const option = LOGIN_OPTIONS.find((o) => o.username === data.username);
+      (userRow?.rol_usuario as unknown as { rol: RolSchema }[] | null)
+        ?.map((ru) => ru.rol)
+        .filter((r): r is RolSchema => Boolean(r && r.nombre)) ?? [];
+
+    if (roles.length === 0 && option) {
+      roles.push({
+        id: 1,
+        nombre: option.rolLabel,
+      });
+    }
 
     return {
-      id: data.id,
-      username: data.username,
-      nombreCompleto: option?.nombreCompleto ?? data.username,
+      id: userRow?.id ?? 1,
+      username: userRow?.username ?? option?.username ?? "usuario",
+      nombreCompleto: option?.nombreCompleto ?? userRow?.username ?? "Usuario SIGEFI",
       email: authUser.email ?? "",
       roles,
-      rolActivo: roles[0]?.nombre ?? option?.rolLabel ?? "",
+      rolActivo: roles[0]?.nombre ?? option?.rolLabel ?? "Investigador Principal",
     };
   } catch {
     return null;

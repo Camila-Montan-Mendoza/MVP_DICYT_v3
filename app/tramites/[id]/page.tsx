@@ -8,14 +8,22 @@ import { WorkflowStepper } from "@/components/workflow/workflow-stepper";
 import { PasoWorkflow, TareaWorkflow } from "@/lib/workflow/stepper-service";
 import { TaskTimeline } from "@/components/workflow/task-timeline";
 import { InteractiveTaskWorkspace } from "@/components/workflow/interactive-task-workspace";
-import { tramiteDBRepository, TramiteDBItem } from "@/lib/db/tramite-repository";
-import { cargarGrafoWorkflow, obtenerNodoPorId } from "@/lib/workflow/workflow-db-service";
+import {
+  tramiteDBRepository,
+  TramiteDBItem,
+} from "@/lib/db/tramite-repository";
+import {
+  cargarGrafoWorkflow,
+  obtenerNodoPorId,
+} from "@/lib/workflow/workflow-db-service";
 import type { NodoWorkflow } from "@/lib/workflow/compra-menor-strategy";
 import { ArrowLeft, Layers, CheckCircle2, Clock, Stamp } from "lucide-react";
 
 function TramiteWorkflowDetailContent() {
   const routeParams = useParams();
-  const rawId = Array.isArray(routeParams?.id) ? routeParams.id[0] : routeParams?.id;
+  const rawId = Array.isArray(routeParams?.id)
+    ? routeParams.id[0]
+    : routeParams?.id;
   const tramiteId = rawId || "1";
 
   const [tramite, setTramite] = useState<TramiteDBItem | undefined>();
@@ -53,7 +61,9 @@ function TramiteWorkflowDetailContent() {
     loadTramite();
   };
 
-  const resolveNextNode = async (destinoDbId: number): Promise<NodoWorkflow | null> => {
+  const resolveNextNode = async (
+    destinoDbId: number,
+  ): Promise<NodoWorkflow | null> => {
     // Primero buscar en el grafo cacheado
     if (grafo[destinoDbId]) return grafo[destinoDbId];
     // Fallback: consultar la BD
@@ -81,31 +91,71 @@ function TramiteWorkflowDetailContent() {
 
   // Construir pasos macro dinámicamente
   const pasosList: PasoWorkflow[] = [
-    { id: "p1", numero: 1, nombre: "Solicitud", estado: activeTramite.pasoNumero === 1 ? "EN_CURSO" : activeTramite.pasoNumero > 1 ? "COMPLETADO" : "PENDIENTE" },
-    { id: "p2", numero: 2, nombre: "Recepción", estado: activeTramite.pasoNumero === 2 ? "EN_CURSO" : activeTramite.pasoNumero > 2 ? "COMPLETADO" : "PENDIENTE" },
-    { id: "p3", numero: 3, nombre: "Pago", estado: activeTramite.pasoNumero === 3 ? "EN_CURSO" : activeTramite.pasoNumero > 3 ? "COMPLETADO" : "PENDIENTE" },
-    { id: "p4", numero: 4, nombre: "Evidencia", estado: activeTramite.pasoNumero === 4 ? "EN_CURSO" : "PENDIENTE" },
+    {
+      id: "p1",
+      numero: 1,
+      nombre: "Solicitud",
+      estado:
+        activeTramite.pasoNumero === 1
+          ? "EN_CURSO"
+          : activeTramite.pasoNumero > 1
+            ? "COMPLETADO"
+            : "PENDIENTE",
+    },
+    {
+      id: "p2",
+      numero: 2,
+      nombre: "Recepción",
+      estado:
+        activeTramite.pasoNumero === 2
+          ? "EN_CURSO"
+          : activeTramite.pasoNumero > 2
+            ? "COMPLETADO"
+            : "PENDIENTE",
+    },
+    {
+      id: "p3",
+      numero: 3,
+      nombre: "Pago",
+      estado:
+        activeTramite.pasoNumero === 3
+          ? "EN_CURSO"
+          : activeTramite.pasoNumero > 3
+            ? "COMPLETADO"
+            : "PENDIENTE",
+    },
+    {
+      id: "p4",
+      numero: 4,
+      nombre: "Evidencia",
+      estado: activeTramite.pasoNumero === 4 ? "EN_CURSO" : "PENDIENTE",
+    },
   ];
 
-  const currentStep = pasosList.find((p) => p.numero === activeTramite.pasoNumero) || pasosList[0];
+  const currentStep =
+    pasosList.find((p) => p.numero === activeTramite.pasoNumero) ||
+    pasosList[0];
   const [activeStepId, setActiveStepId] = useState(currentStep.id);
 
   useEffect(() => {
     setActiveStepId(`p${activeTramite.pasoNumero}`);
   }, [activeTramite.pasoNumero]);
 
-  const activeStep = pasosList.find((p) => p.id === activeStepId) || currentStep;
+  const activeStep =
+    pasosList.find((p) => p.id === activeStepId) || currentStep;
 
   // Recuperar TODAS las tareas granulares del paso activo desde el grafo de la BD
   const nodosDelPaso = Object.values(grafo).filter(
-    (n) => n.pasoNumero === activeStep.numero
+    (n) => n.pasoNumero === activeStep.numero,
   );
 
   const nodoActualResuelto = nodoActual || (Object.values(grafo)[0] ?? null);
 
   const tareasDelPaso: TareaWorkflow[] = nodosDelPaso.map((n) => {
     const nodoId = parseInt(n.id, 10);
-    const currentId = nodoActualResuelto ? parseInt(nodoActualResuelto.id, 10) : 1;
+    const currentId = nodoActualResuelto
+      ? parseInt(nodoActualResuelto.id, 10)
+      : 1;
     const isCurrent = nodoId === currentId;
     const isCompleted =
       activeTramite.pasoNumero > n.pasoNumero ||
@@ -143,8 +193,10 @@ function TramiteWorkflowDetailContent() {
                 Trámite Nº {activeTramite.codigoSeguimiento}
               </h1>
               <p className="text-xs text-[#64748b] mt-0.5">
-                <strong className="text-[#001B47]">Proyecto:</strong> {activeTramite.proyecto} |{" "}
-                <strong className="text-[#001B47]">Solicitante:</strong> {activeTramite.creador}
+                <strong className="text-[#001B47]">Proyecto:</strong>{" "}
+                {activeTramite.proyecto} |{" "}
+                <strong className="text-[#001B47]">Solicitante:</strong>{" "}
+                {activeTramite.creador}
               </p>
             </div>
 
@@ -155,8 +207,8 @@ function TramiteWorkflowDetailContent() {
                   activeTramite.estado === "Aprobado"
                     ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
                     : activeTramite.estado === "Rechazado"
-                    ? "bg-red-100 text-red-800 border border-red-200"
-                    : "bg-amber-100/90 text-amber-900 border border-amber-200"
+                      ? "bg-red-100 text-red-800 border border-red-200"
+                      : "bg-amber-100/90 text-amber-900 border border-amber-200"
                 }`}
               >
                 {activeTramite.estado === "Aprobado" ? (
@@ -170,12 +222,17 @@ function TramiteWorkflowDetailContent() {
           </div>
 
           {/* Muestra de Sello Preventivo Estampado en Encabezado si existe */}
-          {activeTramite.selloPreventivo && activeTramite.selloPreventivo.correlativo !== "NO_EMITIDO" && (
-            <div className="pt-2 flex items-center gap-2 text-xs font-bold text-emerald-800 bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-200">
-              <Stamp className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Sello Preventivo Estampado: <strong>{activeTramite.selloPreventivo.correlativo}</strong> por {activeTramite.selloPreventivo.usuarioAprobador}</span>
-            </div>
-          )}
+          {activeTramite.selloPreventivo &&
+            activeTramite.selloPreventivo.correlativo !== "NO_EMITIDO" && (
+              <div className="pt-2 flex items-center gap-2 text-xs font-bold text-emerald-800 bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-200">
+                <Stamp className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>
+                  Sello Preventivo Estampado:{" "}
+                  <strong>{activeTramite.selloPreventivo.correlativo}</strong>{" "}
+                  por {activeTramite.selloPreventivo.usuarioAprobador}
+                </span>
+              </div>
+            )}
         </div>
 
         {/* Stepper Horizontal Superior de Pasos Macro */}
@@ -225,21 +282,13 @@ function TramiteWorkflowDetailContent() {
                   }}
                 />
               )}
-
-              {/* Tarjeta de Revisión Presupuestaria (solo si el nodo actual lo requiere) */}
-              {nodoActualResuelto && (
-                nodoActualResuelto.nombre.toLowerCase().includes("presupuestaria") ||
-                nodoActualResuelto.nombre.toLowerCase().includes("certificación")
-              ) && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-semibold">
-                  📋 La certificación presupuestaria se realizará como parte de esta tarea operativa.
-                </div>
-              )}
             </div>
 
             <div className="text-[11px] text-[#9ca3af] border-t border-[#e5e7eb] pt-3 flex items-center justify-between">
               <span>Módulo de Ejecución Operativa SIGEFI DICYT</span>
-              <span className="font-mono text-[#002855] font-bold">Server-Driven UI · Conectado a Postgres DB</span>
+              <span className="font-mono text-[#002855] font-bold">
+                Server-Driven UI · Conectado a Postgres DB
+              </span>
             </div>
           </div>
         </div>

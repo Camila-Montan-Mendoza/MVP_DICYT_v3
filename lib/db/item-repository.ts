@@ -24,12 +24,13 @@ export class ItemDBRepository {
           id,
           nombre,
           id_partida_concreta,
-          partida_concreta (
+          partida_concreta:partida_concreta!item_id_partida_concreta_fkey (
             id,
             id_proyecto,
             id_partida,
             presupuesto,
-            partida ( id, codigo, nombre, descripcion )
+            partida
+            :partida!partida_concreta_id_partida_fkey ( id, codigo )
           )
         `)
         .order("id", { ascending: true });

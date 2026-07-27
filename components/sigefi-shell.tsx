@@ -39,6 +39,7 @@ export function SigefiShell({ children }: SigefiShellProps) {
     router.push("/auth/login");
   };
 
+  console.log("HOLAAA", user);
   const currentUser = user ?? {
     nombreCompleto: "Cargando...",
     rolActivo: "",
