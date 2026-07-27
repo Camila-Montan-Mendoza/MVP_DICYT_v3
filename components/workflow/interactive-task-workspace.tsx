@@ -17,6 +17,7 @@ import {
   Building2,
   XCircle,
 } from "lucide-react";import { tramitesStore } from "@/lib/store/tramites-store";
+import { workflowRepository, NODE_ID_TO_DB_ID } from "@/lib/db/workflow-repository";
 
 interface InteractiveTaskWorkspaceProps {
   tramiteId: string;
@@ -56,8 +57,14 @@ export function InteractiveTaskWorkspace({
     const nextNode = NODOS_COMPRA_MENOR[accion.siguienteNodoId] || nodoActual;
     setCurrentNodeId(accion.siguienteNodoId);
 
-    // Persist to Store / Database
+    // Persist to Store
     tramitesStore.updateWorkflowNode(tramiteId, nextNode.id, nextNode.pasoNumero);
+
+    // Persist to Postgres DB Schema (tramite and historial_estado_tramite tables)
+    const tramiteIdNum = parseInt(tramiteId.replace(/\D/g, ""), 10) || 1;
+    const origenDbId = NODE_ID_TO_DB_ID[nodoActual.id] || 1;
+    const destinoDbId = NODE_ID_TO_DB_ID[nextNode.id] || 1;
+    workflowRepository.transicionarEstadoTramite(tramiteIdNum, origenDbId, destinoDbId, 1, accion.label);
 
     const logEntry = {
       nodoNombre: nodoActual.nombre,
