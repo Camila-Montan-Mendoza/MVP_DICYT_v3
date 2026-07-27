@@ -349,6 +349,7 @@ export default function FormulacionRequerimientosPage() {
       custodioNombre: headers[cat].custodioNombre,
       custodioUbicacion: headers[cat].custodioUbicacion,
       proformas: headers[cat].proformas,
+      currentNodeId: "node_1_1",
       items: catItems.map((it) => ({
         id: it.id,
         nombre: it.nombre,
@@ -460,6 +461,7 @@ export default function FormulacionRequerimientosPage() {
             custodioNombre: headers[cat].custodioNombre,
             custodioUbicacion: headers[cat].custodioUbicacion,
             proformas: headers[cat].proformas,
+            currentNodeId: "node_1_1",
             items: catItems.map((it) => ({
               id: it.id,
               nombre: it.nombre,

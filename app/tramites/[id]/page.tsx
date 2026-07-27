@@ -131,9 +131,9 @@ function TramiteWorkflowDetailContent() {
               <InteractiveTaskWorkspace
                 tramiteId={activeTramite.id}
                 onNodeTransition={(nextNode, _log) => {
-                  // Update macro step if changed
                   const nuevoPasoId = `p${nextNode.pasoNumero}`;
                   setActiveStepId(nuevoPasoId);
+                  refreshTramite();
                 }}
               />
 

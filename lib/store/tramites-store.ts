@@ -56,6 +56,7 @@ export interface TramiteStoreItem {
   pasos: PasoStore[];
   tareas: TareaStore[];
   selloPreventivo?: SelloPreventivoStore;
+  currentNodeId?: string; // Current node in Compra Menor workflow strategy (e.g. "node_1_1")
   estado: "Borrador" | "Pendiente" | "En proceso" | "Observado por Presupuestos" | "Aprobado" | "Rechazado";
   requiereAccion: boolean;
 }
@@ -78,6 +79,7 @@ const INITIAL_SEEDS: TramiteStoreItem[] = [
     custodioNombre: "Dr. Marcelino Pérez",
     custodioUbicacion: "Laboratorio de Inteligencia Artificial - Edificio DICYT",
     proformas: [{ id: "p1", nombre: "Cotizacion_TechSol_GPU.pdf" }],
+    currentNodeId: "node_1_1",
     items: [
       {
         id: "it-1",
@@ -361,6 +363,39 @@ class TramiteStoreManager {
           },
           estado: "Observado por Presupuestos" as const,
           requiereAccion: true,
+        };
+      }
+      return t;
+    });
+
+    this.saveLocalItems(updated);
+    return updated.find((t) => t.id === id || t.codigoSeguimiento === id);
+  }
+
+  public updateWorkflowNode(
+    id: string,
+    nextNodeId: string,
+    stepNum: number = 1
+  ): TramiteStoreItem | undefined {
+    const current = this.getLocalItems();
+    const updated = current.map((t) => {
+      if (t.id === id || t.codigoSeguimiento === id) {
+        const updatedPasos: PasoStore[] = t.pasos.map((p) => {
+          if (p.numero < stepNum) return { ...p, estado: "COMPLETADO" as const };
+          if (p.numero === stepNum) return { ...p, estado: "EN_CURSO" as const };
+          return { ...p, estado: "PENDIENTE" as const };
+        });
+
+        let nuevoEstado: TramiteStoreItem["estado"] = "En proceso";
+        if (nextNodeId === "node_4_2") nuevoEstado = "Aprobado";
+        if (nextNodeId === "node_1_4") nuevoEstado = "Rechazado";
+        if (nextNodeId === "node_1_3") nuevoEstado = "Observado por Presupuestos";
+
+        return {
+          ...t,
+          currentNodeId: nextNodeId,
+          pasos: updatedPasos,
+          estado: nuevoEstado,
         };
       }
       return t;
