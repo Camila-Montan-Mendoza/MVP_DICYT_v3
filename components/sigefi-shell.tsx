@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Folder, FileText, LogOut, Bell, User, Menu } from "lucide-react";
+import { Folder, FileText, LogOut, Bell, User, Menu, LayoutDashboard, Settings } from "lucide-react";
 
 interface SigefiShellProps {
   children: React.ReactNode;
@@ -11,8 +11,10 @@ interface SigefiShellProps {
 export function SigefiShell({ children }: SigefiShellProps) {
   const pathname = usePathname();
 
-  const isTramitesActive = pathname.startsWith("/tramites");
+  const isDashboardActive = pathname === "/dashboard";
   const isProyectosActive = pathname.startsWith("/proyectos");
+  const isTramitesActive = pathname.startsWith("/tramites");
+  const isConfigActive = pathname.startsWith("/configuracion");
 
   return (
     <div className="min-h-screen bg-[#f4f6f9] flex flex-col text-[#2c3e50]">
@@ -35,7 +37,7 @@ export function SigefiShell({ children }: SigefiShellProps) {
 
           <div className="flex items-center gap-2 pl-3 border-l border-[#e5e7eb]">
             <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-[#001B47] leading-none">Investigador</p>
+              <p className="text-xs font-bold text-[#001B47] leading-none">Administrador / Investigador</p>
               <p className="text-[11px] text-[#6b7280]">Marcelino Perez</p>
             </div>
             <div className="w-8 h-8 rounded-full bg-[#002855] text-white flex items-center justify-center font-bold text-xs shadow-xs">
@@ -64,6 +66,18 @@ export function SigefiShell({ children }: SigefiShellProps) {
             {/* Menú de Navegación */}
             <nav className="space-y-1.5">
               <Link
+                href="/"
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                  isDashboardActive
+                    ? "bg-[#002855] text-white shadow-xs"
+                    : "text-[#6b7280] hover:bg-[#f0f4f8] hover:text-[#002855]"
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                Dashboard
+              </Link>
+
+              <Link
                 href="/proyectos"
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
                   isProyectosActive
@@ -86,6 +100,18 @@ export function SigefiShell({ children }: SigefiShellProps) {
                 <FileText className="w-4 h-4" />
                 Trámites
               </Link>
+
+              <Link
+                href="/configuracion"
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                  isConfigActive
+                    ? "bg-[#002855] text-white shadow-xs"
+                    : "text-[#6b7280] hover:bg-[#f0f4f8] hover:text-[#002855]"
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+                Configuración
+              </Link>
             </nav>
           </div>
 
@@ -103,7 +129,7 @@ export function SigefiShell({ children }: SigefiShellProps) {
 
         {/* Content Area */}
         <main className="flex-1 p-4 md:p-8 flex flex-col justify-between min-h-[calc(100vh-3.5rem)]">
-          <div className="max-w-5xl mx-auto w-full">{children}</div>
+          <div className="max-w-6xl mx-auto w-full">{children}</div>
 
           {/* Footer del contenido */}
           <footer className="mt-12 pt-4 border-t border-[#e5e7eb]/80 text-center text-[11px] text-[#9ca3af]">
