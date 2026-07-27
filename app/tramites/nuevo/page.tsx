@@ -29,6 +29,7 @@ import { uploadAttachmentFile } from "@/lib/supabase/storage";
 import { itemDBRepository, ItemDBItem } from "@/lib/db/item-repository";
 import { ItemCategoria } from "@/types/requisitions";
 import { tramiteDBRepository } from "@/lib/db/tramite-repository";
+import { proyectoDBRepository, ProyectoDBItem } from "@/lib/db/proyecto-repository";
 
 // Item model
 interface ItemData {
@@ -72,9 +73,8 @@ interface SaldoInsuficienteData {
 export default function FormulacionRequerimientosPage() {
   const router = useRouter();
 
-  const [proyecto, setProyecto] = useState(
-    "Implementacion de IA para la agricultura",
-  );
+  const [proyecto, setProyecto] = useState("");
+  const [proyectos, setProyectos] = useState<ProyectoDBItem[]>([]);
 
   // Items list starts EMPTY per user request (items = [])
   const [items, setItems] = useState<ItemData[]>([]);
@@ -86,6 +86,10 @@ export default function FormulacionRequerimientosPage() {
 
   useEffect(() => {
     itemDBRepository.getItems().then(setDbCatalogItems);
+    proyectoDBRepository.getProyectos().then((data) => {
+      setProyectos(data);
+      setProyecto((current) => current || data[0]?.nombre || "");
+    });
   }, []);
 
   // Independent Requisition Headers by Category
@@ -421,15 +425,14 @@ export default function FormulacionRequerimientosPage() {
             onChange={(e) => setProyecto(e.target.value)}
             className="w-full p-2.5 text-xs bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] font-medium focus:outline-none focus:ring-1 focus:ring-[#002855]"
           >
-            <option value="Implementación de IA para la Agricultura">
-              Implementacion de IA para la agricultura
-            </option>
-            <option value="Sistema de Riego Inteligente">
-              Sistema de Riego Inteligente
-            </option>
-            <option value="Laboratorio de Biotecnología">
-              Laboratorio de Biotecnología
-            </option>
+            {proyectos.length === 0 && (
+              <option value="">Cargando proyectos...</option>
+            )}
+            {proyectos.map((p) => (
+              <option key={p.id} value={p.nombre}>
+                {p.nombre}
+              </option>
+            ))}
           </select>
         </div>
 
