@@ -12,6 +12,7 @@ interface TaskTimelineProps {
 export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
   const { user } = useAuth();
   const currentUser = user?.nombreCompleto || user?.username || "";
+  const currentRole = user?.rolActivo || "";
 
   return (
     <div className="bg-white p-5 rounded-2xl border border-[#e5e7eb] shadow-2xs space-y-4">
@@ -30,29 +31,46 @@ export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
           {tareas.map((tarea) => {
             const isCompletado = tarea.estado === "COMPLETADO";
             const isEnCurso = tarea.estado === "EN_CURSO";
-            const isMeAction =
-              isEnCurso &&
+
+            const isUserMatch =
               Boolean(currentUser) &&
+              tarea.usuarioAsignado &&
+              tarea.usuarioAsignado !== "—" &&
               tarea.usuarioAsignado
                 .toLowerCase()
                 .includes(currentUser.toLowerCase());
+
+            const isRoleMatch =
+              Boolean(currentRole) &&
+              ((tarea.rolEsperado &&
+                tarea.rolEsperado
+                  .toLowerCase()
+                  .includes(currentRole.toLowerCase())) ||
+                (tarea.rolResponsable &&
+                  tarea.rolResponsable
+                    .toLowerCase()
+                    .includes(currentRole.toLowerCase())));
+
+            const isMeAction = isEnCurso && (isUserMatch || isRoleMatch);
 
             return (
               <div key={tarea.id} className="relative flex items-start gap-3">
                 {/* Ícono de Estado en la Línea de Tiempo */}
                 <div
-                  className={`absolute -left-6 top-0.5 w-6 h-6 rounded-full flex items-center justify-center text-white z-10 transition-all ${
+                  className={`absolute -left-6 top-0.5 w-6 h-6 rounded-full flex items-center justify-center z-10 transition-all ${
                     isCompletado
-                      ? "bg-[#002855]"
+                      ? "bg-[#002855] text-white"
                       : isEnCurso
-                        ? "bg-emerald-600 ring-4 ring-emerald-100 animate-pulse"
-                        : "bg-[#94a3b8]"
+                        ? isMeAction
+                          ? "bg-emerald-600 ring-4 ring-emerald-100 text-white shadow-xs"
+                          : "bg-white border-2 border-[#002855] text-[#002855] ring-4 ring-blue-50/80"
+                        : "bg-[#94a3b8] text-white"
                   }`}
                 >
                   {isCompletado ? (
                     <Check className="w-3.5 h-3.5 stroke-[3]" />
                   ) : isEnCurso ? (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <RefreshCw className={`w-3.5 h-3.5 animate-spin`} />
                   ) : (
                     <Clock className="w-3.5 h-3.5" />
                   )}
@@ -62,7 +80,9 @@ export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
                 <div
                   className={`flex-1 p-3.5 rounded-xl border transition-all ${
                     isEnCurso
-                      ? "bg-emerald-50/60 border-2 border-emerald-300 shadow-xs"
+                      ? isMeAction
+                        ? "bg-emerald-50/70 border-2 border-emerald-400/80 shadow-xs ring-2 ring-emerald-500/10"
+                        : "bg-blue-50/20 border-2 border-[#002855]/40 shadow-2xs"
                       : "bg-white border-[#e5e7eb]"
                   }`}
                 >
@@ -79,22 +99,28 @@ export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
                       <p className="text-[11px] text-[#2c3e50] font-medium flex items-center gap-1">
                         <UserCheck className="w-3 h-3 text-[#002855]" />
                         {tarea.usuarioAsignado}
-                        {tarea.rolResponsable && tarea.rolResponsable !== tarea.rolEsperado && (
-                          <span className="text-[10px] text-[#94a3b8] font-normal">({tarea.rolResponsable})</span>
-                        )}
+                        {tarea.rolResponsable &&
+                          tarea.rolResponsable !== tarea.rolEsperado && (
+                            <span className="text-[10px] text-[#94a3b8] font-normal">
+                              ({tarea.rolResponsable})
+                            </span>
+                          )}
                       </p>
                     )}
 
                     {/* Fecha de Finalización para Tareas Completadas */}
                     {isCompletado && tarea.fechaCompletado && (
                       <p className="text-[10px] font-mono text-[#64748b] pt-0.5">
-                        {new Date(tarea.fechaCompletado).toLocaleString("es-BO", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(tarea.fechaCompletado).toLocaleString(
+                          "es-BO",
+                          {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}
                       </p>
                     )}
                   </div>
