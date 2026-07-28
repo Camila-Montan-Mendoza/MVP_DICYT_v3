@@ -27,10 +27,11 @@ export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
           Sin tareas registradas para este paso.
         </p>
       ) : (
-        <div className="relative pl-6 space-y-4 before:absolute before:left-3 before:top-3 before:bottom-3 before:w-[2px] before:bg-[#e2e8f0]">
-          {tareas.map((tarea) => {
+        <div className="relative pl-6 space-y-4">
+          {tareas.map((tarea, index) => {
             const isCompletado = tarea.estado === "COMPLETADO";
             const isEnCurso = tarea.estado === "EN_CURSO";
+            const isLast = index === tareas.length - 1;
 
             const isUserMatch =
               Boolean(currentUser) &&
@@ -55,6 +56,14 @@ export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
 
             return (
               <div key={tarea.id} className="relative flex items-start gap-3">
+                {/* Línea vertical conectora hacia el siguiente ítem (se oculta en la última tarea) */}
+                {!isLast && (
+                  <span
+                    className="absolute -left-3 top-3.5 -bottom-4 w-[2px] bg-[#e2e8f0] z-0"
+                    aria-hidden="true"
+                  />
+                )}
+
                 {/* Ícono de Estado en la Línea de Tiempo */}
                 <div
                   className={`absolute -left-6 top-0.5 w-6 h-6 rounded-full flex items-center justify-center z-10 transition-all ${
