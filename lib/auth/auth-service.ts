@@ -114,8 +114,19 @@ export async function getCurrentUser(): Promise<UsuarioSchema | null> {
     }
 
     const option = LOGIN_OPTIONS.find(
-      (o) => o.username === userRow?.username || o.email === authUser.email
+      (o) =>
+        (userRow?.username && o.username.toLowerCase() === userRow.username.toLowerCase()) ||
+        (authUser.email && o.email.toLowerCase() === authUser.email.toLowerCase()) ||
+        (authUser.email && authUser.email.toLowerCase().includes(o.username.toLowerCase()))
     );
+
+    let resolvedId = userRow?.id;
+    if (!resolvedId && option) {
+      const idx = LOGIN_OPTIONS.findIndex((o) => o.username === option.username);
+      if (idx !== -1) {
+        resolvedId = idx + 1;
+      }
+    }
 
     const roles: RolSchema[] =
       (userRow?.rol_usuario as unknown as { rol: RolSchema }[] | null)
@@ -130,7 +141,7 @@ export async function getCurrentUser(): Promise<UsuarioSchema | null> {
     }
 
     return {
-      id: userRow?.id ?? 1,
+      id: resolvedId ?? 1,
       username: userRow?.username ?? option?.username ?? "usuario",
       nombreCompleto: option?.nombreCompleto ?? userRow?.username ?? "Usuario SIGEFI",
       email: authUser.email ?? "",

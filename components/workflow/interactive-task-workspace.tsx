@@ -112,6 +112,7 @@ export function InteractiveTaskWorkspace({
           idTransicion,
           observaciones,
           datosExtra,
+          usuarioId: user?.id,
         }),
       });
 

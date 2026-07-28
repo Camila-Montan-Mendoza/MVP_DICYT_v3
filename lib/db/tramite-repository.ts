@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
+import { AccionTransicion } from "../workflow/stepper-service";
+import { LOGIN_OPTIONS } from "../auth/auth-service";
 
 export interface TramiteDBItem {
   id: number;
@@ -97,7 +99,13 @@ export class TramiteDBRepository {
             year: "numeric",
           }),
           fechaISO: t.fecha_creacion || new Date().toISOString(),
-          creador: "Dr. Daniel Pérez",
+          creador:
+            t.usuario?.nombre_completo ||
+            LOGIN_OPTIONS.find(
+              (o) => o.username.toLowerCase() === (t.usuario?.username || "").toLowerCase()
+            )?.nombreCompleto ||
+            t.usuario?.username ||
+            "Dr. Daniel Pérez",
           justificacion:
             t.justificacion || "Adquisición de insumos y reactivos para investigación.",
           idEstadoTramite: dbIdEstado,
@@ -219,7 +227,46 @@ export class TramiteDBRepository {
     }>
   > {
     try {
-      // 1. Contexto del Trámite y su paso activo
+      // 0. Intentar ejecución directa por RPC de Supabase (SQL Puro)
+      const { data: rpcRows, error: rpcErr } = await this.supabase.rpc("obtener_timeline_tramite", {
+        p_tramite_id: tramiteIdNum,
+      });
+
+      if (!rpcErr && rpcRows && Array.isArray(rpcRows) && rpcRows.length > 0) {
+        const estadoActualRow = rpcRows.find(
+          (r: any) => r.estado === "EN_CURSO" || r.estado === "RECHAZADO"
+        );
+        const estadoActualId = estadoActualRow?.tarea_id;
+
+        let accionesDisponibles: AccionTransicion[] = [];
+        if (estadoActualId) {
+          const { data: transicionesActuales } = await this.supabase
+            .from("transicion_flujo")
+            .select("id, id_estado_destino, nombre_accion")
+            .eq("id_estado_origen", estadoActualId);
+
+          accionesDisponibles = (transicionesActuales || []).map((t: any) => ({
+            idTransicion: t.id,
+            nombreAccion: t.nombre_accion,
+            idEstadoDestino: t.id_estado_destino,
+          }));
+        }
+
+        return rpcRows.map((r: any) => ({
+          id: String(r.tarea_id),
+          pasoId: `p1`,
+          nombre: r.tarea_nombre,
+          rolEsperado: r.rol_esperado || "Sin rol asignado",
+          usuarioAsignado: r.usuario_responsable || "—",
+          rolResponsable: r.rol_responsable_real || "Sin rol asignado",
+          estado: r.estado as "COMPLETADO" | "EN_CURSO" | "PENDIENTE",
+          fechaCompletado: r.fecha_completado,
+          accionesDisponibles:
+            r.estado === "EN_CURSO" || r.estado === "RECHAZADO" ? accionesDisponibles : undefined,
+        }));
+      }
+
+      // 1. Contexto del Trámite y su paso activo (Fallback si la RPC no existe aún)
       const { data: tramiteData, error: tramiteErr } = await this.supabase
         .from("tramite")
         .select(
@@ -280,12 +327,24 @@ export class TramiteDBRepository {
 
       if (historial) {
         for (const h of historial as any[]) {
+          // Omitir registros iniciales de creación (ej. 1 -> 1)
+          if (h.id_estado_anterior && h.id_estado_anterior === h.id_estado_nuevo) {
+            continue;
+          }
+
           const u = h.usuario;
-          const username = u?.username || "Sistema";
-          const rolReal = u?.rol_usuario?.[0]?.rol?.nombre || "Sin rol asignado";
+          const rawUsername = u?.username || "";
+          const userOpt = LOGIN_OPTIONS.find(
+            (o) => o.username.toLowerCase() === rawUsername.toLowerCase()
+          );
+          const username =
+            u?.nombre_completo || userOpt?.nombreCompleto || rawUsername || "Sistema";
+          const rolReal =
+            userOpt?.rolLabel || u?.rol_usuario?.[0]?.rol?.nombre || "Sin rol asignado";
           const fecha = h.fecha_cambio;
 
-          if (h.id_estado_anterior && !usuarioPorEstadoAnterior.has(h.id_estado_anterior)) {
+          if (h.id_estado_anterior) {
+            // Sobrescribir para registrar la última salida válida del estado
             usuarioPorEstadoAnterior.set(h.id_estado_anterior, {
               username,
               rolReal,
@@ -368,26 +427,32 @@ export class TramiteDBRepository {
 
       // 5. CONSOLIDAR: Pasadas + Actual + Futuras con datos enriquecidos
 
-      // Tareas pasadas: estados del paso actual que aparecen en historial (menos el actual)
+      // Tareas pasadas: estados anteriores presentes en historial (salidas completadas) dentro del paso actual
       const pasadasList: ReturnType<typeof this.makeTarea>[] = [];
-      for (const [_estadoId, estadoInfo] of Array.from(estadosEnHistorial)
-        .filter((id) => id !== estadoActualId)
-        .map((id) => [id, estadosMap.get(id)])
-        .filter(([_, info]) => (info as any)?.id_paso_flujo === pasoActualId)) {
-        const info = estadoInfo as any;
-        const userInfo = usuarioPorEstadoAnterior.get(info?.id || 0);
+      for (const [estadoId, userInfo] of Array.from(usuarioPorEstadoAnterior.entries())) {
+        if (estadoId === estadoActualId) continue;
+        const info = estadosMap.get(estadoId);
+        if (!info || info.id_paso_flujo !== pasoActualId) continue;
+
         pasadasList.push({
           id: String(info.id),
           pasoId: `p${pasoActualId}`,
           nombre: info.nombre,
           rolEsperado: rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
-          usuarioAsignado: userInfo?.username || "Sistema",
+          usuarioAsignado: userInfo.username || "Sistema",
           rolResponsable:
-            userInfo?.rolReal || rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
+            userInfo.rolReal || rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
           estado: "COMPLETADO" as const,
-          fechaCompletado: userInfo?.fechaCompletado,
+          fechaCompletado: userInfo.fechaCompletado,
         });
       }
+
+      // Ordenar tareas pasadas por fecha de finalización
+      pasadasList.sort((a, b) => {
+        const fa = a.fechaCompletado ? new Date(a.fechaCompletado).getTime() : 0;
+        const fb = b.fechaCompletado ? new Date(b.fechaCompletado).getTime() : 0;
+        return fa - fb;
+      });
 
       // Acciones disponibles desde la tarea actual (transiciones asociadas al id_estado_origen)
       const { data: transicionesActuales } = await this.supabase

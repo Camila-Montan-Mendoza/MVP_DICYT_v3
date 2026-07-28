@@ -124,12 +124,18 @@ export function TaskTimeline({
                               ? "text-emerald-950"
                               : "text-blue-950"
                             : isCompletado
-                              ? "text-slate-800"
+                              ? "text-emerald-950"
                               : "text-slate-500"
                         }`}
                       >
                         {tarea.nombre}
                       </p>
+                      {isCompletado && (
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          Completado
+                        </span>
+                      )}
                     </div>
                     {/* Rol institucional esperado */}
                     <p
@@ -139,7 +145,7 @@ export function TaskTimeline({
                             ? "text-emerald-800/90"
                             : "text-blue-800/90"
                           : isCompletado
-                            ? "text-slate-500"
+                            ? "text-emerald-800/80"
                             : "text-slate-400"
                       }`}
                     >
@@ -147,9 +153,12 @@ export function TaskTimeline({
                     </p>
                     {/* Usuario real + su rol */}
                     {tarea.usuarioAsignado && tarea.usuarioAsignado !== "—" && (
-                      <p className="text-[11px] text-[#2c3e50] font-medium flex items-center gap-1">
+                      <p className="text-[11px] text-[#2c3e50] font-medium flex items-center gap-1 pt-0.5">
                         <UserCheck className="w-3 h-3 text-[#002855]" />
-                        {tarea.usuarioAsignado}
+                        <span>
+                          {isCompletado ? "Completado por: " : "Asignado a: "}
+                          <strong className="text-[#001B47]">{tarea.usuarioAsignado}</strong>
+                        </span>
                         {tarea.rolResponsable && tarea.rolResponsable !== tarea.rolEsperado && (
                           <span className="text-[10px] text-[#94a3b8] font-normal">
                             ({tarea.rolResponsable})
@@ -160,14 +169,17 @@ export function TaskTimeline({
 
                     {/* Fecha de Finalización para Tareas Completadas */}
                     {isCompletado && tarea.fechaCompletado && (
-                      <p className="text-[10px] font-mono text-[#64748b] pt-0.5">
-                        {new Date(tarea.fechaCompletado).toLocaleString("es-BO", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                      <p className="text-[10px] font-mono text-emerald-700/80 pt-0.5 flex items-center gap-1">
+                        <span>Finalizado el:</span>
+                        <span>
+                          {new Date(tarea.fechaCompletado).toLocaleString("es-BO", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
                       </p>
                     )}
                   </div>
