@@ -33,10 +33,14 @@ export interface TramiteDBItem {
   items: Array<{
     id: string;
     nombre: string;
+    descripcion?: string;
     categoria: string;
     cantidad: number;
     precioReferencial: number;
+    precioUnitario?: number;
     especificacionesTecnicasTexto?: string;
+    especificacion?: string;
+    total?: number;
     partidaPresupuestaria?: string;
     partidaNombre?: string;
   }>;
@@ -51,7 +55,8 @@ export class TramiteDBRepository {
    */
   public async getTramites(): Promise<TramiteDBItem[]> {
     try {
-      const { data: tramites, error } = await this.supabase
+      // 1. Query principal de trámites con inclusión embebida de relaciones
+      const { data: mainTramites, error: queryError } = await this.supabase
         .from("tramite")
         .select(
           `
@@ -65,14 +70,54 @@ export class TramiteDBRepository {
           rechazado,
           proyecto:proyecto!tramite_id_proyecto_fkey ( nombre, codigo ),
           tipo_tramite:tipo_tramite!tramite_id_tipo_tramite_fkey ( nombre ),
-          estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre ) )
+          usuario:usuario!tramite_id_usuario_fkey ( username ),
+          estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre ) ),
+          item_tramite:item_tramite!item_tramite_id_tramite_fkey (
+            id,
+            cantidad_solicitada,
+            precio,
+            especificacion,
+            item:item!item_tramite_id_item_fkey ( id, nombre )
+          )
         `
         )
         .order("id", { ascending: false });
 
-      if (error) {
-        console.error("[Supabase Tramites Query Error]:", error.message, error.details, error.hint);
-        return [];
+      let tramites: any[] = mainTramites || [];
+
+      // Fallback resiliente si la consulta embebida de item_tramite falla por duplicados en restricciones PostgREST
+      if (queryError) {
+        console.warn(
+          "[Supabase Tramites Query Warning]:",
+          queryError.message,
+          "- Ejecutando consulta de respaldo resiliente"
+        );
+        const { data: baseTramites, error: baseErr } = await this.supabase
+          .from("tramite")
+          .select(
+            `
+            id,
+            id_proyecto,
+            id_tipo_tramite,
+            id_estado_tramite,
+            justificacion,
+            fecha_creacion,
+            fecha_actualizacion,
+            rechazado,
+            proyecto:proyecto!tramite_id_proyecto_fkey ( nombre, codigo ),
+            tipo_tramite:tipo_tramite!tramite_id_tipo_tramite_fkey ( nombre ),
+            usuario:usuario!tramite_id_usuario_fkey ( username ),
+            estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre ) )
+          `
+          )
+          .order("id", { ascending: false });
+
+        if (baseErr || !baseTramites) {
+          console.error("[Supabase Base Tramites Query Error]:", baseErr?.message);
+          return [];
+        }
+
+        tramites = baseTramites;
       }
 
       if (!tramites || tramites.length === 0) {
@@ -85,6 +130,29 @@ export class TramiteDBRepository {
         const dbIdEstado = t.id_estado_tramite || 1;
         const esFinal = estadoObj.es_final || false;
 
+        const tipoNombre = (t.tipo_tramite?.nombre || "").toLowerCase();
+        const categoria: "ACTIVO_FIJO" | "MATERIAL" | "SERVICIO" | "OTROS" = tipoNombre.includes(
+          "activo"
+        )
+          ? "ACTIVO_FIJO"
+          : tipoNombre.includes("servicio")
+            ? "SERVICIO"
+            : "MATERIAL";
+
+        const rawItems = Array.isArray(t.item_tramite) ? t.item_tramite : [];
+        const items = rawItems.map((it: any) => ({
+          id: String(it.id),
+          nombre: it.item?.nombre || "Ítem Solicitado",
+          descripcion: it.item?.nombre || "Ítem Solicitado",
+          categoria: categoria,
+          cantidad: it.cantidad_solicitada || 1,
+          precioReferencial: Number(it.precio || 0),
+          precioUnitario: Number(it.precio || 0),
+          especificacionesTecnicasTexto: it.especificacion || "",
+          especificacion: it.especificacion || "",
+          total: (it.cantidad_solicitada || 1) * Number(it.precio || 0),
+        }));
+
         return {
           id: t.id,
           nro: `${tramites.length - idx}`.padStart(2, "0"),
@@ -92,7 +160,7 @@ export class TramiteDBRepository {
           proyecto: t.proyecto?.nombre || "Proyecto DICYT",
           tipoTramite:
             t.tipo_tramite?.nombre || "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
-          categoria: "MATERIAL",
+          categoria,
           fecha: new Date(t.fecha_creacion || Date.now()).toLocaleDateString("es-BO", {
             day: "2-digit",
             month: "short",
@@ -100,7 +168,6 @@ export class TramiteDBRepository {
           }),
           fechaISO: t.fecha_creacion || new Date().toISOString(),
           creador:
-            t.usuario?.nombre_completo ||
             LOGIN_OPTIONS.find(
               (o) => o.username.toLowerCase() === (t.usuario?.username || "").toLowerCase()
             )?.nombreCompleto ||
@@ -114,11 +181,12 @@ export class TramiteDBRepository {
           requiereAccion: !esFinal && !t.rechazado,
           pasoNumero: pasoObj.orden || 1,
           pasoNombre: pasoObj.nombre || "Solicitud",
-          items: [],
+          items,
         };
       });
-    } catch {
-      return this.getFallbackTramites();
+    } catch (err) {
+      console.error("[getTramites Exception]:", err);
+      return [];
     }
   }
 
@@ -521,10 +589,38 @@ export class TramiteDBRepository {
    */
   public async getTramiteById(idOrCode: string): Promise<TramiteDBItem | undefined> {
     const list = await this.getTramites();
-    return list.find(
+    const tramite = list.find(
       (t) =>
         String(t.id) === idOrCode || t.codigoSeguimiento.toLowerCase() === idOrCode.toLowerCase()
     );
+
+    if (tramite && (!tramite.items || tramite.items.length === 0)) {
+      try {
+        const { data: itemRows } = await this.supabase
+          .from("item_tramite")
+          .select("id, id_item, cantidad_solicitada, precio, especificacion, item ( id, nombre )")
+          .eq("id_tramite", tramite.id);
+
+        if (itemRows && itemRows.length > 0) {
+          tramite.items = itemRows.map((it: any) => ({
+            id: String(it.id),
+            nombre: it.item?.nombre || "Ítem de Solicitud",
+            descripcion: it.item?.nombre || "Ítem de Solicitud",
+            categoria: tramite.categoria,
+            cantidad: it.cantidad_solicitada || 1,
+            precioReferencial: Number(it.precio || 0),
+            precioUnitario: Number(it.precio || 0),
+            especificacionesTecnicasTexto: it.especificacion || "",
+            especificacion: it.especificacion || "",
+            total: (it.cantidad_solicitada || 1) * Number(it.precio || 0),
+          }));
+        }
+      } catch (err) {
+        console.error("[getTramiteById Items Fetch Error]:", err);
+      }
+    }
+
+    return tramite;
   }
 
   /**
@@ -566,8 +662,38 @@ export class TramiteDBRepository {
         .single();
 
       if (error || !newRow) {
-        const fallback = this.getFallbackTramites()[0];
-        return fallback;
+        console.error("[createTramite Error]:", error?.message, error?.details);
+        throw new Error(error?.message || "Error al crear el trámite en la base de datos");
+      }
+
+      // Insertar ítems solicitados en item_tramite
+      if (data.items && data.items.length > 0) {
+        const itemRows = data.items.map((it: any) => {
+          let idItemNum = 1;
+          if (typeof it.id === "number") idItemNum = it.id;
+          else if (it.id_item) idItemNum = Number(it.id_item);
+          else if (it.itemId) idItemNum = Number(it.itemId);
+
+          return {
+            id_tramite: newRow.id,
+            id_item: idItemNum,
+            cantidad_solicitada: it.cantidad || 1,
+            precio: Number(it.precioReferencial || it.precioUnitario || it.precio || 0),
+            especificacion:
+              it.especificacionesTecnicasTexto || it.especificacion || it.nombre || "",
+            existe_en_mercado_virtual: true,
+          };
+        });
+
+        const { error: itemsErr } = await this.supabase.from("item_tramite").insert(itemRows);
+
+        if (itemsErr) {
+          console.error(
+            "[createTramite item_tramite Insert Error]:",
+            itemsErr.message,
+            itemsErr.details
+          );
+        }
       }
 
       return {
@@ -592,36 +718,10 @@ export class TramiteDBRepository {
         pasoNombre: pasoInicial?.nombre || "Solicitud",
         items: data.items || [],
       };
-    } catch {
-      return this.getFallbackTramites()[0];
+    } catch (err: any) {
+      console.error("[createTramite Exception]:", err);
+      throw new Error(err?.message || "Error al registrar el trámite en la base de datos");
     }
-  }
-
-  private getFallbackTramites(): TramiteDBItem[] {
-    return [
-      {
-        id: 0,
-        nro: "00",
-        codigoSeguimiento: "TR-FALLBACK-000",
-        proyecto: "Sin conexión a BD",
-        tipoTramite: "Compra Menor",
-        categoria: "MATERIAL",
-        fecha: new Date().toLocaleDateString("es-BO", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
-        fechaISO: new Date().toISOString(),
-        creador: "Sistema",
-        justificacion: "Error de conexión a la base de datos.",
-        idEstadoTramite: 1,
-        estadoNombre: "Sin conexión",
-        estado: "Error",
-        pasoNumero: 1,
-        pasoNombre: "Solicitud",
-        items: [],
-      },
-    ];
   }
 }
 

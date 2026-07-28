@@ -36,6 +36,7 @@ export default function ListaTramitesPage() {
 
   useEffect(() => {
     tramiteDBRepository.getTramites().then((items) => {
+      console.info(items);
       setTramitesList(items);
     });
   }, []);

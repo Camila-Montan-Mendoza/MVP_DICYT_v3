@@ -81,6 +81,13 @@ The database schema MUST reflect the core PostgreSQL schema provided for Supabas
 - Complete traceability of state changes through `historial_estado_tramite` with timestamp, user ID, previous state, new state, and observations.
 - Document and file handling centralized via `archivo` UUIDs for quotes, contractual documents, receipt acts, and payment vouchers (C-31, cheques, memorandums).
 
+### VI. Strict Real Database Data Discipline (No Mock Data Prohibition)
+
+All UI views, workflow task strategies, and API endpoints MUST query and display real data directly from the Supabase PostgreSQL database (`tramite`, `item_tramite`, `item`, `historial_estado_tramite`, `transicion_flujo`).
+
+- **Prohibition of Hardcoded Mock Arrays**: In-memory static mock arrays, fallback mock items, or dummy static objects inside UI view components are strictly prohibited.
+- **Fail-Fast Database Renders**: If an entity or item list is empty, the interface MUST gracefully render an empty state indicator (e.g. "Sin ítems registrados en la base de datos") instead of falling back to static fake datasets.
+
 ## Technical Requirements & Stack Standards
 
 - **Core Stack**: Next.js (App Router), Supabase (Auth & Database), ShadCN UI, ShadCN Studio, Tailwind CSS, TypeScript.
@@ -93,4 +100,4 @@ The database schema MUST reflect the core PostgreSQL schema provided for Supabas
 2. **Amendment Procedure**: Any modification to core principles, actor definitions, or tech stack mandates requires incrementing `CONSTITUTION_VERSION`, updating governance dates, and documenting rationale in a Sync Impact Report.
 3. **Compliance Verification**: Automated and manual reviews must verify adherence to `DESIGN.md` tokens, RBAC view dynamic rendering, and React design pattern discipline before merging code.
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-23 | **Last Amended**: 2026-07-23
+**Version**: 1.1.0 | **Ratified**: 2026-07-23 | **Last Amended**: 2026-07-28
