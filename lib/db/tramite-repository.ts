@@ -394,7 +394,7 @@ export class TramiteDBRepository {
 
       // Tareas pasadas: estados del paso actual que aparecen en historial (menos el actual)
       const pasadasList: ReturnType<typeof this.makeTarea>[] = [];
-      for (const [estadoId, estadoInfo] of Array.from(estadosEnHistorial)
+      for (const [_estadoId, estadoInfo] of Array.from(estadosEnHistorial)
         .filter((id) => id !== estadoActualId)
         .map((id) => [id, estadosMap.get(id)])
         .filter(([_, info]) => (info as any)?.id_paso_flujo === pasoActualId)) {

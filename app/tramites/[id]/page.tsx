@@ -166,6 +166,7 @@ function TramiteWorkflowDetailContent() {
             id: n.id,
             pasoId: `p${n.pasoNumero}`,
             nombre: n.nombre,
+            rolEsperado: n.actorNombreRol,
             rolResponsable: n.actorNombreRol,
             usuarioAsignado: n.actorNombreRol,
             estado: isCurrent
