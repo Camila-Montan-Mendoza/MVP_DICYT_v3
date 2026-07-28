@@ -249,7 +249,7 @@ export class TramiteDBRepository {
             nombre,
             paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre )
           )
-        `
+        `,
         )
         .eq("id", tramiteIdNum)
         .maybeSingle();
@@ -280,7 +280,7 @@ export class TramiteDBRepository {
               rol:rol ( nombre )
             )
           )
-        `
+        `,
         )
         .eq("id_tramite", tramiteIdNum)
         .order("fecha_cambio", { ascending: true });
@@ -301,7 +301,10 @@ export class TramiteDBRepository {
             u?.rol_usuario?.[0]?.rol?.nombre || "Sin rol asignado";
           const fecha = h.fecha_cambio;
 
-          if (h.id_estado_anterior && !usuarioPorEstadoAnterior.has(h.id_estado_anterior)) {
+          if (
+            h.id_estado_anterior &&
+            !usuarioPorEstadoAnterior.has(h.id_estado_anterior)
+          ) {
             usuarioPorEstadoAnterior.set(h.id_estado_anterior, {
               username,
               rolReal,
@@ -317,11 +320,16 @@ export class TramiteDBRepository {
       // 3. ROL ESPERADO por estado (de rol_estado_paso_flujo → rol)
       const { data: rolesEstado } = await this.supabase
         .from("rol_estado_paso_flujo")
-        .select("id_estado_paso_flujo, rol:rol!rol_estado_paso_flujo_id_rol_fkey ( nombre )");
+        .select(
+          "id_estado_paso_flujo, rol:rol!rol_estado_paso_flujo_id_rol_fkey ( nombre )",
+        );
 
       const rolEsperadoPorEstado = new Map<number, string>();
       (rolesEstado || []).forEach((re: any) => {
-        rolEsperadoPorEstado.set(re.id_estado_paso_flujo, re.rol?.nombre || "Sin rol asignado");
+        rolEsperadoPorEstado.set(
+          re.id_estado_paso_flujo,
+          re.rol?.nombre || "Sin rol asignado",
+        );
       });
 
       // 4. BFS: Ruta más corta hacia siguiente paso o nodo final
@@ -331,7 +339,7 @@ export class TramiteDBRepository {
           `
           id, id_paso_flujo, nombre, es_final,
           paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, id_tipo_tramite )
-        `
+        `,
         )
         .eq("paso_flujo.id_tipo_tramite", idTipoTramite || 1);
 
@@ -398,7 +406,10 @@ export class TramiteDBRepository {
           nombre: info.nombre,
           rolEsperado: rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
           usuarioAsignado: userInfo?.username || "Sistema",
-          rolResponsable: userInfo?.rolReal || rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
+          rolResponsable:
+            userInfo?.rolReal ||
+            rolEsperadoPorEstado.get(info.id) ||
+            "Sin rol asignado",
           estado: "COMPLETADO" as const,
           fechaCompletado: userInfo?.fechaCompletado,
         });
@@ -410,9 +421,13 @@ export class TramiteDBRepository {
         id: String(estadoActualId),
         pasoId: `p${pasoActualId}`,
         nombre: estadoObj.nombre || "Tarea Actual",
-        rolEsperado: rolEsperadoPorEstado.get(estadoActualId) || "Sin rol asignado",
+        rolEsperado:
+          rolEsperadoPorEstado.get(estadoActualId) || "Sin rol asignado",
         usuarioAsignado: actualUserInfo?.username || "—",
-        rolResponsable: actualUserInfo?.rolReal || rolEsperadoPorEstado.get(estadoActualId) || "Sin rol asignado",
+        rolResponsable:
+          actualUserInfo?.rolReal ||
+          rolEsperadoPorEstado.get(estadoActualId) ||
+          "Sin rol asignado",
         estado: (rechazado ? "EN_CURSO" : "EN_CURSO") as "EN_CURSO",
         fechaCompletado: undefined as string | undefined,
       };
