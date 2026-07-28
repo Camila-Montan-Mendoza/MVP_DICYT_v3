@@ -98,22 +98,53 @@ export function TaskTimeline({
                     isSelectable ? "cursor-pointer" : "cursor-not-allowed opacity-75"
                   } ${
                     isSelected
-                      ? "ring-2 ring-[#002855] border-[#002855] shadow-md bg-blue-50/20"
+                      ? "ring-2 ring-[#002855] border-[#002855] shadow-md " +
+                        (isEnCurso
+                          ? isMeAction
+                            ? "bg-emerald-50"
+                            : "bg-blue-50/60"
+                          : isCompletado
+                            ? "bg-slate-50"
+                            : "bg-white")
                       : isEnCurso
                         ? isMeAction
-                          ? "bg-emerald-50/70 border-2 border-emerald-400/80 shadow-xs hover:border-emerald-500"
-                          : "bg-blue-50/20 border-2 border-[#002855]/40 shadow-2xs hover:border-[#002855]"
-                        : "bg-white border-[#e5e7eb] hover:border-[#cbd5e1]"
+                          ? "bg-emerald-50 border-2 border-emerald-500/90 shadow-xs hover:border-emerald-600"
+                          : "bg-blue-50/50 border-2 border-blue-400/80 shadow-2xs hover:border-blue-500"
+                        : isCompletado
+                          ? "bg-slate-50 border border-slate-200/90 hover:border-slate-300"
+                          : "bg-white border border-slate-200/60 opacity-60 hover:border-slate-300"
                   }`}
                 >
                   <div className="space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-bold text-xs text-[#001B47] uppercase leading-snug">
+                      <p
+                        className={`font-bold text-xs uppercase leading-snug ${
+                          isEnCurso
+                            ? isMeAction
+                              ? "text-emerald-950"
+                              : "text-blue-950"
+                            : isCompletado
+                              ? "text-slate-800"
+                              : "text-slate-500"
+                        }`}
+                      >
                         {tarea.nombre}
                       </p>
                     </div>
                     {/* Rol institucional esperado */}
-                    <p className="text-[11px] font-semibold text-[#64748b]">{tarea.rolEsperado}</p>
+                    <p
+                      className={`text-[11px] font-semibold ${
+                        isEnCurso
+                          ? isMeAction
+                            ? "text-emerald-800/90"
+                            : "text-blue-800/90"
+                          : isCompletado
+                            ? "text-slate-500"
+                            : "text-slate-400"
+                      }`}
+                    >
+                      {tarea.rolEsperado}
+                    </p>
                     {/* Usuario real + su rol */}
                     {tarea.usuarioAsignado && tarea.usuarioAsignado !== "—" && (
                       <p className="text-[11px] text-[#2c3e50] font-medium flex items-center gap-1">
