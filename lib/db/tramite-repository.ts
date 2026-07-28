@@ -51,7 +51,8 @@ export class TramiteDBRepository {
     try {
       const { data: tramites, error } = await this.supabase
         .from("tramite")
-        .select(`
+        .select(
+          `
           id,
           id_proyecto,
           id_tipo_tramite,
@@ -63,11 +64,17 @@ export class TramiteDBRepository {
           proyecto:proyecto!tramite_id_proyecto_fkey ( nombre, codigo ),
           tipo_tramite:tipo_tramite!tramite_id_tipo_tramite_fkey ( nombre ),
           estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre ) )
-        `)
+        `,
+        )
         .order("id", { ascending: false });
 
       if (error) {
-        console.error("[Supabase Tramites Query Error]:", error.message, error.details, error.hint);
+        console.error(
+          "[Supabase Tramites Query Error]:",
+          error.message,
+          error.details,
+          error.hint,
+        );
         return [];
       }
 
@@ -86,23 +93,31 @@ export class TramiteDBRepository {
           nro: `${tramites.length - idx}`.padStart(2, "0"),
           codigoSeguimiento: `TR-2026-${String(t.id).padStart(3, "0")}`,
           proyecto: t.proyecto?.nombre || "Proyecto DICYT",
-          tipoTramite: t.tipo_tramite?.nombre || "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
+          tipoTramite:
+            t.tipo_tramite?.nombre ||
+            "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
           categoria: "MATERIAL",
-          fecha: new Date(t.fecha_creacion || Date.now()).toLocaleDateString("es-BO", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          }),
+          fecha: new Date(t.fecha_creacion || Date.now()).toLocaleDateString(
+            "es-BO",
+            {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            },
+          ),
           fechaISO: t.fecha_creacion || new Date().toISOString(),
           creador: "Dr. Daniel Pérez",
-          justificacion: t.justificacion || "Adquisición de insumos y reactivos para investigación.",
+          justificacion:
+            t.justificacion ||
+            "Adquisición de insumos y reactivos para investigación.",
           idEstadoTramite: dbIdEstado,
           estadoNombre: estadoObj.nombre || "Estado desconocido",
-          estado: esFinal && !t.rechazado
-            ? "Aprobado"
-            : t.rechazado
-            ? "Rechazado"
-            : "En proceso",
+          estado:
+            esFinal && !t.rechazado
+              ? "Aprobado"
+              : t.rechazado
+                ? "Rechazado"
+                : "En proceso",
           requiereAccion: !esFinal && !t.rechazado,
           pasoNumero: pasoObj.orden || 1,
           pasoNombre: pasoObj.nombre || "Solicitud",
@@ -130,7 +145,8 @@ export class TramiteDBRepository {
       // 1. Consulta la información del trámite actual y su paso activo
       const { data: tramiteData, error: tramiteErr } = await this.supabase
         .from("tramite")
-        .select(`
+        .select(
+          `
           id,
           id_tipo_tramite,
           rechazado,
@@ -139,7 +155,8 @@ export class TramiteDBRepository {
             id_paso_flujo,
             paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre )
           )
-        `)
+        `,
+        )
         .eq("id", tramiteIdNum)
         .maybeSingle();
 
@@ -169,8 +186,8 @@ export class TramiteDBRepository {
           pf.orden < ordenActual
             ? "COMPLETADO"
             : pf.orden === ordenActual
-            ? "EN_CURSO"
-            : "PENDIENTE";
+              ? "EN_CURSO"
+              : "PENDIENTE";
 
         return {
           id: `p${pf.id}`,
@@ -199,14 +216,253 @@ export class TramiteDBRepository {
   }
 
   /**
+   * Obtener las Tareas del Paso en el que se encuentra el Trámite
+   * (Pasado de Bitácora + Presente En Curso + Ruta Optimista Futura hacia la meta)
+   * Enriquecido con: rol esperado, usuario responsable real, rol real y fecha completado.
+   * Consulta directa desde Supabase Client sin funciones almacenadas ni RPCs.
+   */
+  public async getTareasDelPaso(tramiteIdNum: number): Promise<
+    Array<{
+      id: string;
+      pasoId: string;
+      nombre: string;
+      rolEsperado: string;
+      usuarioAsignado: string;
+      rolResponsable: string;
+      estado: "COMPLETADO" | "EN_CURSO" | "PENDIENTE";
+      fechaCompletado?: string;
+    }>
+  > {
+    try {
+      // 1. Contexto del Trámite y su paso activo
+      const { data: tramiteData, error: tramiteErr } = await this.supabase
+        .from("tramite")
+        .select(
+          `
+          id,
+          id_tipo_tramite,
+          id_estado_tramite,
+          rechazado,
+          estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey (
+            id,
+            id_paso_flujo,
+            nombre,
+            paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre )
+          )
+        `
+        )
+        .eq("id", tramiteIdNum)
+        .maybeSingle();
+
+      if (tramiteErr || !tramiteData) return [];
+
+      const estadoActualId = tramiteData.id_estado_tramite;
+      const estadoObj = (tramiteData as any).estado_paso_flujo || {};
+      const pasoObj = estadoObj.paso_flujo || {};
+      const pasoActualId = estadoObj.id_paso_flujo;
+      const pasoActualOrden = pasoObj.orden;
+      const idTipoTramite = tramiteData.id_tipo_tramite;
+      const rechazado = Boolean(tramiteData.rechazado);
+
+      // 2. HISTORIAL: Quién completó cada estado + fecha (se sabe al SALIR del estado)
+      //    id_estado_anterior = el estado que se completó (salida)
+      const { data: historial } = await this.supabase
+        .from("historial_estado_tramite")
+        .select(
+          `
+          id_estado_anterior,
+          id_estado_nuevo,
+          fecha_cambio,
+          usuario:usuario!historial_estado_tramite_id_usuario_responsable_fkey (
+            id,
+            username,
+            rol_usuario:rol_usuario!rol_usuario_id_usuario_fkey (
+              rol:rol ( nombre )
+            )
+          )
+        `
+        )
+        .eq("id_tramite", tramiteIdNum)
+        .order("fecha_cambio", { ascending: true });
+
+      // Mapa: id del estado completado → { username, rolReal, fechaCompletado }
+      const usuarioPorEstadoAnterior = new Map<
+        number,
+        { username: string; rolReal: string; fechaCompletado: string }
+      >();
+      // Mapa: id del estado nuevo → presente en historial (para marcar como completado)
+      const estadosEnHistorial = new Set<number>();
+
+      if (historial) {
+        for (const h of historial as any[]) {
+          const u = h.usuario;
+          const username = u?.username || "Sistema";
+          const rolReal =
+            u?.rol_usuario?.[0]?.rol?.nombre || "Sin rol asignado";
+          const fecha = h.fecha_cambio;
+
+          if (h.id_estado_anterior && !usuarioPorEstadoAnterior.has(h.id_estado_anterior)) {
+            usuarioPorEstadoAnterior.set(h.id_estado_anterior, {
+              username,
+              rolReal,
+              fechaCompletado: fecha,
+            });
+          }
+          if (h.id_estado_nuevo) {
+            estadosEnHistorial.add(h.id_estado_nuevo);
+          }
+        }
+      }
+
+      // 3. ROL ESPERADO por estado (de rol_estado_paso_flujo → rol)
+      const { data: rolesEstado } = await this.supabase
+        .from("rol_estado_paso_flujo")
+        .select("id_estado_paso_flujo, rol:rol!rol_estado_paso_flujo_id_rol_fkey ( nombre )");
+
+      const rolEsperadoPorEstado = new Map<number, string>();
+      (rolesEstado || []).forEach((re: any) => {
+        rolEsperadoPorEstado.set(re.id_estado_paso_flujo, re.rol?.nombre || "Sin rol asignado");
+      });
+
+      // 4. BFS: Ruta más corta hacia siguiente paso o nodo final
+      const { data: todosEstados } = await this.supabase
+        .from("estado_paso_flujo")
+        .select(
+          `
+          id, id_paso_flujo, nombre, es_final,
+          paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, id_tipo_tramite )
+        `
+        )
+        .eq("paso_flujo.id_tipo_tramite", idTipoTramite || 1);
+
+      const estadosMap = new Map<number, any>();
+      (todosEstados || []).forEach((e: any) => estadosMap.set(e.id, e));
+
+      const { data: transiciones } = await this.supabase
+        .from("transicion_flujo")
+        .select("id_estado_origen, id_estado_destino, nombre_accion");
+
+      const adjList = new Map<number, number[]>();
+      (transiciones || []).forEach((t: any) => {
+        const accion = (t.nombre_accion || "").toLowerCase();
+        if (
+          !accion.includes("rechaz") &&
+          !accion.includes("observ") &&
+          !accion.includes("subsan")
+        ) {
+          if (!adjList.has(t.id_estado_origen)) {
+            adjList.set(t.id_estado_origen, []);
+          }
+          adjList.get(t.id_estado_origen)!.push(t.id_estado_destino);
+        }
+      });
+
+      const queue: Array<{ node: number; path: number[] }> = [];
+      const visited = new Set<number>([estadoActualId]);
+      for (const nxt of adjList.get(estadoActualId) || []) {
+        visited.add(nxt);
+        queue.push({ node: nxt, path: [nxt] });
+      }
+
+      let rutaGanadora: number[] = [];
+      while (queue.length > 0) {
+        const current = queue.shift()!;
+        const nodeInfo = estadosMap.get(current.node);
+        const nodePasoOrden = nodeInfo?.paso_flujo?.orden || pasoActualOrden;
+        const esFinal = Boolean(nodeInfo?.es_final);
+        if (nodePasoOrden > pasoActualOrden || esFinal) {
+          rutaGanadora = current.path;
+          break;
+        }
+        for (const nxt of adjList.get(current.node) || []) {
+          if (!visited.has(nxt)) {
+            visited.add(nxt);
+            queue.push({ node: nxt, path: [...current.path, nxt] });
+          }
+        }
+      }
+
+      // 5. CONSOLIDAR: Pasadas + Actual + Futuras con datos enriquecidos
+
+      // Tareas pasadas: estados del paso actual que aparecen en historial (menos el actual)
+      const pasadasList: ReturnType<typeof this.makeTarea>[] = [];
+      for (const [estadoId, estadoInfo] of Array.from(estadosEnHistorial)
+        .filter((id) => id !== estadoActualId)
+        .map((id) => [id, estadosMap.get(id)])
+        .filter(([_, info]) => (info as any)?.id_paso_flujo === pasoActualId)) {
+        const info = estadoInfo as any;
+        const userInfo = usuarioPorEstadoAnterior.get(info?.id || 0);
+        pasadasList.push({
+          id: String(info.id),
+          pasoId: `p${pasoActualId}`,
+          nombre: info.nombre,
+          rolEsperado: rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
+          usuarioAsignado: userInfo?.username || "Sistema",
+          rolResponsable: userInfo?.rolReal || rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
+          estado: "COMPLETADO" as const,
+          fechaCompletado: userInfo?.fechaCompletado,
+        });
+      }
+
+      // Tarea actual
+      const actualUserInfo = usuarioPorEstadoAnterior.get(estadoActualId);
+      const tareaActualItem = {
+        id: String(estadoActualId),
+        pasoId: `p${pasoActualId}`,
+        nombre: estadoObj.nombre || "Tarea Actual",
+        rolEsperado: rolEsperadoPorEstado.get(estadoActualId) || "Sin rol asignado",
+        usuarioAsignado: actualUserInfo?.username || "—",
+        rolResponsable: actualUserInfo?.rolReal || rolEsperadoPorEstado.get(estadoActualId) || "Sin rol asignado",
+        estado: (rechazado ? "EN_CURSO" : "EN_CURSO") as "EN_CURSO",
+        fechaCompletado: undefined as string | undefined,
+      };
+
+      // Tareas futuras
+      const tareasFuturas = rutaGanadora
+        .map((nodeNum) => estadosMap.get(nodeNum))
+        .filter((n) => n && n.id_paso_flujo === pasoActualId)
+        .map((n) => ({
+          id: String(n.id),
+          pasoId: `p${pasoActualId}`,
+          nombre: n.nombre,
+          rolEsperado: rolEsperadoPorEstado.get(n.id) || "Sin rol asignado",
+          usuarioAsignado: "—",
+          rolResponsable: rolEsperadoPorEstado.get(n.id) || "Sin rol asignado",
+          estado: "PENDIENTE" as const,
+          fechaCompletado: undefined as string | undefined,
+        }));
+
+      return [...pasadasList, tareaActualItem, ...tareasFuturas];
+    } catch {
+      return [];
+    }
+  }
+
+  // Helper para inferencia de tipos
+  private makeTarea(_: {
+    id: string;
+    pasoId: string;
+    nombre: string;
+    rolEsperado: string;
+    usuarioAsignado: string;
+    rolResponsable: string;
+    estado: "COMPLETADO" | "EN_CURSO" | "PENDIENTE";
+    fechaCompletado?: string;
+  }) {
+    return _;
+  }
+
+  /**
    * Fetch single trámite by string ID or numeric ID
    */
-  public async getTramiteById(idOrCode: string): Promise<TramiteDBItem | undefined> {
+  public async getTramiteById(
+    idOrCode: string,
+  ): Promise<TramiteDBItem | undefined> {
     const list = await this.getTramites();
     return list.find(
       (t) =>
         String(t.id) === idOrCode ||
-        t.codigoSeguimiento.toLowerCase() === idOrCode.toLowerCase()
+        t.codigoSeguimiento.toLowerCase() === idOrCode.toLowerCase(),
     );
   }
 
@@ -230,7 +486,8 @@ export class TramiteDBRepository {
         .single();
 
       const estadoInicialId = (estadoInicial as any)?.id || 1;
-      const estadoInicialNombre = (estadoInicial as any)?.nombre || "Estado inicial";
+      const estadoInicialNombre =
+        (estadoInicial as any)?.nombre || "Estado inicial";
       const pasoInicial = (estadoInicial as any)?.paso_flujo;
 
       const { data: newRow, error } = await this.supabase
@@ -260,7 +517,11 @@ export class TramiteDBRepository {
         proyecto: "Proyecto DICYT",
         tipoTramite: "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
         categoria: "MATERIAL",
-        fecha: new Date().toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" }),
+        fecha: new Date().toLocaleDateString("es-BO", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
         fechaISO: newRow.fecha_creacion,
         creador: "Dr. Daniel Pérez",
         justificacion: data.justificacion || "Solicitud de compra menor",
@@ -285,7 +546,11 @@ export class TramiteDBRepository {
         proyecto: "Sin conexión a BD",
         tipoTramite: "Compra Menor",
         categoria: "MATERIAL",
-        fecha: new Date().toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" }),
+        fecha: new Date().toLocaleDateString("es-BO", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
         fechaISO: new Date().toISOString(),
         creador: "Sistema",
         justificacion: "Error de conexión a la base de datos.",

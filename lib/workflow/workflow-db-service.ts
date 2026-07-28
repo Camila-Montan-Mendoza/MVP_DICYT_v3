@@ -34,9 +34,6 @@ let cachedTipoTramiteId: number | null = null;
  */
 function inferVarianteBtn(
   nombreAccion: string,
-  origenPasoOrden: number,
-  destinoPasoOrden: number,
-  destinoEsFinal: boolean,
   origenEstadoId: number,
   destinoEstadoId: number
 ): { tipo: AccionTransicion["tipo"]; varianteBtn: AccionTransicion["varianteBtn"] } {
@@ -189,9 +186,6 @@ export async function cargarGrafoWorkflow(
         t.nombre_accion,
         paso.orden,
         destinoPaso?.orden || paso.orden,
-        destinoEstado?.es_final || false,
-        tarea.id,
-        t.id_estado_destino
       );
 
       return {

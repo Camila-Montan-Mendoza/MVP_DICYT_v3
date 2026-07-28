@@ -2,14 +2,7 @@
 
 import { TareaWorkflow } from "@/lib/workflow/stepper-service";
 import { useAuth } from "@/lib/auth/auth-context";
-import {
-  Check,
-  RefreshCw,
-  Clock,
-  UserCheck,
-  ShieldAlert,
-  ListFilter,
-} from "lucide-react";
+import { Check, RefreshCw, Clock, UserCheck, ListFilter } from "lucide-react";
 
 interface TaskTimelineProps {
   pasoNombre: string;
@@ -77,37 +70,32 @@ export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
                     <p className="font-bold text-xs text-[#001B47] uppercase leading-snug">
                       {tarea.nombre}
                     </p>
+                    {/* Rol institucional esperado */}
                     <p className="text-[11px] font-semibold text-[#64748b]">
-                      {tarea.rolResponsable}
+                      {tarea.rolEsperado}
                     </p>
-                    <p className="text-[11px] text-[#2c3e50] font-medium flex items-center gap-1">
-                      <UserCheck className="w-3 h-3 text-[#002855]" />
-                      {tarea.usuarioAsignado}
-                    </p>
+                    {/* Usuario real + su rol */}
+                    {tarea.usuarioAsignado && tarea.usuarioAsignado !== "—" && (
+                      <p className="text-[11px] text-[#2c3e50] font-medium flex items-center gap-1">
+                        <UserCheck className="w-3 h-3 text-[#002855]" />
+                        {tarea.usuarioAsignado}
+                        {tarea.rolResponsable && tarea.rolResponsable !== tarea.rolEsperado && (
+                          <span className="text-[10px] text-[#94a3b8] font-normal">({tarea.rolResponsable})</span>
+                        )}
+                      </p>
+                    )}
 
                     {/* Fecha de Finalización para Tareas Completadas */}
                     {isCompletado && tarea.fechaCompletado && (
                       <p className="text-[10px] font-mono text-[#64748b] pt-0.5">
-                        Completed: {tarea.fechaCompletado}
+                        {new Date(tarea.fechaCompletado).toLocaleString("es-BO", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
-                    )}
-
-                    {/* Indicador de Intervención del Usuario ("¿Me toca actuar o espero?") */}
-                    {isEnCurso && (
-                      <div className="pt-2">
-                        {isMeAction ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-700 text-white font-bold text-[10px] rounded-md shadow-2xs">
-                            <ShieldAlert className="w-3 h-3" />
-                            Acción requerida por tu parte
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-900 font-bold text-[10px] rounded-md border border-amber-300">
-                            <Clock className="w-3 h-3 text-amber-700" />
-                            En espera de acción por parte de{" "}
-                            {tarea.usuarioAsignado} ({tarea.rolResponsable})
-                          </span>
-                        )}
-                      </div>
                     )}
                   </div>
                 </div>

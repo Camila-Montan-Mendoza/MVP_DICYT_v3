@@ -29,6 +29,7 @@ function TramiteWorkflowDetailContent() {
   const [pasosList, setPasosList] = useState<PasoWorkflow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [tareasList, setTareasList] = useState<TareaWorkflow[]>([]);
 
   useEffect(() => {
     cargarGrafoWorkflow(1).then(setGrafo);
@@ -49,7 +50,7 @@ function TramiteWorkflowDetailContent() {
 
       if (!targetTramite) {
         setLoadError(
-          `No se encontró ningún trámite registrado en la base de datos.`,
+          `No se encontró ningún trámite registrado en la base de datos.`
         );
         setIsLoading(false);
         return;
@@ -57,15 +58,19 @@ function TramiteWorkflowDetailContent() {
 
       setTramite(targetTramite);
 
-      const pasos = await tramiteDBRepository.getPasosTramite(
-        targetTramite.id || tramiteIdNum,
-      );
+      const targetId = targetTramite.id || tramiteIdNum;
+      const pasos = await tramiteDBRepository.getPasosTramite(targetId);
       if (pasos && pasos.length > 0) {
         setPasosList(pasos);
       } else {
         setLoadError(
-          "No se encontraron pasos de flujo registrados en la base de datos.",
+          "No se encontraron pasos de flujo registrados en la base de datos."
         );
+      }
+
+      const tareas = await tramiteDBRepository.getTareasDelPaso(targetId);
+      if (tareas && tareas.length > 0) {
+        setTareasList(tareas as TareaWorkflow[]);
       }
     } catch (e: any) {
       setLoadError(e?.message || "Error al conectar con la base de datos.");
@@ -144,25 +149,28 @@ function TramiteWorkflowDetailContent() {
 
   const nodoActualResuelto = nodoActual || (Object.values(grafo)[0] ?? null);
 
-  const tareasDelPaso: TareaWorkflow[] = nodosDelPaso.map((n) => {
-    const nodoId = parseInt(n.id, 10);
-    const currentId = nodoActualResuelto
-      ? parseInt(nodoActualResuelto.id, 10)
-      : 1;
-    const isCurrent = nodoId === currentId;
-    const isCompleted =
-      activeTramite.pasoNumero > n.pasoNumero ||
-      (activeTramite.pasoNumero === n.pasoNumero && nodoId < currentId);
+  const tareasDelPaso: TareaWorkflow[] =
+    tareasList.length > 0
+      ? tareasList
+      : nodosDelPaso.map((n) => {
+          const nodoId = parseInt(n.id, 10);
+          const currentId = nodoActualResuelto
+            ? parseInt(nodoActualResuelto.id, 10)
+            : 1;
+          const isCurrent = nodoId === currentId;
+          const isCompleted =
+            activeTramite.pasoNumero > n.pasoNumero ||
+            (activeTramite.pasoNumero === n.pasoNumero && nodoId < currentId);
 
-    return {
-      id: n.id,
-      pasoId: `p${n.pasoNumero}`,
-      nombre: n.nombre,
-      rolResponsable: n.actorNombreRol,
-      usuarioAsignado: n.actorNombreRol,
-      estado: isCurrent ? "EN_CURSO" : isCompleted ? "COMPLETADO" : "PENDIENTE",
-    };
-  });
+          return {
+            id: n.id,
+            pasoId: `p${n.pasoNumero}`,
+            nombre: n.nombre,
+            rolResponsable: n.actorNombreRol,
+            usuarioAsignado: n.actorNombreRol,
+            estado: isCurrent ? "EN_CURSO" : isCompleted ? "COMPLETADO" : "PENDIENTE",
+          };
+        });
 
   return (
     <SigefiShell>

@@ -14,8 +14,12 @@ export interface TareaWorkflow {
   id: string;
   pasoId: string;
   nombre: string;
-  rolResponsable: string;
+  /** Rol institucional esperado para esta tarea (de rol_estado_paso_flujo) */
+  rolEsperado: string;
+  /** Nombre de usuario real que completó o está completando esta tarea */
   usuarioAsignado: string;
+  /** Rol real del usuario responsable (de rol_usuario) */
+  rolResponsable: string;
   estado: "COMPLETADO" | "EN_CURSO" | "PENDIENTE";
   fechaCompletado?: string;
 }
