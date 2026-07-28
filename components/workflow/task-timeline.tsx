@@ -7,9 +7,16 @@ import { Check, RefreshCw, Clock, UserCheck, ListFilter } from "lucide-react";
 interface TaskTimelineProps {
   pasoNombre: string;
   tareas: TareaWorkflow[];
+  selectedTaskId?: string;
+  onSelectTask?: (tarea: TareaWorkflow) => void;
 }
 
-export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
+export function TaskTimeline({
+  pasoNombre,
+  tareas,
+  selectedTaskId,
+  onSelectTask,
+}: TaskTimelineProps) {
   const { user } = useAuth();
   const currentUser = user?.nombreCompleto || user?.username || "";
   const currentRole = user?.rolActivo || "";
@@ -31,6 +38,8 @@ export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
           {tareas.map((tarea, index) => {
             const isCompletado = tarea.estado === "COMPLETADO";
             const isEnCurso = tarea.estado === "EN_CURSO";
+            const isPendiente = tarea.estado === "PENDIENTE";
+            const isSelected = selectedTaskId === tarea.id;
             const isLast = index === tareas.length - 1;
 
             const isUserMatch =
@@ -53,6 +62,7 @@ export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
                     .includes(currentRole.toLowerCase())));
 
             const isMeAction = isEnCurso && (isUserMatch || isRoleMatch);
+            const isSelectable = !isPendiente;
 
             return (
               <div key={tarea.id} className="relative flex items-start gap-3">
@@ -85,20 +95,31 @@ export function TaskTimeline({ pasoNombre, tareas }: TaskTimelineProps) {
                   )}
                 </div>
 
-                {/* Tarjeta Informativa de la Tarea */}
+                {/* Tarjeta Informativa de la Tarea (Interactiva) */}
                 <div
+                  onClick={() => {
+                    if (isSelectable && onSelectTask) {
+                      onSelectTask(tarea);
+                    }
+                  }}
                   className={`flex-1 p-3.5 rounded-xl border transition-all ${
-                    isEnCurso
-                      ? isMeAction
-                        ? "bg-emerald-50/70 border-2 border-emerald-400/80 shadow-xs ring-2 ring-emerald-500/10"
-                        : "bg-blue-50/20 border-2 border-[#002855]/40 shadow-2xs"
-                      : "bg-white border-[#e5e7eb]"
+                    isSelectable ? "cursor-pointer" : "cursor-not-allowed opacity-75"
+                  } ${
+                    isSelected
+                      ? "ring-2 ring-[#002855] border-[#002855] shadow-md bg-blue-50/20"
+                      : isEnCurso
+                        ? isMeAction
+                          ? "bg-emerald-50/70 border-2 border-emerald-400/80 shadow-xs hover:border-emerald-500"
+                          : "bg-blue-50/20 border-2 border-[#002855]/40 shadow-2xs hover:border-[#002855]"
+                        : "bg-white border-[#e5e7eb] hover:border-[#cbd5e1]"
                   }`}
                 >
                   <div className="space-y-1">
-                    <p className="font-bold text-xs text-[#001B47] uppercase leading-snug">
-                      {tarea.nombre}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-bold text-xs text-[#001B47] uppercase leading-snug">
+                        {tarea.nombre}
+                      </p>
+                    </div>
                     {/* Rol institucional esperado */}
                     <p className="text-[11px] font-semibold text-[#64748b]">
                       {tarea.rolEsperado}

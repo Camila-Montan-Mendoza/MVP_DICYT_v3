@@ -24,6 +24,7 @@ function runTests() {
     id: "t1",
     pasoId: "p1",
     nombre: "Revisión presupuestaria",
+    rolEsperado: "Responsable de Presupuesto",
     rolResponsable: "Responsable de Presupuesto",
     usuarioAsignado: "Alan",
     estado: "COMPLETADO",

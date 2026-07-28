@@ -30,6 +30,7 @@ function TramiteWorkflowDetailContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tareasList, setTareasList] = useState<TareaWorkflow[]>([]);
+  const [selectedTareaId, setSelectedTareaId] = useState<string>("");
 
   useEffect(() => {
     cargarGrafoWorkflow(1).then(setGrafo);
@@ -70,7 +71,12 @@ function TramiteWorkflowDetailContent() {
 
       const tareas = await tramiteDBRepository.getTareasDelPaso(targetId);
       if (tareas && tareas.length > 0) {
-        setTareasList(tareas as TareaWorkflow[]);
+        const list = tareas as TareaWorkflow[];
+        setTareasList(list);
+        const activeTask = list.find((t) => t.estado === "EN_CURSO") || list[0];
+        if (activeTask) {
+          setSelectedTareaId(activeTask.id);
+        }
       }
     } catch (e: any) {
       setLoadError(e?.message || "Error al conectar con la base de datos.");
@@ -177,6 +183,12 @@ function TramiteWorkflowDetailContent() {
           };
         });
 
+  const selectedTarea =
+    tareasDelPaso.find((t) => t.id === selectedTareaId) ||
+    tareasDelPaso.find((t) => t.estado === "EN_CURSO") ||
+    tareasDelPaso[0] ||
+    null;
+
   return (
     <SigefiShell>
       <div className="space-y-6 max-w-6xl mx-auto pb-24">
@@ -254,13 +266,19 @@ function TramiteWorkflowDetailContent() {
             <TaskTimeline
               pasoNombre={activeStep.nombre}
               tareas={tareasDelPaso}
+              selectedTaskId={selectedTareaId || selectedTarea?.id}
+              onSelectTask={(tarea) => setSelectedTareaId(tarea.id)}
             />
           </div>
 
-          {/* Lado Derecho: Área Operativa Server-Driven (8 columnas) */}
+          {/* Lado Derecho: Área Operativa Basada en Strategy Pattern (8 columnas) */}
           <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-[#e5e7eb] shadow-2xs space-y-4 flex flex-col justify-between min-h-[420px]">
             <div className="space-y-4">
-              <InteractiveTaskWorkspace />
+              <InteractiveTaskWorkspace
+                selectedTarea={selectedTarea}
+                tramite={activeTramite}
+                onActionSuccess={loadTramite}
+              />
             </div>
           </div>
         </div>
