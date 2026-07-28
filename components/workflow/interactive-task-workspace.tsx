@@ -99,6 +99,46 @@ export function InteractiveTaskWorkspace({
 
   const isMeAction = isUserMatch || isRoleMatch;
 
+  const handleEjecutarTransicion = async (
+    idTransicion: number,
+    observaciones?: string,
+    datosExtra?: Record<string, any>
+  ) => {
+    try {
+      const res = await fetch(`/api/tramites/${tramite.id}/transicion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idTransicion,
+          observaciones,
+          datosExtra,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        return {
+          success: false,
+          message: data.message || "Error al procesar la transición.",
+        };
+      }
+
+      if (onActionSuccess) {
+        onActionSuccess();
+      }
+
+      return {
+        success: true,
+        message: data.message || "Transición ejecutada exitosamente.",
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        message: err.message || "Error de red al ejecutar la transición.",
+      };
+    }
+  };
+
   const TaskView = getTaskView(selectedTarea.id, isMeAction);
 
   return (
@@ -115,6 +155,7 @@ export function InteractiveTaskWorkspace({
         currentUser={currentUser}
         currentRole={currentRole}
         onActionSuccess={onActionSuccess}
+        ejecutarTransicion={handleEjecutarTransicion}
       />
     </Suspense>
   );

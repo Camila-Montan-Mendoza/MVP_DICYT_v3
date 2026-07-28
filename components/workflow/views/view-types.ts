@@ -12,4 +12,10 @@ export interface TaskViewProps {
   currentUser: string;
   currentRole: string;
   onActionSuccess?: () => void;
+  /** Helper para ejecutar transiciones/acciones de workflow desde la vista */
+  ejecutarTransicion?: (
+    idTransicion: number,
+    observaciones?: string,
+    datosExtra?: Record<string, any>
+  ) => Promise<{ success: boolean; message?: string }>;
 }

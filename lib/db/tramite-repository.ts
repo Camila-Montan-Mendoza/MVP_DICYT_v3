@@ -389,6 +389,18 @@ export class TramiteDBRepository {
         });
       }
 
+      // Acciones disponibles desde la tarea actual (transiciones asociadas al id_estado_origen)
+      const { data: transicionesActuales } = await this.supabase
+        .from("transicion_flujo")
+        .select("id, id_estado_destino, nombre_accion")
+        .eq("id_estado_origen", estadoActualId);
+
+      const accionesDisponibles = (transicionesActuales || []).map((t: any) => ({
+        idTransicion: t.id,
+        nombreAccion: t.nombre_accion,
+        idEstadoDestino: t.id_estado_destino,
+      }));
+
       // Tarea actual
       const actualUserInfo = usuarioPorEstadoAnterior.get(estadoActualId);
       const tareaActualItem = {
@@ -401,6 +413,7 @@ export class TramiteDBRepository {
           actualUserInfo?.rolReal || rolEsperadoPorEstado.get(estadoActualId) || "Sin rol asignado",
         estado: (rechazado ? "EN_CURSO" : "EN_CURSO") as "EN_CURSO",
         fechaCompletado: undefined as string | undefined,
+        accionesDisponibles,
       };
 
       // Tareas futuras

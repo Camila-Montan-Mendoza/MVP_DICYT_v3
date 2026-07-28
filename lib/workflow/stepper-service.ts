@@ -10,6 +10,12 @@ export interface PasoWorkflow {
   estado: "COMPLETADO" | "EN_CURSO" | "PENDIENTE";
 }
 
+export interface AccionTransicion {
+  idTransicion: number;
+  nombreAccion: string;
+  idEstadoDestino: number;
+}
+
 export interface TareaWorkflow {
   id: string;
   pasoId: string;
@@ -20,8 +26,10 @@ export interface TareaWorkflow {
   usuarioAsignado: string;
   /** Rol real del usuario responsable (de rol_usuario) */
   rolResponsable: string;
-  estado: "COMPLETADO" | "EN_CURSO" | "PENDIENTE";
+  estado: "COMPLETADO" | "EN_CURSO" | "PENDIENTE" | "RECHAZADO";
   fechaCompletado?: string;
+  /** Acciones/transiciones disponibles que se pueden ejecutar desde esta tarea */
+  accionesDisponibles?: AccionTransicion[];
 }
 
 export interface DetalleTramiteWorkflow {
