@@ -8,19 +8,14 @@ import { WorkflowStepper } from "@/components/workflow/workflow-stepper";
 import { PasoWorkflow, TareaWorkflow } from "@/lib/workflow/stepper-service";
 import { TaskTimeline } from "@/components/workflow/task-timeline";
 import { InteractiveTaskWorkspace } from "@/components/workflow/interactive-task-workspace";
-import {
-  tramiteDBRepository,
-  TramiteDBItem,
-} from "@/lib/db/tramite-repository";
+import { tramiteDBRepository, TramiteDBItem } from "@/lib/db/tramite-repository";
 import { cargarGrafoWorkflow } from "@/lib/workflow/workflow-db-service";
 import type { NodoWorkflow } from "@/lib/workflow/compra-menor-strategy";
 import { ArrowLeft, CheckCircle2, Clock, Stamp } from "lucide-react";
 
 function TramiteWorkflowDetailContent() {
   const routeParams = useParams();
-  const rawId = Array.isArray(routeParams?.id)
-    ? routeParams.id[0]
-    : routeParams?.id;
+  const rawId = Array.isArray(routeParams?.id) ? routeParams.id[0] : routeParams?.id;
   const tramiteId = rawId!;
 
   const [tramite, setTramite] = useState<TramiteDBItem | undefined>();
@@ -50,9 +45,7 @@ function TramiteWorkflowDetailContent() {
       }
 
       if (!targetTramite) {
-        setLoadError(
-          `No se encontró ningún trámite registrado en la base de datos.`,
-        );
+        setLoadError(`No se encontró ningún trámite registrado en la base de datos.`);
         setIsLoading(false);
         return;
       }
@@ -64,9 +57,7 @@ function TramiteWorkflowDetailContent() {
       if (pasos && pasos.length > 0) {
         setPasosList(pasos);
       } else {
-        setLoadError(
-          "No se encontraron pasos de flujo registrados en la base de datos.",
-        );
+        setLoadError("No se encontraron pasos de flujo registrados en la base de datos.");
       }
 
       const tareas = await tramiteDBRepository.getTareasDelPaso(targetId);
@@ -97,8 +88,7 @@ function TramiteWorkflowDetailContent() {
     }
   }, [tramite, grafo]);
 
-  const currentStep =
-    pasosList.find((p) => p.numero === tramite?.pasoNumero) || pasosList[0];
+  const currentStep = pasosList.find((p) => p.numero === tramite?.pasoNumero) || pasosList[0];
   const [activeStepId, setActiveStepId] = useState<string>("");
 
   useEffect(() => {
@@ -107,8 +97,7 @@ function TramiteWorkflowDetailContent() {
     }
   }, [currentStep]);
 
-  const activeStep =
-    pasosList.find((p) => p.id === activeStepId) || currentStep;
+  const activeStep = pasosList.find((p) => p.id === activeStepId) || currentStep;
 
   if (isLoading) {
     return (
@@ -149,9 +138,7 @@ function TramiteWorkflowDetailContent() {
 
   const activeTramite = tramite;
 
-  const nodosDelPaso = Object.values(grafo).filter(
-    (n) => n.pasoNumero === activeStep.numero,
-  );
+  const nodosDelPaso = Object.values(grafo).filter((n) => n.pasoNumero === activeStep.numero);
 
   const nodoActualResuelto = nodoActual || (Object.values(grafo)[0] ?? null);
 
@@ -160,9 +147,7 @@ function TramiteWorkflowDetailContent() {
       ? tareasList
       : nodosDelPaso.map((n) => {
           const nodoId = parseInt(n.id, 10);
-          const currentId = nodoActualResuelto
-            ? parseInt(nodoActualResuelto.id, 10)
-            : 1;
+          const currentId = nodoActualResuelto ? parseInt(nodoActualResuelto.id, 10) : 1;
           const isCurrent = nodoId === currentId;
           const isCompleted =
             activeTramite.pasoNumero > n.pasoNumero ||
@@ -175,11 +160,7 @@ function TramiteWorkflowDetailContent() {
             rolEsperado: n.actorNombreRol,
             rolResponsable: n.actorNombreRol,
             usuarioAsignado: n.actorNombreRol,
-            estado: isCurrent
-              ? "EN_CURSO"
-              : isCompleted
-                ? "COMPLETADO"
-                : "PENDIENTE",
+            estado: isCurrent ? "EN_CURSO" : isCompleted ? "COMPLETADO" : "PENDIENTE",
           };
         });
 
@@ -211,10 +192,8 @@ function TramiteWorkflowDetailContent() {
                 Trámite Nº {activeTramite.codigoSeguimiento}
               </h1>
               <p className="text-xs text-[#64748b] mt-0.5">
-                <strong className="text-[#001B47]">Proyecto:</strong>{" "}
-                {activeTramite.proyecto} |{" "}
-                <strong className="text-[#001B47]">Solicitante:</strong>{" "}
-                {activeTramite.creador}
+                <strong className="text-[#001B47]">Proyecto:</strong> {activeTramite.proyecto} |{" "}
+                <strong className="text-[#001B47]">Solicitante:</strong> {activeTramite.creador}
               </p>
             </div>
 
@@ -246,8 +225,8 @@ function TramiteWorkflowDetailContent() {
                 <Stamp className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>
                   Sello Preventivo Estampado:{" "}
-                  <strong>{activeTramite.selloPreventivo.correlativo}</strong>{" "}
-                  por {activeTramite.selloPreventivo.usuarioAprobador}
+                  <strong>{activeTramite.selloPreventivo.correlativo}</strong> por{" "}
+                  {activeTramite.selloPreventivo.usuarioAprobador}
                 </span>
               </div>
             )}

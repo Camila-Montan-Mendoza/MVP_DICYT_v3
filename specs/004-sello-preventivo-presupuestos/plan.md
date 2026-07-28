@@ -28,19 +28,23 @@
 ## Phase 1: Design Artifacts
 
 ### 1. Data Model (`data-model.md`)
+
 - `PartidaPresupuestariaCheck`: Entity representing budget availability (codigoPartida, denominacion, montoRequerido, saldoDisponible, suficiente: boolean).
 - `SelloPreventivo`: Entity representing the preventive seal (correlativo, fechaEmision, usuarioAprobador, observaciones?: string).
 
 ### 2. Interface Contracts (`contracts/`)
+
 - `lib/budget/preventivo-service.ts`: API service for checking partida budget availability and issuing preventive seals.
 - `components/budget/revision-preventiva-card.tsx`: Operational UI card component for budget verification and stamping.
 
 ### 3. Quickstart Validation (`quickstart.md`)
+
 - Runnable manual & automated test instructions proving budget availability checks, preventive seal generation, and observation workflow.
 
 ---
 
 ## Plan Status
+
 - [x] Phase 0: Research & Decisions complete (`research.md`)
 - [x] Phase 1: Design Artifacts generated (`data-model.md`, `quickstart.md`)
 - [x] Targeted Unit Testing: `tests/unit/preventivo.test.ts`

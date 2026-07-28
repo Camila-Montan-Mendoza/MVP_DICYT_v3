@@ -8,7 +8,7 @@
 ## 1. Architectural Abstraction of Trámites
 
 - **Decision**: Define a single, un-hardcoded interface `TramiteConsolidado` in `lib/tramites/consolidated-service.ts`.
-- **Rationale**: The user requirements explicitly specify: *"Abstracción de Trámites: El sistema no hardcodea tipos de trámites específicos en la narrativa; la bandeja consume un servicio unificado capaz de renderizar cualquier tipo de trámite (compras, fondos, servicios, etc.) presente o futuro."*
+- **Rationale**: The user requirements explicitly specify: _"Abstracción de Trámites: El sistema no hardcodea tipos de trámites específicos en la narrativa; la bandeja consume un servicio unificado capaz de renderizar cualquier tipo de trámite (compras, fondos, servicios, etc.) presente o futuro."_
 - **Alternatives Considered**: Creating separate database tables and UI components for each requisition category. Rejected because it fragments the inbox and requires code changes whenever a new administrative process type is introduced.
 
 ---

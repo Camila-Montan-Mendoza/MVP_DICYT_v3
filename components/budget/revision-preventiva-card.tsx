@@ -63,7 +63,8 @@ export function RevisionPreventivaCard({
             SELLO PREVENTIVO EMITIDO — {sello.correlativo}
           </div>
           <p className="text-xs text-emerald-700">
-            Reserva Presupuestaria Confirmada por <strong className="font-bold">{sello.usuarioAprobador}</strong>
+            Reserva Presupuestaria Confirmada por{" "}
+            <strong className="font-bold">{sello.usuarioAprobador}</strong>
           </p>
           <p className="text-[11px] font-mono text-emerald-600">
             Fecha/Hora: {new Date(sello.fechaEmision).toLocaleString("es-BO")}
@@ -75,8 +76,12 @@ export function RevisionPreventivaCard({
             <AlertOctagon className="w-4 h-4 text-red-600" />
             Trámite Observado por Presupuestos
           </p>
-          <p><strong>Observación:</strong> {observacionTexto}</p>
-          <p className="text-[10px] text-red-600 italic">El trámite ha sido devuelto a la bandeja del Investigador Principal.</p>
+          <p>
+            <strong>Observación:</strong> {observacionTexto}
+          </p>
+          <p className="text-[10px] text-red-600 italic">
+            El trámite ha sido devuelto a la bandeja del Investigador Principal.
+          </p>
         </div>
       ) : (
         <>

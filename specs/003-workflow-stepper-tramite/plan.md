@@ -20,26 +20,30 @@
 
 - **Decision**: No global single state; progress is derived from `PasoWorkflow[]` and `TareaWorkflow[]`.
 - **Decision**: Stepper Horizontal Component at top of page, vertical timeline of tasks on the left column, and open workspace container on the right column for operational forms.
-- **Decision**: Read-only informative Stepper component displaying completion timestamp, assigned role/user, and intervention badge (*"Acción requerida por tu parte"* vs *"En espera de acción por parte de [Nombre / Rol]"*).
+- **Decision**: Read-only informative Stepper component displaying completion timestamp, assigned role/user, and intervention badge (_"Acción requerida por tu parte"_ vs _"En espera de acción por parte de [Nombre / Rol]"_).
 
 ---
 
 ## Phase 1: Design Artifacts
 
 ### 1. Data Model (`data-model.md`)
+
 - `PasoWorkflow`: Macro step entity (id, numero, nombre, estado: `COMPLETADO` | `EN_CURSO` | `PENDIENTE`).
 - `TareaWorkflow`: Granular task entity (id, pasoId, nombre, rolResponsable, usuarioAsignado, estado: `COMPLETADO` | `EN_CURSO` | `PENDIENTE`, fechaCompletado?: string).
 
 ### 2. Interface Contracts (`contracts/`)
+
 - `components/workflow/workflow-stepper.tsx`: Reusable Stepper Horizontal component.
 - `components/workflow/task-timeline.tsx`: Vertical timeline component for granular tasks.
 
 ### 3. Quickstart Validation (`quickstart.md`)
+
 - Runnable manual & automated test instructions proving step progress rendering, task timestamps, and user intervention badge resolution.
 
 ---
 
 ## Plan Status
+
 - [x] Phase 0: Research & Decisions complete (`research.md`)
 - [x] Phase 1: Design Artifacts generated (`data-model.md`, `quickstart.md`)
 - [x] Targeted Unit Testing: `tests/unit/workflow-stepper.test.ts`

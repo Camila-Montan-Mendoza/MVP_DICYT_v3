@@ -78,7 +78,7 @@ function resolveLoginEmail(usernameOrEmail: string): string {
 
 export async function loginWithUsername(
   usernameOrEmail: string,
-  password: string,
+  password: string
 ): Promise<string | null> {
   const supabase = createClient();
   const email = resolveLoginEmail(usernameOrEmail);
@@ -96,9 +96,7 @@ export async function getCurrentUser(): Promise<UsuarioSchema | null> {
 
     const { data, error } = await supabase
       .from("usuario")
-      .select(
-        "id, username, rol_usuario:rol_usuario!rol_usuario_id_usuario_fkey(rol(id, nombre))",
-      )
+      .select("id, username, rol_usuario:rol_usuario!rol_usuario_id_usuario_fkey(rol(id, nombre))")
       .eq("auth_user_id", authUser.id)
       .maybeSingle();
 
@@ -108,7 +106,7 @@ export async function getCurrentUser(): Promise<UsuarioSchema | null> {
       const { data: fallbackData } = await supabase
         .from("usuario")
         .select(
-          "id, username, rol_usuario:rol_usuario!rol_usuario_id_usuario_fkey(rol(id, nombre))",
+          "id, username, rol_usuario:rol_usuario!rol_usuario_id_usuario_fkey(rol(id, nombre))"
         )
         .ilike("username", `%${usernamePrefix}%`)
         .maybeSingle();
@@ -116,7 +114,7 @@ export async function getCurrentUser(): Promise<UsuarioSchema | null> {
     }
 
     const option = LOGIN_OPTIONS.find(
-      (o) => o.username === userRow?.username || o.email === authUser.email,
+      (o) => o.username === userRow?.username || o.email === authUser.email
     );
 
     const roles: RolSchema[] =
@@ -134,12 +132,10 @@ export async function getCurrentUser(): Promise<UsuarioSchema | null> {
     return {
       id: userRow?.id ?? 1,
       username: userRow?.username ?? option?.username ?? "usuario",
-      nombreCompleto:
-        option?.nombreCompleto ?? userRow?.username ?? "Usuario SIGEFI",
+      nombreCompleto: option?.nombreCompleto ?? userRow?.username ?? "Usuario SIGEFI",
       email: authUser.email ?? "",
       roles,
-      rolActivo:
-        roles[0]?.nombre ?? option?.rolLabel ?? "Investigador Principal",
+      rolActivo: roles[0]?.nombre ?? option?.rolLabel ?? "Investigador Principal",
     };
   } catch {
     return null;

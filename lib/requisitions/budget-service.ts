@@ -9,7 +9,10 @@ export interface BudgetLookupResult {
 /**
  * Servicio de consulta de partidas presupuestarias desde el Backend / Supabase DB.
  */
-export async function lookupBudgetLine(description: string, category: string): Promise<BudgetLookupResult> {
+export async function lookupBudgetLine(
+  description: string,
+  category: string
+): Promise<BudgetLookupResult> {
   const DEFAULT_FALLBACK: BudgetLookupResult = {
     found: false,
     partidaCode: "Pendiente de asignación",

@@ -28,7 +28,10 @@ export function RequisitionContainer({
     return (
       <div className="p-8 text-center bg-card border border-border rounded-xl text-muted-foreground">
         <p className="font-medium text-sm">Aún no hay ítems agregados a la solicitud.</p>
-        <p className="text-xs mt-1">Utilice el formulario de arriba para agregar ítems de Materiales, Activos Fijos o Servicios.</p>
+        <p className="text-xs mt-1">
+          Utilice el formulario de arriba para agregar ítems de Materiales, Activos Fijos o
+          Servicios.
+        </p>
       </div>
     );
   }
@@ -69,8 +72,8 @@ export function RequisitionContainer({
             {t.categoria === "MATERIAL"
               ? "Materiales"
               : t.categoria === "ACTIVO_FIJO"
-              ? "Activos Fijos"
-              : "Servicios"}{" "}
+                ? "Activos Fijos"
+                : "Servicios"}{" "}
             ({t.items.length})
           </button>
         ))}

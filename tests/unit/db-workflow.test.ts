@@ -18,12 +18,18 @@ console.log("=== Running Unit Tests: Workflow DB Service Exports ===");
 
 // Test 1: All functions are exported and callable
 function testExports() {
-  if (typeof cargarGrafoWorkflow !== "function") throw new Error("FAILED: cargarGrafoWorkflow not exported");
-  if (typeof cargarNodosDelPaso !== "function") throw new Error("FAILED: cargarNodosDelPaso not exported");
-  if (typeof obtenerNodoPorId !== "function") throw new Error("FAILED: obtenerNodoPorId not exported");
-  if (typeof cargarTransicionesDesdeNodo !== "function") throw new Error("FAILED: cargarTransicionesDesdeNodo not exported");
-  if (typeof cargarPasosFlujo !== "function") throw new Error("FAILED: cargarPasosFlujo not exported");
-  if (typeof invalidarCacheWorkflow !== "function") throw new Error("FAILED: invalidarCacheWorkflow not exported");
+  if (typeof cargarGrafoWorkflow !== "function")
+    throw new Error("FAILED: cargarGrafoWorkflow not exported");
+  if (typeof cargarNodosDelPaso !== "function")
+    throw new Error("FAILED: cargarNodosDelPaso not exported");
+  if (typeof obtenerNodoPorId !== "function")
+    throw new Error("FAILED: obtenerNodoPorId not exported");
+  if (typeof cargarTransicionesDesdeNodo !== "function")
+    throw new Error("FAILED: cargarTransicionesDesdeNodo not exported");
+  if (typeof cargarPasosFlujo !== "function")
+    throw new Error("FAILED: cargarPasosFlujo not exported");
+  if (typeof invalidarCacheWorkflow !== "function")
+    throw new Error("FAILED: invalidarCacheWorkflow not exported");
   console.log("✔ Test 1: All 6 workflow-db-service functions are exported PASSED");
 }
 

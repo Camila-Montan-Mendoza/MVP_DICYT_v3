@@ -64,17 +64,12 @@ export class TramiteDBRepository {
           proyecto:proyecto!tramite_id_proyecto_fkey ( nombre, codigo ),
           tipo_tramite:tipo_tramite!tramite_id_tipo_tramite_fkey ( nombre ),
           estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre ) )
-        `,
+        `
         )
         .order("id", { ascending: false });
 
       if (error) {
-        console.error(
-          "[Supabase Tramites Query Error]:",
-          error.message,
-          error.details,
-          error.hint,
-        );
+        console.error("[Supabase Tramites Query Error]:", error.message, error.details, error.hint);
         return [];
       }
 
@@ -94,30 +89,20 @@ export class TramiteDBRepository {
           codigoSeguimiento: `TR-2026-${String(t.id).padStart(3, "0")}`,
           proyecto: t.proyecto?.nombre || "Proyecto DICYT",
           tipoTramite:
-            t.tipo_tramite?.nombre ||
-            "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
+            t.tipo_tramite?.nombre || "Compra Menor de 1.001 Bs. a 20.000 Bs. de Material",
           categoria: "MATERIAL",
-          fecha: new Date(t.fecha_creacion || Date.now()).toLocaleDateString(
-            "es-BO",
-            {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            },
-          ),
+          fecha: new Date(t.fecha_creacion || Date.now()).toLocaleDateString("es-BO", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
           fechaISO: t.fecha_creacion || new Date().toISOString(),
           creador: "Dr. Daniel Pérez",
           justificacion:
-            t.justificacion ||
-            "Adquisición de insumos y reactivos para investigación.",
+            t.justificacion || "Adquisición de insumos y reactivos para investigación.",
           idEstadoTramite: dbIdEstado,
           estadoNombre: estadoObj.nombre || "Estado desconocido",
-          estado:
-            esFinal && !t.rechazado
-              ? "Aprobado"
-              : t.rechazado
-                ? "Rechazado"
-                : "En proceso",
+          estado: esFinal && !t.rechazado ? "Aprobado" : t.rechazado ? "Rechazado" : "En proceso",
           requiereAccion: !esFinal && !t.rechazado,
           pasoNumero: pasoObj.orden || 1,
           pasoNombre: pasoObj.nombre || "Solicitud",
@@ -155,7 +140,7 @@ export class TramiteDBRepository {
             id_paso_flujo,
             paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre )
           )
-        `,
+        `
         )
         .eq("id", tramiteIdNum)
         .maybeSingle();
@@ -249,7 +234,7 @@ export class TramiteDBRepository {
             nombre,
             paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre )
           )
-        `,
+        `
         )
         .eq("id", tramiteIdNum)
         .maybeSingle();
@@ -280,7 +265,7 @@ export class TramiteDBRepository {
               rol:rol ( nombre )
             )
           )
-        `,
+        `
         )
         .eq("id_tramite", tramiteIdNum)
         .order("fecha_cambio", { ascending: true });
@@ -297,14 +282,10 @@ export class TramiteDBRepository {
         for (const h of historial as any[]) {
           const u = h.usuario;
           const username = u?.username || "Sistema";
-          const rolReal =
-            u?.rol_usuario?.[0]?.rol?.nombre || "Sin rol asignado";
+          const rolReal = u?.rol_usuario?.[0]?.rol?.nombre || "Sin rol asignado";
           const fecha = h.fecha_cambio;
 
-          if (
-            h.id_estado_anterior &&
-            !usuarioPorEstadoAnterior.has(h.id_estado_anterior)
-          ) {
+          if (h.id_estado_anterior && !usuarioPorEstadoAnterior.has(h.id_estado_anterior)) {
             usuarioPorEstadoAnterior.set(h.id_estado_anterior, {
               username,
               rolReal,
@@ -320,16 +301,11 @@ export class TramiteDBRepository {
       // 3. ROL ESPERADO por estado (de rol_estado_paso_flujo → rol)
       const { data: rolesEstado } = await this.supabase
         .from("rol_estado_paso_flujo")
-        .select(
-          "id_estado_paso_flujo, rol:rol!rol_estado_paso_flujo_id_rol_fkey ( nombre )",
-        );
+        .select("id_estado_paso_flujo, rol:rol!rol_estado_paso_flujo_id_rol_fkey ( nombre )");
 
       const rolEsperadoPorEstado = new Map<number, string>();
       (rolesEstado || []).forEach((re: any) => {
-        rolEsperadoPorEstado.set(
-          re.id_estado_paso_flujo,
-          re.rol?.nombre || "Sin rol asignado",
-        );
+        rolEsperadoPorEstado.set(re.id_estado_paso_flujo, re.rol?.nombre || "Sin rol asignado");
       });
 
       // 4. BFS: Ruta más corta hacia siguiente paso o nodo final
@@ -339,7 +315,7 @@ export class TramiteDBRepository {
           `
           id, id_paso_flujo, nombre, es_final,
           paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, id_tipo_tramite )
-        `,
+        `
         )
         .eq("paso_flujo.id_tipo_tramite", idTipoTramite || 1);
 
@@ -407,9 +383,7 @@ export class TramiteDBRepository {
           rolEsperado: rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
           usuarioAsignado: userInfo?.username || "Sistema",
           rolResponsable:
-            userInfo?.rolReal ||
-            rolEsperadoPorEstado.get(info.id) ||
-            "Sin rol asignado",
+            userInfo?.rolReal || rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
           estado: "COMPLETADO" as const,
           fechaCompletado: userInfo?.fechaCompletado,
         });
@@ -421,13 +395,10 @@ export class TramiteDBRepository {
         id: String(estadoActualId),
         pasoId: `p${pasoActualId}`,
         nombre: estadoObj.nombre || "Tarea Actual",
-        rolEsperado:
-          rolEsperadoPorEstado.get(estadoActualId) || "Sin rol asignado",
+        rolEsperado: rolEsperadoPorEstado.get(estadoActualId) || "Sin rol asignado",
         usuarioAsignado: actualUserInfo?.username || "—",
         rolResponsable:
-          actualUserInfo?.rolReal ||
-          rolEsperadoPorEstado.get(estadoActualId) ||
-          "Sin rol asignado",
+          actualUserInfo?.rolReal || rolEsperadoPorEstado.get(estadoActualId) || "Sin rol asignado",
         estado: (rechazado ? "EN_CURSO" : "EN_CURSO") as "EN_CURSO",
         fechaCompletado: undefined as string | undefined,
       };
@@ -470,14 +441,11 @@ export class TramiteDBRepository {
   /**
    * Fetch single trámite by string ID or numeric ID
    */
-  public async getTramiteById(
-    idOrCode: string,
-  ): Promise<TramiteDBItem | undefined> {
+  public async getTramiteById(idOrCode: string): Promise<TramiteDBItem | undefined> {
     const list = await this.getTramites();
     return list.find(
       (t) =>
-        String(t.id) === idOrCode ||
-        t.codigoSeguimiento.toLowerCase() === idOrCode.toLowerCase(),
+        String(t.id) === idOrCode || t.codigoSeguimiento.toLowerCase() === idOrCode.toLowerCase()
     );
   }
 
@@ -501,8 +469,7 @@ export class TramiteDBRepository {
         .single();
 
       const estadoInicialId = (estadoInicial as any)?.id || 1;
-      const estadoInicialNombre =
-        (estadoInicial as any)?.nombre || "Estado inicial";
+      const estadoInicialNombre = (estadoInicial as any)?.nombre || "Estado inicial";
       const pasoInicial = (estadoInicial as any)?.paso_flujo;
 
       const { data: newRow, error } = await this.supabase

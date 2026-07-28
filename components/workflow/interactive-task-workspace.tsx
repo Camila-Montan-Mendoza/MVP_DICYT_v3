@@ -37,24 +37,18 @@ export function InteractiveTaskWorkspace({
           <span className="text-xs font-bold text-[#002855] bg-[#002855]/10 px-2.5 py-1 rounded-md">
             Tarea {selectedTarea.id}
           </span>
-          <h3 className="text-sm font-bold text-[#001B47]">
-            {selectedTarea.nombre}
-          </h3>
+          <h3 className="text-sm font-bold text-[#001B47]">{selectedTarea.nombre}</h3>
         </div>
 
         <div className="p-4 bg-[#f0fdf4] border border-[#86efac] rounded-lg space-y-2">
-          <p className="text-xs font-medium text-[#166534]">
-            ✓ Tarea completada
-          </p>
+          <p className="text-xs font-medium text-[#166534]">✓ Tarea completada</p>
           {selectedTarea.fechaCompletado && (
             <p className="text-[11px] text-[#16a34a]">
               Completada el {selectedTarea.fechaCompletado}
             </p>
           )}
           {selectedTarea.usuarioAsignado && selectedTarea.usuarioAsignado !== "—" && (
-            <p className="text-[11px] text-[#16a34a]">
-              Por: {selectedTarea.usuarioAsignado}
-            </p>
+            <p className="text-[11px] text-[#16a34a]">Por: {selectedTarea.usuarioAsignado}</p>
           )}
         </div>
 
@@ -82,8 +76,8 @@ export function InteractiveTaskWorkspace({
       <div className="p-8 text-center text-xs text-[#64748b] bg-[#f8fafc] border border-[#e2e8f0] rounded-xl space-y-2">
         <p className="font-bold text-[#001B47]">Etapa Pendiente (Futura)</p>
         <p className="text-[11px] text-[#64748b]">
-          Esta tarea no ha sido iniciada aún. Estará disponible para
-          procesamiento una vez que se completen los pasos anteriores.
+          Esta tarea no ha sido iniciada aún. Estará disponible para procesamiento una vez que se
+          completen los pasos anteriores.
         </p>
       </div>
     );
@@ -94,20 +88,14 @@ export function InteractiveTaskWorkspace({
     Boolean(currentUser) &&
     Boolean(selectedTarea.usuarioAsignado) &&
     selectedTarea.usuarioAsignado !== "—" &&
-    selectedTarea.usuarioAsignado
-      .toLowerCase()
-      .includes(currentUser.toLowerCase());
+    selectedTarea.usuarioAsignado.toLowerCase().includes(currentUser.toLowerCase());
 
   const isRoleMatch =
     Boolean(currentRole) &&
     ((Boolean(selectedTarea.rolEsperado) &&
-      selectedTarea.rolEsperado
-        .toLowerCase()
-        .includes(currentRole.toLowerCase())) ||
+      selectedTarea.rolEsperado.toLowerCase().includes(currentRole.toLowerCase())) ||
       (Boolean(selectedTarea.rolResponsable) &&
-        selectedTarea.rolResponsable
-          .toLowerCase()
-          .includes(currentRole.toLowerCase())));
+        selectedTarea.rolResponsable.toLowerCase().includes(currentRole.toLowerCase())));
 
   const isMeAction = isUserMatch || isRoleMatch;
 

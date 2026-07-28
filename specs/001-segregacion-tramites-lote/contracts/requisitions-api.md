@@ -1,7 +1,7 @@
 # Contracts: API de Trámites y Segregación de Compras
 
 **Feature**: `001-segregacion-tramites-lote`  
-**Date**: 2026-07-27  
+**Date**: 2026-07-27
 
 ## Endpoints
 
@@ -10,14 +10,13 @@
 Envia un único trámite validado al flujo de aprobación.
 
 #### Request Body
+
 ```json
 {
   "id": "tramite-mat-001",
   "categoria": "MATERIAL",
   "justificacion": "Materiales para laboratorio de química",
-  "archivosRespaldo": [
-    { "nombre": "proforma_cotizacion.pdf", "path": "uploads/proforma_01.pdf" }
-  ],
+  "archivosRespaldo": [{ "nombre": "proforma_cotizacion.pdf", "path": "uploads/proforma_01.pdf" }],
   "items": [
     {
       "id": "item-1",
@@ -25,8 +24,8 @@ Envia un único trámite validado al flujo de aprobación.
       "categoria": "MATERIAL",
       "cantidad": 10,
       "unidad": "Frasco",
-      "precioUnitario": 150.00,
-      "precioReferencial": 1500.00,
+      "precioUnitario": 150.0,
+      "precioReferencial": 1500.0,
       "partidaPresupuestaria": "34110",
       "documentotecnicoPath": "uploads/et_reactivo_a.pdf"
     }
@@ -35,6 +34,7 @@ Envia un único trámite validado al flujo de aprobación.
 ```
 
 #### Response (200 OK)
+
 ```json
 {
   "success": true,
@@ -52,17 +52,19 @@ Envia un único trámite validado al flujo de aprobación.
 Procesa múltiples trámites en lote de forma resiliente (non-blocking).
 
 #### Request Body
+
 ```json
 {
   "tramites": [
-    { /* Objeto TramiteSolicitud 1 */ },
-    { /* Objeto TramiteSolicitud 2 */ },
-    { /* Objeto TramiteSolicitud 3 */ }
+    {/* Objeto TramiteSolicitud 1 */},
+    {/* Objeto TramiteSolicitud 2 */},
+    {/* Objeto TramiteSolicitud 3 */}
   ]
 }
 ```
 
 #### Response (200 OK - Resilient Result)
+
 ```json
 {
   "tramitesExitosos": [
@@ -89,6 +91,7 @@ Procesa múltiples trámites en lote de forma resiliente (non-blocking).
 Consulta el servicio externo para sugerir la partida presupuestaria.
 
 #### Response (200 OK - Encontrado)
+
 ```json
 {
   "found": true,
@@ -98,6 +101,7 @@ Consulta el servicio externo para sugerir la partida presupuestaria.
 ```
 
 #### Response (200 OK - No encontrado / Fallo de servicio)
+
 ```json
 {
   "found": false,

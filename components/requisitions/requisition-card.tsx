@@ -82,7 +82,9 @@ export function RequisitionCard({
   return (
     <div
       className={`bg-card text-card-foreground rounded-xl border transition-all ${
-        localErrors.length > 0 ? "border-destructive/80 shadow-md ring-1 ring-destructive/30" : "border-border shadow-sm"
+        localErrors.length > 0
+          ? "border-destructive/80 shadow-md ring-1 ring-destructive/30"
+          : "border-border shadow-sm"
       }`}
     >
       {/* Banner de Cabecera por Trámite */}

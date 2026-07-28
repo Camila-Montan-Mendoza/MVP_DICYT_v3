@@ -30,9 +30,7 @@ export function TaskTimeline({
       </h3>
 
       {tareas.length === 0 ? (
-        <p className="text-xs text-[#9ca3af] italic p-3">
-          Sin tareas registradas para este paso.
-        </p>
+        <p className="text-xs text-[#9ca3af] italic p-3">Sin tareas registradas para este paso.</p>
       ) : (
         <div className="relative pl-6 space-y-4">
           {tareas.map((tarea, index) => {
@@ -46,20 +44,14 @@ export function TaskTimeline({
               Boolean(currentUser) &&
               tarea.usuarioAsignado &&
               tarea.usuarioAsignado !== "—" &&
-              tarea.usuarioAsignado
-                .toLowerCase()
-                .includes(currentUser.toLowerCase());
+              tarea.usuarioAsignado.toLowerCase().includes(currentUser.toLowerCase());
 
             const isRoleMatch =
               Boolean(currentRole) &&
               ((tarea.rolEsperado &&
-                tarea.rolEsperado
-                  .toLowerCase()
-                  .includes(currentRole.toLowerCase())) ||
+                tarea.rolEsperado.toLowerCase().includes(currentRole.toLowerCase())) ||
                 (tarea.rolResponsable &&
-                  tarea.rolResponsable
-                    .toLowerCase()
-                    .includes(currentRole.toLowerCase())));
+                  tarea.rolResponsable.toLowerCase().includes(currentRole.toLowerCase())));
 
             const isMeAction = isEnCurso && (isUserMatch || isRoleMatch);
             const isSelectable = !isPendiente;
@@ -121,36 +113,30 @@ export function TaskTimeline({
                       </p>
                     </div>
                     {/* Rol institucional esperado */}
-                    <p className="text-[11px] font-semibold text-[#64748b]">
-                      {tarea.rolEsperado}
-                    </p>
+                    <p className="text-[11px] font-semibold text-[#64748b]">{tarea.rolEsperado}</p>
                     {/* Usuario real + su rol */}
                     {tarea.usuarioAsignado && tarea.usuarioAsignado !== "—" && (
                       <p className="text-[11px] text-[#2c3e50] font-medium flex items-center gap-1">
                         <UserCheck className="w-3 h-3 text-[#002855]" />
                         {tarea.usuarioAsignado}
-                        {tarea.rolResponsable &&
-                          tarea.rolResponsable !== tarea.rolEsperado && (
-                            <span className="text-[10px] text-[#94a3b8] font-normal">
-                              ({tarea.rolResponsable})
-                            </span>
-                          )}
+                        {tarea.rolResponsable && tarea.rolResponsable !== tarea.rolEsperado && (
+                          <span className="text-[10px] text-[#94a3b8] font-normal">
+                            ({tarea.rolResponsable})
+                          </span>
+                        )}
                       </p>
                     )}
 
                     {/* Fecha de Finalización para Tareas Completadas */}
                     {isCompletado && tarea.fechaCompletado && (
                       <p className="text-[10px] font-mono text-[#64748b] pt-0.5">
-                        {new Date(tarea.fechaCompletado).toLocaleString(
-                          "es-BO",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          },
-                        )}
+                        {new Date(tarea.fechaCompletado).toLocaleString("es-BO", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
                     )}
                   </div>

@@ -17,27 +17,21 @@ export default function GenericFallbackView({ tarea }: TaskViewProps) {
       </div>
 
       <div className="p-4 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg space-y-2">
-        <p className="text-xs font-medium text-[#64748b]">
-          Vista pendiente de implementación
-        </p>
+        <p className="text-xs font-medium text-[#64748b]">Vista pendiente de implementación</p>
         <p className="text-[11px] text-[#94a3b8]">
-          Este espacio de trabajo será personalizado próximamente con los
-          formularios y acciones específicas para esta tarea del flujo.
+          Este espacio de trabajo será personalizado próximamente con los formularios y acciones
+          específicas para esta tarea del flujo.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-[11px]">
         <div className="p-3 bg-[#f1f5f9] rounded-lg">
           <span className="text-[#94a3b8] block mb-1">Rol esperado</span>
-          <span className="text-[#334155] font-medium">
-            {tarea.rolEsperado || "—"}
-          </span>
+          <span className="text-[#334155] font-medium">{tarea.rolEsperado || "—"}</span>
         </div>
         <div className="p-3 bg-[#f1f5f9] rounded-lg">
           <span className="text-[#94a3b8] block mb-1">Asignado a</span>
-          <span className="text-[#334155] font-medium">
-            {tarea.usuarioAsignado || "—"}
-          </span>
+          <span className="text-[#334155] font-medium">{tarea.usuarioAsignado || "—"}</span>
         </div>
       </div>
     </div>

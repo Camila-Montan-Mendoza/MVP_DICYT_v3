@@ -10,7 +10,7 @@
 
 ---
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 <!--
   MVP & TESTING NOTE: This project is an MVP for fast validation.
@@ -88,7 +88,7 @@ Como Investigador, deseo presionar el botón "Enviar Trámite" de un formulario 
 
 ---
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -106,7 +106,7 @@ Como Investigador, deseo presionar el botón "Enviar Trámite" de un formulario 
 
 ---
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

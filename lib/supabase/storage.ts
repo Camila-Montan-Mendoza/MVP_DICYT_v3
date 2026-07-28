@@ -12,7 +12,10 @@ export interface UploadResult {
 /**
  * Helper to upload attachment files (ET, TDR, proformas) to Supabase Storage or mock storage.
  */
-export async function uploadAttachmentFile(file: File, folder: string = "general"): Promise<UploadResult> {
+export async function uploadAttachmentFile(
+  file: File,
+  folder: string = "general"
+): Promise<UploadResult> {
   try {
     const supabase = createClient();
     const fileExt = file.name.split(".").pop();

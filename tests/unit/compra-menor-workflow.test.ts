@@ -4,7 +4,11 @@
  *
  * Los nodos reales se cargan desde la BD — este test solo valida las interfaces.
  */
-import type { NodoWorkflow, AccionTransicion, ActorRolCode } from "../../lib/workflow/compra-menor-strategy";
+import type {
+  NodoWorkflow,
+  AccionTransicion,
+  ActorRolCode,
+} from "../../lib/workflow/compra-menor-strategy";
 
 console.log("=== Running Unit Tests: Workflow Type Interfaces ===");
 

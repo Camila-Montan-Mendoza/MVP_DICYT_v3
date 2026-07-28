@@ -9,9 +9,7 @@ export default function Tarea2RevisionTecnicaPassive({ tarea }: TaskViewProps) {
         <span className="text-xs font-bold text-[#002855] bg-[#002855]/10 px-2.5 py-1 rounded-md">
           Tarea 2
         </span>
-        <h3 className="text-sm font-bold text-[#001B47]">
-          Revisión técnica inicial de solicitud
-        </h3>
+        <h3 className="text-sm font-bold text-[#001B47]">Revisión técnica inicial de solicitud</h3>
       </div>
 
       <div className="p-4 bg-[#eff6ff] border border-[#93c5fd] rounded-lg text-xs text-[#1e40af]">

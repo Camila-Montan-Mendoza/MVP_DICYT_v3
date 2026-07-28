@@ -24,9 +24,7 @@ export default function RequisitionsPage() {
 
   // Handler for header updates
   const handleUpdateHeader = (tramiteId: string, updates: Partial<TramiteSolicitud>) => {
-    setTramites((prev) =>
-      prev.map((t) => (t.id === tramiteId ? { ...t, ...updates } : t))
-    );
+    setTramites((prev) => prev.map((t) => (t.id === tramiteId ? { ...t, ...updates } : t)));
   };
 
   // Handler for item updates
@@ -68,7 +66,12 @@ export default function RequisitionsPage() {
       prev.map((t) => {
         const exito = resultado.tramitesExitosos.find((e) => e.id === t.id);
         if (exito) {
-          return { ...t, estado: "ENVIADO", codigoSeguimiento: exito.codigoSeguimiento, erroresValidacion: [] };
+          return {
+            ...t,
+            estado: "ENVIADO",
+            codigoSeguimiento: exito.codigoSeguimiento,
+            erroresValidacion: [],
+          };
         }
         const fallo = resultado.tramitesFallidos.find((f) => f.id === t.id);
         if (fallo) {
@@ -86,7 +89,10 @@ export default function RequisitionsPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Link href="/" className="inline-flex items-center gap-1 text-xs opacity-80 hover:opacity-100 transition-opacity">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1 text-xs opacity-80 hover:opacity-100 transition-opacity"
+              >
                 <ArrowLeft className="w-3.5 h-3.5" /> Volver al Inicio
               </Link>
               <span className="text-xs opacity-50">•</span>
@@ -98,7 +104,8 @@ export default function RequisitionsPage() {
               Creación y Envío de Trámites de Adquisición
             </h1>
             <p className="text-xs opacity-90 mt-1 max-w-2xl">
-              Sistema automático de auto-clasificación por tipo de compra (Materiales, Activos Fijos y Servicios) con regla de segregación estricta 100% homogénea y envío resiliente.
+              Sistema automático de auto-clasificación por tipo de compra (Materiales, Activos Fijos
+              y Servicios) con regla de segregación estricta 100% homogénea y envío resiliente.
             </p>
           </div>
 

@@ -21,7 +21,9 @@
 ## Core Principles
 
 ### I. Workflow-Driven Role-Based Access Control (RBAC & Dynamic Views)
+
 Every trámite execution MUST be strictly governed by the procedure step-and-state workflow engine (`paso_flujo`, `estado_paso_flujo`, `rol_estado_paso_flujo`, `transicion_flujo`).
+
 - **Actor Permissions**: Access and actions are strictly role-scoped across the 13 defined system actors:
   1. **IP (Investigador Principal)**: Initiates trámites, uploads quotes & receipt acts, requests payments, gathers signatures.
   2. **RC (Responsable de Compras)**: Conducts initial review, verifies virtual market items, awards/rejects providers, issues purchase orders.
@@ -39,13 +41,17 @@ Every trámite execution MUST be strictly governed by the procedure step-and-sta
 - **Dynamic Views**: User Interfaces MUST render dynamically based on active user role. Active actors display actionable controls (approve, reject, submit, upload); passive actors display read-only monitoring and stepper tracking.
 
 ### II. Institutional Minimalist UX & Prototyping Consistency
+
 Visual interfaces MUST adhere strictly to `DESIGN.md` and institutional identity standards of the Universidad Mayor de San Simón (UMSS).
+
 - **Color Tokens**: Primary Azul Institutional (`#003770`), Secondary Rojo Institutional (`#BC000C`), Dark Blue Accent (`#001B47`), Button Blue (`#002855`), Background (`#fdfdfd`), Foreground (`#2c3e50`), Muted (`#f0f4f8`), Border (`#e5e7eb`).
 - **UI Uniformity**: High design consistency across all screens without design fragmentation or mixed component styles. Component variants (buttons, cards, inputs, tables, badges) MUST utilize ShadCN UI + Tailwind CSS mapped directly to `globals.css` CSS variables.
 - **Mockup Fidelity**: Interface layouts MUST replicate prototype mockups in `.mockups/` using the `/frontend-design` skill to ensure clean, non-cluttered, accessible UI/UX.
 
 ### III. Modular React Architecture & Pattern Discipline
+
 Frontend codebase structure MUST implement clean component architecture using standard React design patterns:
+
 - **Container / Presentational Pattern**: Decouple data-fetching / state containers from purely visual presentation components.
 - **Hooks Pattern**: Encapsulate reusable domain logic, Supabase queries, and state management into custom React hooks.
 - **Compound Pattern**: Build flexible, composed UI components (e.g., dynamic Steppers, Trámite Modals, Form Steppers).
@@ -53,7 +59,9 @@ Frontend codebase structure MUST implement clean component architecture using st
 - **AI UI & React Stack Patterns**: Modern layout structures with ShadCN Studio standards, responsive mobile/desktop navigation, and seamless state transitions.
 
 ### IV. Functional Core Scope & Trámite Execution (MVP First)
+
 The application MUST prioritize end-to-end functionality for the 8 core trámites over non-essential features or edge-case customization:
+
 1. **Compra menor de material** (PD-73)
 2. **Compra menor de activo fijo** (PD-73)
 3. **Compra menor de servicios** (PD-73)
@@ -66,7 +74,9 @@ The application MUST prioritize end-to-end functionality for the 8 core trámite
 - **Navigation Flow**: IP and authorized users MUST be able to navigate: `Lista de Proyectos` → `Detalle de Proyecto` → `Crear Nuevo Trámite`, alongside a dedicated global `Sección de Trámites` listing all user-accessible trámites with workflow stepper status tracking.
 
 ### V. Supabase / PostgreSQL Relational Integrity & Traceability
+
 The database schema MUST reflect the core PostgreSQL schema provided for Supabase:
+
 - Strict Foreign Keys with `ON UPDATE CASCADE` and explicit deletion constraints (`RESTRICT` or `SET NULL`, strictly avoiding cascading deletes).
 - Complete traceability of state changes through `historial_estado_tramite` with timestamp, user ID, previous state, new state, and observations.
 - Document and file handling centralized via `archivo` UUIDs for quotes, contractual documents, receipt acts, and payment vouchers (C-31, cheques, memorandums).

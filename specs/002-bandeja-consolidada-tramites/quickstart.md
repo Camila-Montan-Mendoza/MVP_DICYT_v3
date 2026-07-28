@@ -14,6 +14,7 @@ npx tsx tests/unit/consolidated-inbox.test.ts
 ```
 
 Expected output:
+
 ```text
 === Running Unit Tests: Consolidated Inbox & Filtering ===
 ✔ Test 1: Filter by search text (proyecto/nro) PASSED

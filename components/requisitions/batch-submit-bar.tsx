@@ -49,9 +49,12 @@ export function BatchSubmitBar({ tramites, onBatchSubmitSuccess }: BatchSubmitBa
             <Info className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-foreground text-sm">Resumen de Trámites Generados ({tramites.length})</h3>
+            <h3 className="font-bold text-foreground text-sm">
+              Resumen de Trámites Generados ({tramites.length})
+            </h3>
             <p className="text-xs text-muted-foreground">
-              {borradores.length} trámite(s) pendiente(s) de envío | Normativa de Segregación Estricta Activa
+              {borradores.length} trámite(s) pendiente(s) de envío | Normativa de Segregación
+              Estricta Activa
             </p>
           </div>
         </div>
@@ -75,7 +78,9 @@ export function BatchSubmitBar({ tramites, onBatchSubmitSuccess }: BatchSubmitBa
               <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <span>
                 {feedback.tramitesExitosos.length} trámite(s) enviado(s) exitosamente:{" "}
-                {feedback.tramitesExitosos.map((t) => `${t.categoria} (${t.codigoSeguimiento})`).join(", ")}
+                {feedback.tramitesExitosos
+                  .map((t) => `${t.categoria} (${t.codigoSeguimiento})`)
+                  .join(", ")}
               </span>
             </div>
           )}
@@ -84,7 +89,8 @@ export function BatchSubmitBar({ tramites, onBatchSubmitSuccess }: BatchSubmitBa
             <div className="p-2.5 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200 rounded-lg flex items-center gap-2 font-medium">
               <AlertOctagon className="w-4 h-4 text-amber-600 flex-shrink-0" />
               <span>
-                {feedback.tramitesFallidos.length} trámite(s) no se enviaron por datos pendientes. Revise las tarjetas en pantalla para corregir los campos señalados.
+                {feedback.tramitesFallidos.length} trámite(s) no se enviaron por datos pendientes.
+                Revise las tarjetas en pantalla para corregir los campos señalados.
               </span>
             </div>
           )}

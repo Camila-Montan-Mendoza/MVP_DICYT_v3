@@ -30,7 +30,7 @@ Implementar la auto-clasificación y segregación estricta de solicitudes de com
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 - **MVP Validation Focus**: Aprobado. Pruebas puntuales acotadas a la lógica de negocio central.
 - **Design Tokens**: Aprobado. Integración de variables institucionales `--primary: #003770` y `--secondary: #BC000C`.

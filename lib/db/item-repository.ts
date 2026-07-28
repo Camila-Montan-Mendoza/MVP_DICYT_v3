@@ -20,7 +20,8 @@ export class ItemDBRepository {
     try {
       const { data: items, error } = await this.supabase
         .from("item")
-        .select(`
+        .select(
+          `
           id,
           nombre,
           id_partida_concreta,
@@ -32,7 +33,8 @@ export class ItemDBRepository {
             partida
             :partida!partida_concreta_id_partida_fkey ( id, codigo )
           )
-        `)
+        `
+        )
         .order("id", { ascending: true });
 
       if (error) {
@@ -52,8 +54,8 @@ export class ItemDBRepository {
           codigoNum >= 40000
             ? "ACTIVO_FIJO"
             : codigoNum >= 20000 && codigoNum < 30000
-            ? "SERVICIO"
-            : "MATERIAL";
+              ? "SERVICIO"
+              : "MATERIAL";
 
         return {
           id: i.id,

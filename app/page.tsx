@@ -35,7 +35,8 @@ export default function Home() {
             Plataforma de Trámites y Adquisiciones
           </h1>
           <p className="text-sm text-[#6b7280] leading-relaxed">
-            Bienvenido al módulo de formulación y seguimiento de requerimientos de investigación. Administre sus proyectos y organice trámites segregados por categoría de compra.
+            Bienvenido al módulo de formulación y seguimiento de requerimientos de investigación.
+            Administre sus proyectos y organice trámites segregados por categoría de compra.
           </p>
         </div>
 

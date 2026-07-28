@@ -13,13 +13,10 @@ export default function Tarea1RevisionPresupuestariaActive({ tarea }: TaskViewPr
           Revisión de disponibilidad presupuestaria y certificación de fondos
         </h3>
       </div>
-
       <div className="p-4 bg-[#f0fdf4] border border-[#86efac] rounded-lg text-xs text-[#166534]">
         🟢 Vista activa — Pendiente de implementación
       </div>
-
       CAMI LO LOGREEEE AAAAAA
-
       <div className="grid grid-cols-2 gap-3 text-[11px]">
         <div className="p-3 bg-[#f1f5f9] rounded-lg">
           <span className="text-[#94a3b8] block mb-1">Estado</span>

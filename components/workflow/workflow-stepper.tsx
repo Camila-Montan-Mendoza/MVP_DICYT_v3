@@ -9,11 +9,7 @@ interface WorkflowStepperProps {
   onSelectStep: (stepId: string) => void;
 }
 
-export function WorkflowStepper({
-  pasos,
-  activeStepId,
-  onSelectStep,
-}: WorkflowStepperProps) {
+export function WorkflowStepper({ pasos, activeStepId, onSelectStep }: WorkflowStepperProps) {
   return (
     <div className="bg-white p-6 rounded-2xl border border-[#e5e7eb] shadow-2xs">
       <div className="flex items-center justify-between relative max-w-4xl mx-auto">
@@ -43,8 +39,8 @@ export function WorkflowStepper({
                     isCompletado
                       ? "bg-[#002855] text-white shadow-md"
                       : isEnCurso
-                      ? "border-2 border-[#002855] bg-white text-[#002855] ring-4 ring-[#002855]/10 shadow-md"
-                      : "border-2 border-[#cbd5e1] bg-white text-[#9ca3af]"
+                        ? "border-2 border-[#002855] bg-white text-[#002855] ring-4 ring-[#002855]/10 shadow-md"
+                        : "border-2 border-[#cbd5e1] bg-white text-[#9ca3af]"
                   }`}
                 >
                   {isCompletado ? <Check className="w-5 h-5 stroke-[3]" /> : paso.numero}
@@ -53,9 +49,7 @@ export function WorkflowStepper({
                 {/* Nombre del Paso */}
                 <span
                   className={`text-xs font-bold transition-colors ${
-                    isSelected || isEnCurso || isCompletado
-                      ? "text-[#001B47]"
-                      : "text-[#9ca3af]"
+                    isSelected || isEnCurso || isCompletado ? "text-[#001B47]" : "text-[#9ca3af]"
                   }`}
                 >
                   {paso.nombre}
@@ -67,8 +61,8 @@ export function WorkflowStepper({
                     isCompletado
                       ? "bg-[#e2e8f0] text-[#334155]"
                       : isEnCurso
-                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                      : "bg-[#f1f5f9] text-[#94a3b8]"
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        : "bg-[#f1f5f9] text-[#94a3b8]"
                   }`}
                 >
                   {paso.estado.replace("_", " ")}

@@ -11,8 +11,8 @@
 
 ```typescript
 export interface PartidaPresupuestariaCheck {
-  codigo: string;             // 5-digit code e.g. "34200", "43120"
-  denominacion: string;       // e.g. "Productos Químicos y Farmacéuticos"
+  codigo: string; // 5-digit code e.g. "34200", "43120"
+  denominacion: string; // e.g. "Productos Químicos y Farmacéuticos"
   montoRequerido: number;
   saldoDisponible: number;
   suficiente: boolean;
@@ -23,9 +23,9 @@ export interface PartidaPresupuestariaCheck {
 
 ```typescript
 export interface SelloPreventivo {
-  correlativo: string;        // e.g. "PREV-2026-00123"
-  fechaEmision: string;       // e.g. "2026-01-11T09:15:00Z"
-  usuarioAprobador: string;   // e.g. "Alan - Resp. Presupuestos"
+  correlativo: string; // e.g. "PREV-2026-00123"
+  fechaEmision: string; // e.g. "2026-01-11T09:15:00Z"
+  usuarioAprobador: string; // e.g. "Alan - Resp. Presupuestos"
   estado: "APROBADO" | "OBSERVADO";
   observaciones?: string;
 }

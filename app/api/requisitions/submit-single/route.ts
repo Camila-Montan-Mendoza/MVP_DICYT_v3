@@ -8,10 +8,7 @@ export async function POST(req: Request) {
 
     const errors = validateTramite(tramite);
     if (errors.length > 0) {
-      return NextResponse.json(
-        { success: false, errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, errors }, { status: 400 });
     }
 
     const codigoSeguimiento = `TR-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;

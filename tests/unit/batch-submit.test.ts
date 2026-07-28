@@ -32,7 +32,7 @@ async function runBatchSubmitTest() {
     estado: "BORRADOR",
     justificacion: "Compra de equipo laboratorio",
     archivosRespaldo: [], // Missing respaldo file
-    custodioNombre: "",   // Missing custodio
+    custodioNombre: "", // Missing custodio
     items: [],
     fechaCreacion: new Date().toISOString(),
   };
@@ -55,7 +55,9 @@ async function runBatchSubmitTest() {
   console.assert(exitosos.length === 1, "Expected 1 successful tramite submission");
   console.assert(fallidos.length === 1, "Expected 1 failed tramite submission");
 
-  console.log("✔ Resilient Batch Submit Test PASSED: Valid tramites submit independently without being blocked by invalid ones.");
+  console.log(
+    "✔ Resilient Batch Submit Test PASSED: Valid tramites submit independently without being blocked by invalid ones."
+  );
 }
 
 runBatchSubmitTest();

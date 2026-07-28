@@ -14,7 +14,7 @@ import {
   CheckCircle2,
   CreditCard,
   Inbox,
-  FilterX
+  FilterX,
 } from "lucide-react";
 import { tramiteDBRepository, TramiteDBItem } from "@/lib/db/tramite-repository";
 
@@ -101,7 +101,8 @@ export default function ListaTramitesPage() {
       if (pasoActualFilter !== "Cualquier paso") {
         const pasoInfo = getPasoInfo(t);
         if (pasoActualFilter === "Paso 1/4: Solicitud" && pasoInfo.num !== 1) return false;
-        if (pasoActualFilter === "Paso 2/4: Recepcion de Material" && pasoInfo.num !== 2) return false;
+        if (pasoActualFilter === "Paso 2/4: Recepcion de Material" && pasoInfo.num !== 2)
+          return false;
         if (pasoActualFilter === "Paso 3/4: Pago a Proveedor" && pasoInfo.num !== 3) return false;
         if (pasoActualFilter === "Paso 4/4: Completado" && !pasoInfo.isCompletado) return false;
       }
@@ -292,10 +293,7 @@ export default function ListaTramitesPage() {
                       const isAtender = tramite.requiereAccion || pasoInfo.num === 2;
 
                       return (
-                        <tr
-                          key={tramite.id}
-                          className="hover:bg-[#f8fafc] transition-colors"
-                        >
+                        <tr key={tramite.id} className="hover:bg-[#f8fafc] transition-colors">
                           {/* 1. Nº */}
                           <td className="py-4 px-4 text-center font-mono font-semibold text-[#64748b]">
                             {tramite.nro || `${index + 1}`.padStart(2, "0")}
@@ -382,8 +380,10 @@ export default function ListaTramitesPage() {
               <div className="p-4 bg-[#f8fafc] border-t border-[#e5e7eb] flex items-center justify-between text-xs text-[#6b7280]">
                 <div>
                   Mostrando <strong className="text-[#001B47]">{startIndex + 1}</strong>-
-                  <strong className="text-[#001B47]">{Math.min(startIndex + itemsPerPage, totalItems)}</strong> de{" "}
-                  <strong className="text-[#001B47]">{totalItems}</strong> trámites
+                  <strong className="text-[#001B47]">
+                    {Math.min(startIndex + itemsPerPage, totalItems)}
+                  </strong>{" "}
+                  de <strong className="text-[#001B47]">{totalItems}</strong> trámites
                 </div>
 
                 <div className="flex items-center gap-1">

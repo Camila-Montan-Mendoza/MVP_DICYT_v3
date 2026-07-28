@@ -93,9 +93,7 @@ export default function FormulacionRequerimientosPage() {
   }, []);
 
   // Independent Requisition Headers by Category
-  const [headers, setHeaders] = useState<
-    Record<ItemCategoria, TramiteBorrador>
-  >({
+  const [headers, setHeaders] = useState<Record<ItemCategoria, TramiteBorrador>>({
     ACTIVO_FIJO: {
       categoria: "ACTIVO_FIJO",
       titulo: "Activos Fijos",
@@ -129,9 +127,7 @@ export default function FormulacionRequerimientosPage() {
   });
 
   // Collapsible cards state
-  const [collapsedCategories, setCollapsedCategories] = useState<
-    Record<string, boolean>
-  >({});
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
 
   const toggleCategoryCollapse = (cat: ItemCategoria) => {
     setCollapsedCategories((prev) => ({
@@ -144,14 +140,11 @@ export default function FormulacionRequerimientosPage() {
   const [selectedItem, setSelectedItem] = useState<ItemData | null>(null);
 
   // Modal Saldo Insuficiente State
-  const [saldoModalData, setSaldoModalData] =
-    useState<SaldoInsuficienteData | null>(null);
+  const [saldoModalData, setSaldoModalData] = useState<SaldoInsuficienteData | null>(null);
 
   // Toast / Feedback State
   const [batchSubmitting, setBatchSubmitting] = useState(false);
-  const [lastSubmittedCode, setLastSubmittedCode] = useState<string | null>(
-    null,
-  );
+  const [lastSubmittedCode, setLastSubmittedCode] = useState<string | null>(null);
 
   // Categorized items
   const activosItems = items.filter((i) => i.categoria === "ACTIVO_FIJO");
@@ -230,7 +223,7 @@ export default function FormulacionRequerimientosPage() {
 
   const handleProformaUpload = async (
     cat: ItemCategoria,
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
@@ -239,10 +232,7 @@ export default function FormulacionRequerimientosPage() {
       ...prev,
       [cat]: {
         ...prev[cat],
-        proformas: [
-          ...prev[cat].proformas,
-          { id: `prof-${Date.now()}`, nombre: res.name },
-        ],
+        proformas: [...prev[cat].proformas, { id: `prof-${Date.now()}`, nombre: res.name }],
       },
     }));
   };
@@ -257,9 +247,7 @@ export default function FormulacionRequerimientosPage() {
       errs.push("Debe ingresar la Justificación del Trámite.");
     }
     if (h.proformas.length === 0) {
-      errs.push(
-        "Debe adjuntar al menos una proforma o cotización de respaldo (Imagen o PDF).",
-      );
+      errs.push("Debe adjuntar al menos una proforma o cotización de respaldo (Imagen o PDF).");
     }
     if (cat === "ACTIVO_FIJO") {
       if (!h.custodioNombre.trim()) {
@@ -274,16 +262,15 @@ export default function FormulacionRequerimientosPage() {
     catItems.forEach((it) => {
       if (cat === "SERVICIO" && !it.documentotecnicoNombre) {
         errs.push(
-          `El servicio '${it.nombre}' no tiene adjunto su documento obligatorio de TDR en PDF.`,
+          `El servicio '${it.nombre}' no tiene adjunto su documento obligatorio de TDR en PDF.`
         );
       }
       if (
         cat !== "SERVICIO" &&
-        (!it.especificacionesTecnicasTexto ||
-          !it.especificacionesTecnicasTexto.trim())
+        (!it.especificacionesTecnicasTexto || !it.especificacionesTecnicasTexto.trim())
       ) {
         errs.push(
-          `El ítem '${it.nombre}' debe contar con sus Especificaciones Técnicas (ET) en texto.`,
+          `El ítem '${it.nombre}' debe contar con sus Especificaciones Técnicas (ET) en texto.`
         );
       }
     });
@@ -296,7 +283,7 @@ export default function FormulacionRequerimientosPage() {
     const catItems = items.filter((i) => i.categoria === cat);
     const totalAmount = catItems.reduce(
       (acc, curr) => acc + (Number(curr.precioReferencial) || 0),
-      0,
+      0
     );
 
     // Simulation of Saldo Insuficiente check (e.g. if category is ACTIVO_FIJO and amount > 5000 Bs)
@@ -351,10 +338,7 @@ export default function FormulacionRequerimientosPage() {
 
     if (
       activosItems.length > 0 &&
-      activosItems.reduce(
-        (acc, curr) => acc + (Number(curr.precioReferencial) || 0),
-        0,
-      ) > 5000
+      activosItems.reduce((acc, curr) => acc + (Number(curr.precioReferencial) || 0), 0) > 5000
     ) {
       setBatchSubmitting(false);
       const firstItem = activosItems[0];
@@ -398,7 +382,7 @@ export default function FormulacionRequerimientosPage() {
             },
           }));
         }
-      }),
+      })
     );
 
     setBatchSubmitting(false);
@@ -425,9 +409,7 @@ export default function FormulacionRequerimientosPage() {
             onChange={(e) => setProyecto(e.target.value)}
             className="w-full p-2.5 text-xs bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] font-medium focus:outline-none focus:ring-1 focus:ring-[#002855]"
           >
-            {proyectos.length === 0 && (
-              <option value="">Cargando proyectos...</option>
-            )}
+            {proyectos.length === 0 && <option value="">Cargando proyectos...</option>}
             {proyectos.map((p) => (
               <option key={p.id} value={p.nombre}>
                 {p.nombre}
@@ -469,8 +451,7 @@ export default function FormulacionRequerimientosPage() {
             <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e5e7eb] rounded-xl shadow-xl z-40 max-h-64 overflow-y-auto divide-y divide-[#e5e7eb]">
               {filteredCatalog.length === 0 ? (
                 <div className="p-3 text-xs text-[#6b7280]">
-                  Sin coincidencia exacta. Presione &quot;Agregar&quot; para
-                  registrar el ítem.
+                  Sin coincidencia exacta. Presione &quot;Agregar&quot; para registrar el ítem.
                 </div>
               ) : (
                 filteredCatalog.map((item) => (
@@ -480,15 +461,11 @@ export default function FormulacionRequerimientosPage() {
                     className="p-3 hover:bg-[#f8fafc] cursor-pointer flex items-center justify-between text-xs transition-colors"
                   >
                     <div>
-                      <p className="font-bold text-[#001B47]">
-                        {item.nombre}
-                      </p>
+                      <p className="font-bold text-[#001B47]">{item.nombre}</p>
                       <p className="text-[11px] text-[#6b7280]">
                         Partida 5 dígitos:{" "}
-                        <strong className="text-[#BC000C]">
-                          {item.partidaCodigo}
-                        </strong>{" "}
-                        - {item.partidaNombre}
+                        <strong className="text-[#BC000C]">{item.partidaCodigo}</strong> -{" "}
+                        {item.partidaNombre}
                       </p>
                     </div>
                     <span
@@ -515,13 +492,10 @@ export default function FormulacionRequerimientosPage() {
             <div className="w-12 h-12 bg-[#002855]/10 text-[#002855] rounded-full flex items-center justify-center mx-auto font-bold text-lg">
               ✨
             </div>
-            <h3 className="font-bold text-sm text-[#001B47]">
-              Ningún Trámite Generado Aún
-            </h3>
+            <h3 className="font-bold text-sm text-[#001B47]">Ningún Trámite Generado Aún</h3>
             <p className="text-xs text-[#6b7280] max-w-md mx-auto leading-relaxed">
-              Use el buscador para agregar ítems a su pedido inicial. Tan pronto
-              agregue un ítem, el sistema creará dinámicamente la tarjeta de
-              trámite correspondiente a esa categoría.
+              Use el buscador para agregar ítems a su pedido inicial. Tan pronto agregue un ítem, el
+              sistema creará dinámicamente la tarjeta de trámite correspondiente a esa categoría.
             </p>
           </div>
         )}
@@ -534,9 +508,7 @@ export default function FormulacionRequerimientosPage() {
             className={`grid grid-cols-1 ${selectedItem ? "lg:grid-cols-12" : "grid-cols-1"} gap-6 transition-all`}
           >
             {/* COLUMNA IZQUIERDA: Tarjetas de Trámites por Categoría */}
-            <div
-              className={`space-y-6 ${selectedItem ? "lg:col-span-7" : "w-full"}`}
-            >
+            <div className={`space-y-6 ${selectedItem ? "lg:col-span-7" : "w-full"}`}>
               {activeCategories.map((cat) => {
                 const catHeader = headers[cat];
                 const catItems = items.filter((i) => i.categoria === cat);
@@ -610,9 +582,7 @@ export default function FormulacionRequerimientosPage() {
                             toggleCategoryCollapse(cat);
                           }}
                           className="p-1 rounded-lg text-slate-500 hover:text-[#002855] hover:bg-slate-100 transition-colors"
-                          title={
-                            isCollapsed ? "Desplegar trámite" : "Plegar trámite"
-                          }
+                          title={isCollapsed ? "Desplegar trámite" : "Plegar trámite"}
                         >
                           {isCollapsed ? (
                             <ChevronDown className="w-5 h-5" />
@@ -733,8 +703,7 @@ export default function FormulacionRequerimientosPage() {
                           {/* Carga de Proformas / Cotizaciones específicas de este trámite (Imagen o PDF) */}
                           <div className="space-y-1 pt-1">
                             <label className="text-xs font-semibold text-[#2c3e50]">
-                              Archivos de Respaldo (Proformas / Cotizaciones en
-                              Imagen o PDF) *
+                              Archivos de Respaldo (Proformas / Cotizaciones en Imagen o PDF) *
                             </label>
                             {catHeader.estado !== "ENVIADO" && (
                               <div className="flex items-center gap-3">
@@ -768,8 +737,7 @@ export default function FormulacionRequerimientosPage() {
                             <div
                               key={item.id}
                               onClick={() =>
-                                catHeader.estado !== "ENVIADO" &&
-                                setSelectedItem(item)
+                                catHeader.estado !== "ENVIADO" && setSelectedItem(item)
                               }
                               className={`p-3.5 bg-white border rounded-xl flex items-center justify-between cursor-pointer transition-all shadow-2xs group ${
                                 selectedItem?.id === item.id
@@ -781,10 +749,8 @@ export default function FormulacionRequerimientosPage() {
                                 <ChevronDown className="w-4 h-4 text-[#9ca3af] group-hover:text-[#002855]" />
                                 <div>
                                   <div className="font-bold text-xs text-[#001B47] uppercase">
-                                    {isServicio
-                                      ? `SERVICIO ${idx + 1}`
-                                      : `ITEM ${idx + 1}`}{" "}
-                                    | {item.nombre}
+                                    {isServicio ? `SERVICIO ${idx + 1}` : `ITEM ${idx + 1}`} |{" "}
+                                    {item.nombre}
                                   </div>
                                   <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-[#64748b]">
                                     <span className="px-2 py-0.5 bg-[#002855]/10 text-[#002855] rounded font-bold text-[10px] uppercase">
@@ -792,9 +758,7 @@ export default function FormulacionRequerimientosPage() {
                                     </span>
                                     <span>Cantidad: {item.cantidad || 1}</span>
                                     {item.precioReferencial !== "" && (
-                                      <span>
-                                        Total: {item.precioReferencial} Bs
-                                      </span>
+                                      <span>Total: {item.precioReferencial} Bs</span>
                                     )}
                                   </div>
                                 </div>
@@ -840,9 +804,7 @@ export default function FormulacionRequerimientosPage() {
                   <div>
                     <h3 className="font-extrabold text-sm text-[#001B47] uppercase tracking-wider">
                       DETALLE DE{" "}
-                      {selectedItem.categoria === "SERVICIO"
-                        ? "SERVICIO"
-                        : "REQUERIMIENTO"}
+                      {selectedItem.categoria === "SERVICIO" ? "SERVICIO" : "REQUERIMIENTO"}
                     </h3>
                     <p className="text-xs text-[#64748b] capitalize">
                       {selectedItem.nombre.toLowerCase()}
@@ -860,9 +822,7 @@ export default function FormulacionRequerimientosPage() {
                 <div className="space-y-4 text-xs">
                   {/* Campo DETALLE (Nombre del ítem) - SOLO LECTURA INALTERABLE */}
                   <div>
-                    <label className="font-bold text-xs text-[#2c3e50] block mb-1">
-                      DETALLE *
-                    </label>
+                    <label className="font-bold text-xs text-[#2c3e50] block mb-1">DETALLE *</label>
                     <input
                       type="text"
                       readOnly
@@ -886,10 +846,7 @@ export default function FormulacionRequerimientosPage() {
                         onChange={(e) =>
                           setSelectedItem({
                             ...selectedItem,
-                            precioReferencial:
-                              e.target.value === ""
-                                ? ""
-                                : Number(e.target.value),
+                            precioReferencial: e.target.value === "" ? "" : Number(e.target.value),
                           })
                         }
                         className="w-full p-2 bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] text-xs font-medium"
@@ -907,10 +864,7 @@ export default function FormulacionRequerimientosPage() {
                         onChange={(e) =>
                           setSelectedItem({
                             ...selectedItem,
-                            cantidad:
-                              e.target.value === ""
-                                ? ""
-                                : Number(e.target.value),
+                            cantidad: e.target.value === "" ? "" : Number(e.target.value),
                           })
                         }
                         className="w-full p-2 bg-white border border-[#e5e7eb] rounded-lg text-[#2c3e50] text-xs font-medium"
@@ -960,8 +914,7 @@ export default function FormulacionRequerimientosPage() {
                         </label>
                         <div className="flex items-center justify-between bg-[#f8fafc] p-2 border border-[#e5e7eb] rounded-lg">
                           <span className="text-xs text-[#64748b] truncate max-w-[180px]">
-                            {selectedItem.documentotecnicoNombre ||
-                              "Ningún archivo TDR adjuntado"}
+                            {selectedItem.documentotecnicoNombre || "Ningún archivo TDR adjuntado"}
                           </span>
                           <label className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#002855] text-white text-[11px] font-semibold rounded cursor-pointer hover:bg-[#001B47]">
                             <FileUp className="w-3 h-3" />
@@ -970,14 +923,8 @@ export default function FormulacionRequerimientosPage() {
                               type="file"
                               accept=".pdf"
                               onChange={async (e) => {
-                                if (
-                                  e.target.files &&
-                                  e.target.files.length > 0
-                                ) {
-                                  const res = await uploadAttachmentFile(
-                                    e.target.files[0],
-                                    "docs",
-                                  );
+                                if (e.target.files && e.target.files.length > 0) {
+                                  const res = await uploadAttachmentFile(e.target.files[0], "docs");
                                   setSelectedItem({
                                     ...selectedItem,
                                     documentotecnicoNombre: res.name,
@@ -1055,9 +1002,7 @@ export default function FormulacionRequerimientosPage() {
             <CheckCircle2 className="w-6 h-6" />
             <div>
               <p className="font-bold text-sm">Trámite Enviado Exitosamente</p>
-              <p className="text-xs opacity-90">
-                Código asignado: {lastSubmittedCode}
-              </p>
+              <p className="text-xs opacity-90">Código asignado: {lastSubmittedCode}</p>
             </div>
           </div>
         )}
@@ -1074,17 +1019,13 @@ export default function FormulacionRequerimientosPage() {
 
             {/* Title & Description */}
             <div className="space-y-1.5">
-              <h3 className="font-extrabold text-lg text-[#001B47]">
-                Saldo Insuficiente
-              </h3>
+              <h3 className="font-extrabold text-lg text-[#001B47]">Saldo Insuficiente</h3>
               <p className="text-xs text-[#6b7280] leading-relaxed">
                 No se puede procesar el envío. La partida{" "}
                 <strong className="text-[#001B47] font-mono">
-                  {saldoModalData.partidaCodigo} -{" "}
-                  {saldoModalData.partidaNombre}
+                  {saldoModalData.partidaCodigo} - {saldoModalData.partidaNombre}
                 </strong>{" "}
-                no cuenta con el saldo disponible requerido para los activos
-                seleccionados.
+                no cuenta con el saldo disponible requerido para los activos seleccionados.
               </p>
             </div>
 
@@ -1131,9 +1072,7 @@ export default function FormulacionRequerimientosPage() {
               <button
                 type="button"
                 onClick={() => {
-                  alert(
-                    "Redirigiendo a la pantalla de Modificación Presupuestaria...",
-                  );
+                  alert("Redirigiendo a la pantalla de Modificación Presupuestaria...");
                   setSaldoModalData(null);
                 }}
                 className="w-full py-3 bg-[#002855] text-white text-xs font-bold rounded-xl hover:bg-[#001B47] transition-all flex items-center justify-center gap-2 shadow-sm"

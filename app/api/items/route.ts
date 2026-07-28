@@ -9,7 +9,8 @@ export async function GET(request: Request) {
 
     let req = supabase
       .from("item")
-      .select(`
+      .select(
+        `
         id,
         nombre,
         id_partida_concreta,
@@ -20,7 +21,8 @@ export async function GET(request: Request) {
           presupuesto,
           partida ( id, codigo, nombre, descripcion )
         )
-      `)
+      `
+      )
       .order("id", { ascending: true });
 
     if (query) {

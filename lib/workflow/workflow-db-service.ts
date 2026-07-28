@@ -97,11 +97,18 @@ export async function cargarGrafoWorkflow(
     .order("orden", { ascending: true });
 
   if (errorPasos) {
-    console.error("[Supabase Workflow Error - paso_flujo]:", errorPasos.message, errorPasos.details);
+    console.error(
+      "[Supabase Workflow Error - paso_flujo]:",
+      errorPasos.message,
+      errorPasos.details
+    );
   }
 
   if (!pasos || pasos.length === 0) {
-    console.warn("[workflow-db-service] No se encontraron pasos de flujo para tipo_tramite:", tipoTramiteId);
+    console.warn(
+      "[workflow-db-service] No se encontraron pasos de flujo para tipo_tramite:",
+      tipoTramiteId
+    );
     return {};
   }
 
@@ -185,7 +192,7 @@ export async function cargarGrafoWorkflow(
       const { tipo, varianteBtn } = inferVarianteBtn(
         t.nombre_accion,
         paso.orden,
-        destinoPaso?.orden || paso.orden,
+        destinoPaso?.orden || paso.orden
       );
 
       return {

@@ -75,9 +75,7 @@ export function LoginForm() {
                   <p className="font-extrabold text-[#001B47] text-[11px] truncate leading-tight">
                     {u.nombreCompleto.split(" ")[1] || u.nombreCompleto}
                   </p>
-                  <p className="text-[10px] text-[#6b7280] truncate font-mono">
-                    {u.rolLabel}
-                  </p>
+                  <p className="text-[10px] text-[#6b7280] truncate font-mono">{u.rolLabel}</p>
                 </div>
               </button>
             ))}
@@ -95,9 +93,7 @@ export function LoginForm() {
         {/* Formulario de Login Estándar */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#001B47] block">
-              Nombre de Usuario
-            </label>
+            <label className="text-xs font-bold text-[#001B47] block">Nombre de Usuario</label>
             <div className="relative">
               <UserCheck className="w-4 h-4 text-[#9ca3af] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -112,9 +108,7 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#001B47] block">
-              Contraseña
-            </label>
+            <label className="text-xs font-bold text-[#001B47] block">Contraseña</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-[#9ca3af] absolute left-3 top-1/2 -translate-y-1/2" />
               <input

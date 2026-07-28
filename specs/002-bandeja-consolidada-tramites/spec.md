@@ -10,7 +10,7 @@
 
 ---
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 <!--
   MVP & TESTING NOTE: This project is an MVP for fast validation.
@@ -88,7 +88,7 @@ Como Investigador Principal, quiero contar con paginación fluida (ej. 10, 20 o 
 
 ---
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -108,7 +108,7 @@ Como Investigador Principal, quiero contar con paginación fluida (ej. 10, 20 o 
 
 ---
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

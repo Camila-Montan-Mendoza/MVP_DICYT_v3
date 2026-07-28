@@ -115,10 +115,7 @@ const registry: Record<string, ViewEntry> = {
  * @param isActive - true si el usuario actual es responsable de esta tarea
  * @returns Componente React que implementa TaskViewProps
  */
-export function getTaskView(
-  tareaId: string,
-  isActive: boolean
-): ComponentType<TaskViewProps> {
+export function getTaskView(tareaId: string, isActive: boolean): ComponentType<TaskViewProps> {
   const entry = registry[tareaId];
   if (!entry) return GenericFallbackView;
   return isActive ? entry.active : entry.passive;

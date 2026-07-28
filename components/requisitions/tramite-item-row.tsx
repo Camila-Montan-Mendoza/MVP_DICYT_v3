@@ -119,7 +119,9 @@ export function TramiteItemRow({ item, onUpdateItem, onRemoveItem }: TramiteItem
             type="number"
             disabled={!isServicio}
             value={item.precioReferencial || 0}
-            onChange={(e) => onUpdateItem(item.id, { precioReferencial: Number(e.target.value) || 0 })}
+            onChange={(e) =>
+              onUpdateItem(item.id, { precioReferencial: Number(e.target.value) || 0 })
+            }
             className="w-full p-1.5 bg-muted border border-border rounded text-foreground font-semibold text-xs"
           />
         </div>
@@ -129,7 +131,9 @@ export function TramiteItemRow({ item, onUpdateItem, onRemoveItem }: TramiteItem
       <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xs">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-foreground">
-            {isServicio ? "Documento TDR (PDF Obligatorio):" : "Especificación Técnica ET (PDF Obligatorio):"}
+            {isServicio
+              ? "Documento TDR (PDF Obligatorio):"
+              : "Especificación Técnica ET (PDF Obligatorio):"}
           </span>
           {item.documentotecnicoNombre ? (
             <span className="inline-flex items-center gap-1 text-emerald-600 font-medium">

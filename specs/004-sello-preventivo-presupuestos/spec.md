@@ -10,7 +10,7 @@
 
 ---
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 <!--
   MVP & TESTING NOTE: This project is an MVP for fast validation.
@@ -76,7 +76,7 @@ Como Responsable de Presupuestos (Alan), si identifico observaciones administrat
 
 ---
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -93,7 +93,7 @@ Como Responsable de Presupuestos (Alan), si identifico observaciones administrat
 
 ---
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

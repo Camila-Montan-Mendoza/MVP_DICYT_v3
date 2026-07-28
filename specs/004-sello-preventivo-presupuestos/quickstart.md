@@ -14,6 +14,7 @@ npx tsx tests/unit/preventivo.test.ts
 ```
 
 Expected output:
+
 ```text
 === Running Unit Tests: Sello Preventivo & Revision Presupuestaria ===
 ✔ Test 1: Budget sufficiency check per 5-digit partida PASSED

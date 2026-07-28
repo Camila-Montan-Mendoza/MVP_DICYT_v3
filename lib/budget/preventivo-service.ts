@@ -14,7 +14,14 @@ export interface SelloPreventivo {
   observaciones?: string;
 }
 
-export function obtenerCertificacionPartidas(items?: Array<{ partidaPresupuestaria?: string; partidaNombre?: string; precioReferencial?: number; cantidad?: number }>): PartidaPresupuestariaCheck[] {
+export function obtenerCertificacionPartidas(
+  items?: Array<{
+    partidaPresupuestaria?: string;
+    partidaNombre?: string;
+    precioReferencial?: number;
+    cantidad?: number;
+  }>
+): PartidaPresupuestariaCheck[] {
   if (!items || items.length === 0) {
     return [
       {
@@ -47,7 +54,9 @@ export function obtenerCertificacionPartidas(items?: Array<{ partidaPresupuestar
   });
 }
 
-export function generarSelloPreventivo(usuarioAprobador: string = "Alan - Resp. Presupuestos"): SelloPreventivo {
+export function generarSelloPreventivo(
+  usuarioAprobador: string = "Alan - Resp. Presupuestos"
+): SelloPreventivo {
   const randomSeq = Math.floor(100 + Math.random() * 900);
   return {
     correlativo: `PREV-2026-00${randomSeq}`,

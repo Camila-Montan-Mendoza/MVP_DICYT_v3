@@ -14,6 +14,7 @@ npx tsx tests/unit/workflow-stepper.test.ts
 ```
 
 Expected output:
+
 ```text
 === Running Unit Tests: Workflow Stepper & Tasks Timeline ===
 ✔ Test 1: Macro step status resolution PASSED
@@ -30,5 +31,5 @@ Expected output:
 2. Verify top header shows `Trámite Nº TR-2026-001`, project name, and applicant name.
 3. Check horizontal stepper renders 4 steps: Step 1 (COMPLETADO), Step 2 (EN_CURSO), Step 3 (PENDIENTE), Step 4 (PENDIENTE).
 4. Check vertical timeline renders granular tasks with checkmarks `✓`, role, user name, and completion timestamps.
-5. Confirm active task displays highlighted green card *"Acción requerida por tu parte"*.
+5. Confirm active task displays highlighted green card _"Acción requerida por tu parte"_.
 6. Confirm right workspace area is available for operational execution UI.

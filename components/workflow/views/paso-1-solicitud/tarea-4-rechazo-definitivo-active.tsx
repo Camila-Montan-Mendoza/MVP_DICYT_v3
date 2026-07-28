@@ -9,9 +9,7 @@ export default function Tarea4RechazoDefinitivoActive({ tarea }: TaskViewProps) 
         <span className="text-xs font-bold text-[#002855] bg-[#002855]/10 px-2.5 py-1 rounded-md">
           Tarea 4
         </span>
-        <h3 className="text-sm font-bold text-[#001B47]">
-          Rechazo definitivo de la solicitud
-        </h3>
+        <h3 className="text-sm font-bold text-[#001B47]">Rechazo definitivo de la solicitud</h3>
       </div>
 
       <div className="p-4 bg-[#f0fdf4] border border-[#86efac] rounded-lg text-xs text-[#166534]">

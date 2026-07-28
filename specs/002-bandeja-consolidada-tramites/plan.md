@@ -27,6 +27,7 @@
 ## Phase 1: Design Artifacts
 
 ### 1. Data Model (`data-model.md`)
+
 - `TramiteConsolidado`: Entity representing a consolidated requisition entry across projects and categories.
   - `id`: Unique string
   - `nro`: Sequential string (e.g. `01`, `02`)
@@ -38,14 +39,17 @@
   - `requiereAccion`: Boolean flag controlling `ATENDER` vs `VER DETALLE` action button
 
 ### 2. Interface Contracts (`contracts/`)
+
 - `lib/tramites/consolidated-service.ts`: API service contract function `filterTramitesConsolidados(...)`.
 
 ### 3. Quickstart Validation (`quickstart.md`)
+
 - Runnable manual & automated test instructions proving multi-criteria filtering, dynamic step badges, action buttons, pagination, and empty state.
 
 ---
 
 ## Plan Status
+
 - [x] Phase 0: Research & Decisions complete (`research.md`)
 - [x] Phase 1: Design Artifacts generated (`data-model.md`, `quickstart.md`)
 - [x] Targeted Unit Testing: `tests/unit/consolidated-inbox.test.ts`

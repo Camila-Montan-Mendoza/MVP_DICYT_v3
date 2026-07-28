@@ -1,6 +1,6 @@
-export type ItemCategoria = 'MATERIAL' | 'ACTIVO_FIJO' | 'SERVICIO';
+export type ItemCategoria = "MATERIAL" | "ACTIVO_FIJO" | "SERVICIO";
 
-export type EstadoTramite = 'BORRADOR' | 'ENVIADO' | 'CON_ERRORES';
+export type EstadoTramite = "BORRADOR" | "ENVIADO" | "CON_ERRORES";
 
 export interface ItemSolicitud {
   id: string;
@@ -29,8 +29,8 @@ export interface TramiteSolicitud {
   estado: EstadoTramite;
   justificacion: string;
   archivosRespaldo: ArchivoRespaldo[];
-  custodioNombre?: string;   // Requerido si categoria === 'ACTIVO_FIJO'
-  custodioUbicacion?: string;// Requerido si categoria === 'ACTIVO_FIJO'
+  custodioNombre?: string; // Requerido si categoria === 'ACTIVO_FIJO'
+  custodioUbicacion?: string; // Requerido si categoria === 'ACTIVO_FIJO'
   items: ItemSolicitud[];
   erroresValidacion?: string[];
   fechaCreacion: string;

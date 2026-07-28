@@ -10,7 +10,7 @@
 
 ---
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 <!--
   MVP & TESTING NOTE: This project is an MVP for fast validation.
@@ -64,8 +64,8 @@ Como usuario del sistema, al consultar la tarea activa `En Curso`, quiero visual
 
 **Acceptance Scenarios**:
 
-1. **Given** una tarea en estado `En Curso` asignada al usuario autenticado, **When** el usuario la visualiza en el stepper, **Then** la tarjeta se destaca con fondo verde claro y muestra la etiqueta *"Acción requerida por tu parte"*.
-2. **Given** una tarea en estado `En Curso` asignada a otro rol/persona, **When** el usuario la visualiza, **Then** el sistema muestra la etiqueta *"En espera de acción por parte de [Nombre / Rol]"*.
+1. **Given** una tarea en estado `En Curso` asignada al usuario autenticado, **When** el usuario la visualiza en el stepper, **Then** la tarjeta se destaca con fondo verde claro y muestra la etiqueta _"Acción requerida por tu parte"_.
+2. **Given** una tarea en estado `En Curso` asignada a otro rol/persona, **When** el usuario la visualiza, **Then** el sistema muestra la etiqueta _"En espera de acción por parte de [Nombre / Rol]"_.
 
 ---
 
@@ -83,7 +83,7 @@ Como usuario del sistema, quiero que el área de trabajo contigua a la cronolog�
 
 ---
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -93,13 +93,13 @@ Como usuario del sistema, quiero que el área de trabajo contigua a la cronolog�
 - **FR-004**: La estructura de dominio DEBE modelarse sin un estado global único, derivando el avance a partir de Pasos (Nivel Macro) y Tareas (Nivel Granular).
 - **FR-005**: Cada Tarea DEBE especificar: Nombre de la Tarea, Rol Responsable, Usuario Asignado y Estado (`Completado`, `En Curso`, `Pendiente`).
 - **FR-006**: Para toda Tarea con estado `Completado`, el sistema DEBE exhibir obligatoriamente la fecha y hora exacta de finalización (ej: `11 Ene 2026 - 09:15`).
-- **FR-007**: Para la Tarea `En Curso`, si pertenece al usuario autenticado, DEBE destacar el badge de intervención *"Acción requerida por tu parte"*. Si pertenece a otro rol, DEBE mostrar *"En espera de acción por parte de [Nombre / Rol]"*.
+- **FR-007**: Para la Tarea `En Curso`, si pertenece al usuario autenticado, DEBE destacar el badge de intervención _"Acción requerida por tu parte"_. Si pertenece a otro rol, DEBE mostrar _"En espera de acción por parte de [Nombre / Rol]"_.
 - **FR-008**: El componente Stepper DEBE ser de carácter exclusivamente informativo (Read-Only), sin botones de modificación directa en la cronología.
 - **FR-009**: La distribución de pantalla DEBE ser un Split Layout donde el panel izquierdo contiene la cronología de tareas y el panel derecho contiguo sirve de espacio libre para la interfaz de ejecución funcional.
 
 ---
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

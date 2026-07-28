@@ -13,17 +13,17 @@ Represents a unified administrative requisition entry in the principal investiga
 
 ```typescript
 export interface TramiteConsolidado {
-  id: string;                      // Unique ID (e.g. "tr-001")
-  nro: string;                     // Sequential number per project (e.g. "01", "02")
-  proyecto: string;                // Research project title
-  tipoTramite: string;             // Type label (e.g. "Solicitud de Materiales", "Fondo Rotatorio")
-  fecha: string;                   // Display date (e.g. "15 Oct 2023")
-  fechaISO: string;                // ISO date for sorting (e.g. "2023-10-15")
-  pasoActualEtiqueta: string;      // Dynamic step label (e.g. "Paso 1/4: Solicitud")
-  pasoNumero: number;              // Current step index (e.g. 1)
-  pasoTotal: number;               // Total steps in workflow (e.g. 4)
-  creador: string;                 // User who created the requisition
-  requiereAccion: boolean;         // True = ATENDER button, False = VER DETALLE button
+  id: string; // Unique ID (e.g. "tr-001")
+  nro: string; // Sequential number per project (e.g. "01", "02")
+  proyecto: string; // Research project title
+  tipoTramite: string; // Type label (e.g. "Solicitud de Materiales", "Fondo Rotatorio")
+  fecha: string; // Display date (e.g. "15 Oct 2023")
+  fechaISO: string; // ISO date for sorting (e.g. "2023-10-15")
+  pasoActualEtiqueta: string; // Dynamic step label (e.g. "Paso 1/4: Solicitud")
+  pasoNumero: number; // Current step index (e.g. 1)
+  pasoTotal: number; // Total steps in workflow (e.g. 4)
+  creador: string; // User who created the requisition
+  requiereAccion: boolean; // True = ATENDER button, False = VER DETALLE button
   estadoGeneral: "EN_PROCESO" | "COMPLETADO" | "PENDIENTE_MODIFICACION" | "RECHAZADO";
 }
 ```

@@ -49,12 +49,7 @@ export function CodeBlock({ code }: { code: string }) {
 
   return (
     <pre className="bg-muted rounded-md p-6 my-6 relative">
-      <Button
-        size="icon"
-        onClick={copy}
-        variant={"outline"}
-        className="absolute right-2 top-2"
-      >
+      <Button size="icon" onClick={copy} variant={"outline"} className="absolute right-2 top-2">
         {copied ? <CheckIcon /> : <CopyIcon />}
       </Button>
       <code className="text-xs p-3">{code}</code>
