@@ -50,7 +50,7 @@ function TramiteWorkflowDetailContent() {
 
       if (!targetTramite) {
         setLoadError(
-          `No se encontró ningún trámite registrado en la base de datos.`
+          `No se encontró ningún trámite registrado en la base de datos.`,
         );
         setIsLoading(false);
         return;
@@ -64,7 +64,7 @@ function TramiteWorkflowDetailContent() {
         setPasosList(pasos);
       } else {
         setLoadError(
-          "No se encontraron pasos de flujo registrados en la base de datos."
+          "No se encontraron pasos de flujo registrados en la base de datos.",
         );
       }
 
@@ -168,7 +168,11 @@ function TramiteWorkflowDetailContent() {
             nombre: n.nombre,
             rolResponsable: n.actorNombreRol,
             usuarioAsignado: n.actorNombreRol,
-            estado: isCurrent ? "EN_CURSO" : isCompleted ? "COMPLETADO" : "PENDIENTE",
+            estado: isCurrent
+              ? "EN_CURSO"
+              : isCompleted
+                ? "COMPLETADO"
+                : "PENDIENTE",
           };
         });
 
