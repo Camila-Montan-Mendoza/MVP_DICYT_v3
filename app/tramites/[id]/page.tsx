@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, useCallback } from "react";
+import { useState, useEffect, Suspense, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { SigefiShell } from "@/components/sigefi-shell";
@@ -142,27 +142,53 @@ function TramiteWorkflowDetailContent() {
 
   const nodoActualResuelto = nodoActual || (Object.values(grafo)[0] ?? null);
 
-  const tareasDelPaso: TareaWorkflow[] =
-    tareasList.length > 0
-      ? tareasList
-      : nodosDelPaso.map((n) => {
-          const nodoId = parseInt(n.id, 10);
-          const currentId = nodoActualResuelto ? parseInt(nodoActualResuelto.id, 10) : 1;
-          const isCurrent = nodoId === currentId;
-          const isCompleted =
-            activeTramite.pasoNumero > n.pasoNumero ||
-            (activeTramite.pasoNumero === n.pasoNumero && nodoId < currentId);
+  const tareasDelPaso: TareaWorkflow[] = useMemo(() => {
+    const tareasFiltradasDB = tareasList.filter((t) => {
+      const nodo = grafo[parseInt(t.id, 10)];
+      if (nodo) {
+        return nodo.pasoNumero === activeStep.numero;
+      }
+      if (t.pasoId) {
+        return t.pasoId === activeStep.id || t.pasoId === `p${activeStep.numero}`;
+      }
+      return false;
+    });
 
-          return {
-            id: n.id,
-            pasoId: `p${n.pasoNumero}`,
-            nombre: n.nombre,
-            rolEsperado: n.actorNombreRol,
-            rolResponsable: n.actorNombreRol,
-            usuarioAsignado: n.actorNombreRol,
-            estado: isCurrent ? "EN_CURSO" : isCompleted ? "COMPLETADO" : "PENDIENTE",
-          };
-        });
+    if (tareasFiltradasDB.length > 0) {
+      return tareasFiltradasDB;
+    }
+
+    return nodosDelPaso.map((n) => {
+      const nodoId = parseInt(n.id, 10);
+      const currentId = nodoActualResuelto ? parseInt(nodoActualResuelto.id, 10) : 1;
+      const isCurrent = nodoId === currentId;
+      const isCompleted =
+        activeTramite.pasoNumero > n.pasoNumero ||
+        (activeTramite.pasoNumero === n.pasoNumero && nodoId < currentId);
+
+      return {
+        id: n.id,
+        pasoId: `p${n.pasoNumero}`,
+        nombre: n.nombre,
+        rolEsperado: n.actorNombreRol,
+        rolResponsable: n.actorNombreRol,
+        usuarioAsignado: n.actorNombreRol,
+        estado: isCurrent ? "EN_CURSO" : isCompleted ? "COMPLETADO" : "PENDIENTE",
+      };
+    });
+  }, [tareasList, activeStep, grafo, nodosDelPaso, nodoActualResuelto, activeTramite]);
+
+  useEffect(() => {
+    if (tareasDelPaso.length > 0) {
+      const isSelectedInStep = tareasDelPaso.some((t) => t.id === selectedTareaId);
+      if (!isSelectedInStep) {
+        const target = tareasDelPaso.find((t) => t.estado === "EN_CURSO") || tareasDelPaso[0];
+        if (target) {
+          setSelectedTareaId(target.id);
+        }
+      }
+    }
+  }, [activeStepId, tareasDelPaso, selectedTareaId]);
 
   const selectedTarea =
     tareasDelPaso.find((t) => t.id === selectedTareaId) ||

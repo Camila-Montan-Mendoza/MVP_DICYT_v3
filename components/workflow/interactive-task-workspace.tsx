@@ -29,43 +29,41 @@ export function InteractiveTaskWorkspace({
     );
   }
 
-  // ── Caso COMPLETADO: vista histórica de lectura ────────────────────
+  // ── Caso COMPLETADO: vista histórica de lectura pasiva ───────────────
   if (selectedTarea.estado === "COMPLETADO") {
+    const TaskView = getTaskView(selectedTarea.id, false);
+
     return (
-      <div className="p-6 space-y-4">
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-[#002855] bg-[#002855]/10 px-2.5 py-1 rounded-md">
-            Tarea {selectedTarea.id}
-          </span>
-          <h3 className="text-sm font-bold text-[#001B47]">{selectedTarea.nombre}</h3>
-        </div>
-
-        <div className="p-4 bg-[#f0fdf4] border border-[#86efac] rounded-lg space-y-2">
-          <p className="text-xs font-medium text-[#166534]">✓ Tarea completada</p>
-          {selectedTarea.fechaCompletado && (
-            <p className="text-[11px] text-[#16a34a]">
-              Completada el {selectedTarea.fechaCompletado}
-            </p>
-          )}
+      <div className="space-y-4">
+        {/* Encabezado e indicador de Tarea Completada */}
+        <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-900 font-semibold shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>✓ Tarea completada {selectedTarea.fechaCompletado ? `el ${selectedTarea.fechaCompletado}` : ""}</span>
+          </div>
           {selectedTarea.usuarioAsignado && selectedTarea.usuarioAsignado !== "—" && (
-            <p className="text-[11px] text-[#16a34a]">Por: {selectedTarea.usuarioAsignado}</p>
+            <span className="text-[11px] text-emerald-700 bg-emerald-100/80 px-2.5 py-1 rounded-lg">
+              Ejecutado por: <strong>{selectedTarea.usuarioAsignado}</strong>
+            </span>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 text-[11px]">
-          <div className="p-3 bg-[#f1f5f9] rounded-lg">
-            <span className="text-[#94a3b8] block mb-1">Rol responsable</span>
-            <span className="text-[#334155] font-medium">
-              {selectedTarea.rolEsperado || selectedTarea.rolResponsable || "—"}
-            </span>
-          </div>
-          <div className="p-3 bg-[#f1f5f9] rounded-lg">
-            <span className="text-[#94a3b8] block mb-1">Ejecutado por</span>
-            <span className="text-[#334155] font-medium">
-              {selectedTarea.usuarioAsignado || "—"}
-            </span>
-          </div>
-        </div>
+        {/* Vista Pasiva / Modo Lectura de la Tarea Completada */}
+        <Suspense
+          fallback={
+            <div className="p-8 text-center text-xs text-[#94a3b8] animate-pulse">
+              Cargando resumen de tarea completada...
+            </div>
+          }
+        >
+          <TaskView
+            tarea={selectedTarea}
+            tramite={tramite}
+            currentUser={currentUser}
+            currentRole={currentRole}
+            onActionSuccess={onActionSuccess}
+          />
+        </Suspense>
       </div>
     );
   }
