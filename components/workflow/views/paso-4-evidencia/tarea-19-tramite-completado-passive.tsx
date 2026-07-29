@@ -1,31 +1,42 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { TaskViewProps } from "../view-types";
+import { ResumenEjecutivoTramiteData } from "@/types/expediente";
+import { obtenerResumenEjecutivoTramite } from "@/services/expedienteService";
+import { FichaResumenEjecutivoTramite } from "@/components/tramites/evidencia/FichaResumenEjecutivoTramite";
+import { Loader2 } from "lucide-react";
 
-export default function Tarea19TramiteCompletadoPassive({ tarea }: TaskViewProps) {
-  return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center gap-3">
-        <span className="text-xs font-bold text-[#002855] bg-[#002855]/10 px-2.5 py-1 rounded-md">
-          Tarea 19
-        </span>
-        <h3 className="text-sm font-bold text-[#001B47]">Trámite completado y archivado</h3>
-      </div>
+export default function Tarea19TramiteCompletadoPassive({ tramite }: TaskViewProps) {
+  const tramiteId = tramite?.id || 3;
 
-      <div className="p-4 bg-[#eff6ff] border border-[#93c5fd] rounded-lg text-xs text-[#1e40af]">
-        🔵 Vista pasiva — Pendiente de implementación
-      </div>
+  const [loading, setLoading] = useState(true);
+  const [resumen, setResumen] = useState<ResumenEjecutivoTramiteData | null>(null);
 
-      <div className="grid grid-cols-2 gap-3 text-[11px]">
-        <div className="p-3 bg-[#f1f5f9] rounded-lg">
-          <span className="text-[#94a3b8] block mb-1">Estado</span>
-          <span className="text-[#334155] font-medium">{tarea.estado}</span>
-        </div>
-        <div className="p-3 bg-[#f1f5f9] rounded-lg">
-          <span className="text-[#94a3b8] block mb-1">Asignado a</span>
-          <span className="text-[#334155] font-medium">{tarea.usuarioAsignado || "—"}</span>
-        </div>
+  const cargarResumen = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await obtenerResumenEjecutivoTramite(tramiteId);
+      setResumen(data);
+    } catch {
+      // Silently fail
+    } finally {
+      setLoading(false);
+    }
+  }, [tramiteId]);
+
+  useEffect(() => {
+    cargarResumen();
+  }, [cargarResumen]);
+
+  if (loading || !resumen) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 gap-2 bg-white rounded-xl border border-slate-200 shadow-2xs">
+        <Loader2 className="w-6 h-6 animate-spin text-[#001B47]" />
+        <p className="text-xs font-semibold text-slate-500">Cargando resumen de trámite completado...</p>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return <FichaResumenEjecutivoTramite resumen={resumen} />;
 }
