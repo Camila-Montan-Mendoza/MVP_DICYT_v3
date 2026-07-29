@@ -139,28 +139,23 @@ export async function cargarGrafoWorkflow(
     .in("id_estado_origen", estadoIds);
 
   // 4. Cargar roles responsables por nodo
+  const { data: rolesData } = await supabase
+    .from("rol")
+    .select("id, nombre");
+
   const { data: rolesEstado } = await supabase
     .from("rol_estado_paso_flujo")
-    .select("id_rol, id_estado_paso_flujo, rol ( id, nombre )")
+    .select("id_rol, id_estado_paso_flujo")
     .in("id_estado_paso_flujo", estadoIds);
 
-  // ─── Construir mapas auxiliares ────────────────────────────────
-  // Mapa: estadoId -> transiciones salientes
-  const transicionesPorEstado = new Map<number, TransicionFlujoRow[]>();
-  if (transiciones) {
-    for (const t of transiciones) {
-      const list = transicionesPorEstado.get(t.id_estado_origen) || [];
-      list.push(t as TransicionFlujoRow);
-      transicionesPorEstado.set(t.id_estado_origen, list);
-    }
-  }
+  const rolCatalogMap = new Map<number, string>();
+  (rolesData || []).forEach((r) => rolCatalogMap.set(r.id, r.nombre));
 
   // Mapa: estadoId -> rol asignado
   const rolPorEstado = new Map<number, { rolNombre: string; rolCode: string }>();
   if (rolesEstado) {
     for (const re of rolesEstado as any[]) {
-      const rolObj = re.rol;
-      const rolNombre = rolObj?.nombre || "Sin rol asignado";
+      const rolNombre = rolCatalogMap.get(re.id_rol) || "Sin rol asignado";
       rolPorEstado.set(re.id_estado_paso_flujo, {
         rolNombre,
         rolCode: inferActorRolCode(rolNombre),
@@ -172,6 +167,16 @@ export async function cargarGrafoWorkflow(
   const estadosMap = new Map<number, EstadoPasoFlujoRow>();
   for (const e of tareas) {
     estadosMap.set(e.id, e as EstadoPasoFlujoRow);
+  }
+
+  // Mapa: estadoId -> transiciones salientes
+  const transicionesPorEstado = new Map<number, TransicionFlujoRow[]>();
+  if (transiciones) {
+    for (const t of transiciones) {
+      const list = transicionesPorEstado.get(t.id_estado_origen) || [];
+      list.push(t as TransicionFlujoRow);
+      transicionesPorEstado.set(t.id_estado_origen, list);
+    }
   }
 
   // ─── Construir el grafo de NodoWorkflow ────────────────────────

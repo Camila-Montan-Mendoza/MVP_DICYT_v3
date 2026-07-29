@@ -320,18 +320,24 @@ export class TramiteDBRepository {
           }));
         }
 
-        return rpcRows.map((r: any) => ({
-          id: String(r.tarea_id),
-          pasoId: `p1`,
-          nombre: r.tarea_nombre,
-          rolEsperado: r.rol_esperado || "Sin rol asignado",
-          usuarioAsignado: r.usuario_responsable || "—",
-          rolResponsable: r.rol_responsable_real || "Sin rol asignado",
-          estado: r.estado as "COMPLETADO" | "EN_CURSO" | "PENDIENTE",
-          fechaCompletado: r.fecha_completado,
-          accionesDisponibles:
-            r.estado === "EN_CURSO" || r.estado === "RECHAZADO" ? accionesDisponibles : undefined,
-        }));
+        return rpcRows.map((r: any) => {
+          const rawUser = r.usuario_responsable || "";
+          const userOpt = LOGIN_OPTIONS.find((o) => o.username.toLowerCase() === rawUser.toLowerCase());
+          const usuarioNom = userOpt?.nombreCompleto || (rawUser && rawUser !== "—" ? rawUser : "—");
+
+          return {
+            id: String(r.tarea_id),
+            pasoId: `p1`,
+            nombre: r.tarea_nombre,
+            rolEsperado: r.rol_esperado || "Sin rol asignado",
+            usuarioAsignado: usuarioNom,
+            rolResponsable: r.rol_responsable_real || r.rol_esperado || "Sin rol asignado",
+            estado: r.estado as "COMPLETADO" | "EN_CURSO" | "PENDIENTE",
+            fechaCompletado: r.fecha_completado,
+            accionesDisponibles:
+              r.estado === "EN_CURSO" || r.estado === "RECHAZADO" ? accionesDisponibles : undefined,
+          };
+        });
       }
 
       // 1. Contexto del Trámite y su paso activo (Fallback si la RPC no existe aún)
