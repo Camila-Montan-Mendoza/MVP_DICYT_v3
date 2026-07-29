@@ -71,8 +71,8 @@ const registry: Record<string, ViewEntry> = {
     passive: lazy(() => import("./paso-2-recepcion/tarea-11-recepcion-provisional-passive")),
   },
   "12": {
-    active: lazy(() => import("./paso-2-recepcion/tarea-12-recepcion-definitiva-active")),
-    passive: lazy(() => import("./paso-2-recepcion/tarea-12-recepcion-definitiva-passive")),
+    active: lazy(() => import("./paso-2-recepcion/tarea-11-recepcion-provisional-active")),
+    passive: lazy(() => import("./paso-2-recepcion/tarea-11-recepcion-provisional-passive")),
   },
 
   // ── Paso 3: Pago ──────────────────────────────────────────────────
