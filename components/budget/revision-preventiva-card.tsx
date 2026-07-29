@@ -7,7 +7,6 @@ import {
   SelloPreventivo,
 } from "@/lib/budget/preventivo-service";
 import { ShieldCheck, CheckCircle2, AlertOctagon, X, Stamp } from "lucide-react";
-import { tramiteDBRepository } from "@/lib/db/tramite-repository";
 
 interface RevisionPreventivaCardProps {
   tramiteId: string;
@@ -16,7 +15,7 @@ interface RevisionPreventivaCardProps {
 }
 
 export function RevisionPreventivaCard({
-  tramiteId,
+  tramiteId: _tramiteId,
   onApproveSuccess,
   onRejectSuccess,
 }: RevisionPreventivaCardProps) {

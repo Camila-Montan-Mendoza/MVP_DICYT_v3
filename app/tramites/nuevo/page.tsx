@@ -385,6 +385,7 @@ export default function FormulacionRequerimientosPage() {
       })
     );
 
+    setLastSubmittedCode("TR-2026-0089");
     setBatchSubmitting(false);
     setTimeout(() => {
       router.push("/tramites");

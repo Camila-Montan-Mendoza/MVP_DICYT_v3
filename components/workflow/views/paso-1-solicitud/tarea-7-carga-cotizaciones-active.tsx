@@ -17,6 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { guardarCotizacionProforma } from "@/services/adjudicacionService";
 
 interface ItemCotizacionState {
   idItem: number;
@@ -190,7 +191,7 @@ export default function Tarea7CargaCotizacionesActive({
     );
   };
 
-  const handleSaveProforma = (e: React.FormEvent) => {
+  const handleSaveProforma = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nit.trim()) return;
 
@@ -210,6 +211,34 @@ export default function Tarea7CargaCotizacionesActive({
       totalBs,
       items: modalItems,
     };
+
+    // Persistir directamente en Supabase (cotizacion, detalle_cotizacion, proveedor)
+    const tramiteId = tramite?.id || 3;
+    const res = await guardarCotizacionProforma({
+      tramiteId,
+      nit,
+      proveedorNombre: recordName,
+      telefono,
+      direccion,
+      tiempoEntregaDias: parseInt(tiempoEntrega, 10) || 3,
+      validezOfertaDias: parseInt(validezOferta, 10) || 30,
+      items: modalItems.map((it) => ({
+        idItem: it.idItem,
+        cantidad: it.cantidad,
+        precioUnitario: it.precioUnitario,
+        conExistencia: it.conExistencia,
+        detalle: it.detalle,
+      })),
+    });
+
+    if (res.success) {
+      setFeedback({
+        type: "success",
+        message: `Proforma de ${recordName} guardada exitosamente en Supabase.`,
+      });
+    } else {
+      console.warn("Advertencia guardando en Supabase:", res.error);
+    }
 
     if (editingIndex !== null) {
       setProformas((prev) => prev.map((p, idx) => (idx === editingIndex ? newRecord : p)));
