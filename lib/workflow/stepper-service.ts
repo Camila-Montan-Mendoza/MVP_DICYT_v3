@@ -30,6 +30,8 @@ export interface TareaWorkflow {
   fechaCompletado?: string;
   /** Acciones/transiciones disponibles que se pueden ejecutar desde esta tarea */
   accionesDisponibles?: AccionTransicion[];
+  /** Indica si esta tarea representa el estado final del flujo */
+  esFinal?: boolean;
 }
 
 export interface DetalleTramiteWorkflow {

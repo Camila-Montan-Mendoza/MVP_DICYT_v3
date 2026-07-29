@@ -14,11 +14,13 @@ export function WorkflowStepper({ pasos, activeStepId, onSelectStep }: WorkflowS
     <div className="bg-white p-6 rounded-2xl border border-[#e5e7eb] shadow-2xs">
       <div className="flex items-center justify-between relative max-w-4xl mx-auto">
         {pasos.map((paso, idx) => {
-          const isCompletado = paso.estado === "COMPLETADO";
-          const isEnCurso = paso.estado === "EN_CURSO" || (paso.estado as string) === "EN CURSO";
+          const isLast = idx === pasos.length - 1;
+          const isCompletadoRaw = paso.estado === "COMPLETADO";
+          // Si el paso ya está completado en BD o si estamos en el último paso (Paso 4) y no está PENDIENTE
+          const isCompletado = isCompletadoRaw || (isLast && paso.estado !== "PENDIENTE");
+          const isEnCurso = !isCompletado && (paso.estado === "EN_CURSO" || (paso.estado as string) === "EN CURSO");
           const isPendiente = paso.estado === "PENDIENTE";
           const isSelected = paso.id === activeStepId;
-          const isLast = idx === pasos.length - 1;
 
           return (
             <div key={paso.id} className="flex-1 flex items-center relative">
@@ -59,13 +61,13 @@ export function WorkflowStepper({ pasos, activeStepId, onSelectStep }: WorkflowS
                 <span
                   className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
                     isCompletado
-                      ? "bg-[#e2e8f0] text-[#334155]"
+                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                       : isEnCurso
-                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        ? "bg-blue-100 text-blue-800 border border-blue-300"
                         : "bg-[#f1f5f9] text-[#94a3b8]"
                   }`}
                 >
-                  {paso.estado.replace("_", " ")}
+                  {isCompletado ? "COMPLETADO" : paso.estado.replace("_", " ")}
                 </span>
               </div>
 

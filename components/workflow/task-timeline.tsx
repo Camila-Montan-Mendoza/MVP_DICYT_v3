@@ -34,11 +34,13 @@ export function TaskTimeline({
       ) : (
         <div className="relative pl-6 space-y-4">
           {tareas.map((tarea, index) => {
-            const isCompletado = tarea.estado === "COMPLETADO";
-            const isEnCurso = tarea.estado === "EN_CURSO";
+            const isLast = index === tareas.length - 1;
+            const isFinalTask = Boolean(tarea.esFinal) || tarea.id === "19" || (!tarea.accionesDisponibles?.length && isLast && (pasoNombre.toLowerCase().includes("completado") || pasoNombre.toLowerCase().includes("evidencia")));
+            const isCompletadoRaw = tarea.estado === "COMPLETADO";
+            const isCompletado = isCompletadoRaw || (isFinalTask && tarea.estado !== "PENDIENTE");
+            const isEnCurso = !isCompletado && tarea.estado === "EN_CURSO";
             const isPendiente = tarea.estado === "PENDIENTE";
             const isSelected = selectedTaskId === tarea.id;
-            const isLast = index === tareas.length - 1;
 
             const isUserMatch =
               Boolean(currentUser) &&
