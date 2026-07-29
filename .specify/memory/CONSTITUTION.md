@@ -1,14 +1,10 @@
 <!--
 ### Sync Impact Report
-- Version change: Template [CONSTITUTION_VERSION] → 1.0.0
+- Version change: 1.1.0 → 1.2.0
 - Added/Modified principles:
-  - Principle I: Workflow-Driven Role-Based Access Control (RBAC & Dynamic Views)
-  - Principle II: Institutional Minimalist UX & Prototyping Consistency (DESIGN.md & UMSS Standards)
-  - Principle III: Modular React Architecture & Pattern Discipline (HOC, Hooks, Compound, Container/Presentational, Render Props)
-  - Principle IV: Functional Core Scope & Trámite Execution (MVP First)
-  - Principle V: Supabase/PostgreSQL Relational Integrity & Traceability
-- Added sections: Core Principles, Technical Requirements & Stack Standards, Governance & Amendment Policy
-- Removed sections: N/A (initialized from template placeholders)
+  - Principle VI: Expanded to "Strict Real Database Data & Backend Persistence Discipline (Prohibition of Mock Data)" — Mandates bi-directional read/write active usage of Supabase PostgreSQL and backend endpoints across all workflow views and task components.
+- Added sections: None
+- Removed sections: None
 - Templates requiring updates:
   - ✅ `.specify/templates/plan-template.md` (aligned)
   - ✅ `.specify/templates/spec-template.md` (aligned)
@@ -81,12 +77,13 @@ The database schema MUST reflect the core PostgreSQL schema provided for Supabas
 - Complete traceability of state changes through `historial_estado_tramite` with timestamp, user ID, previous state, new state, and observations.
 - Document and file handling centralized via `archivo` UUIDs for quotes, contractual documents, receipt acts, and payment vouchers (C-31, cheques, memorandums).
 
-### VI. Strict Real Database Data Discipline (No Mock Data Prohibition)
+### VI. Strict Real Database Data & Backend Persistence Discipline (Prohibition of Mock Data)
 
-All UI views, workflow task strategies, and API endpoints MUST query and display real data directly from the Supabase PostgreSQL database (`tramite`, `item_tramite`, `item`, `historial_estado_tramite`, `transicion_flujo`).
+All UI views, workflow task strategies, and API endpoints MUST actively query, render, and persist data directly using the backend and Supabase PostgreSQL database (`tramite`, `item_tramite`, `item`, `cotizacion`, `detalle_cotizacion`, `proveedor`, `item_proveedor_tramite`, `orden_contractual`, `historial_estado_tramite`, `transicion_flujo`).
 
 - **Prohibition of Hardcoded Mock Arrays**: In-memory static mock arrays, fallback mock items, or dummy static objects inside UI view components are strictly prohibited.
-- **Fail-Fast Database Renders**: If an entity or item list is empty, the interface MUST gracefully render an empty state indicator (e.g. "Sin ítems registrados en la base de datos") instead of falling back to static fake datasets.
+- **Bi-directional Supabase Persistence**: Every user operation (creating trámites, uploading quotes, awarding items, issuing purchase orders, verifying signatures, recording payments) MUST write directly to Supabase PostgreSQL tables and update workflow state via `historial_estado_tramite`.
+- **Fail-Fast Database Renders**: If an entity or item list is empty in the database, the interface MUST gracefully render an explicit empty state indicator (e.g. "Sin registros en la base de datos de Supabase") rather than falling back to static fake datasets.
 
 ## Technical Requirements & Stack Standards
 
@@ -98,6 +95,6 @@ All UI views, workflow task strategies, and API endpoints MUST query and display
 
 1. **Constitution Authority**: This Constitution supersedes all informal architectural decisions. All proposed features, pull requests, specifications (`spec.md`), and task breakdowns (`tasks.md`) MUST comply with these principles.
 2. **Amendment Procedure**: Any modification to core principles, actor definitions, or tech stack mandates requires incrementing `CONSTITUTION_VERSION`, updating governance dates, and documenting rationale in a Sync Impact Report.
-3. **Compliance Verification**: Automated and manual reviews must verify adherence to `DESIGN.md` tokens, RBAC view dynamic rendering, and React design pattern discipline before merging code.
+3. **Compliance Verification**: Automated and manual reviews must verify adherence to `DESIGN.md` tokens, RBAC view dynamic rendering, strict Supabase backend persistence, and React design pattern discipline before merging code.
 
-**Version**: 1.1.0 | **Ratified**: 2026-07-23 | **Last Amended**: 2026-07-28
+**Version**: 1.2.0 | **Ratified**: 2026-07-23 | **Last Amended**: 2026-07-29

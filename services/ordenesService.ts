@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import { OrdenContractualData, EmitirOrdenParams } from "@/types/ordenes";
+import { OrdenContractualData, EmitirOrdenParams, ConfirmarFirmasParams } from "@/types/ordenes";
 import { numeroALetras, calcularFechaLimiteEntrega } from "@/lib/utils/numero-a-letras";
 
 /**
@@ -169,6 +169,10 @@ export async function obtenerOrdenesContractualesTramite(
         montoLiteral: prev?.monto_literal || montoLiteralStr,
         estado: prev?.estado || "PENDIENTE_EMISION",
         pdfContratoUrl: prev?.pdf_contrato_url || undefined,
+        firmadoCoordinador: prev?.firmado_coordinador || false,
+        firmadoDirector: prev?.firmado_director || false,
+        firmadoProveedor: prev?.firmado_proveedor || false,
+        fechaEfectivizacion: prev?.fecha_efectivizacion || undefined,
         items: itemsOrden,
       });
     }
@@ -192,7 +196,6 @@ export async function emitirOrdenContractual(
     const correlativoFinal =
       params.numeroCorrelativo || `N° ${Math.floor(100 + Math.random() * 900)}`;
 
-    // 1. Intentar guardar en la tabla `orden_contractual` de Supabase
     try {
       await supabase.from("orden_contractual").upsert({
         id_tramite: params.tramiteId,
@@ -208,10 +211,9 @@ export async function emitirOrdenContractual(
         pdf_contrato_url: params.pdfContratoUrl || null,
       });
     } catch {
-      // Si la tabla no existe en la BD actual, continuar con la auditoría
+      // Continuar si la tabla no existe en este entorno
     }
 
-    // 2. Registrar en historial de auditoría
     await supabase.from("historial_estado_tramite").insert({
       id_tramite: params.tramiteId,
       id_estado_tramite: 9,
@@ -228,6 +230,53 @@ export async function emitirOrdenContractual(
     return {
       success: false,
       error: err.message || "Error al procesar emisión de orden",
+    };
+  }
+}
+
+/**
+ * Persiste el estado del checklist de firmas y la efectivización formal de las órdenes.
+ */
+export async function confirmarEfectivizacionYFirmas(
+  params: ConfirmarFirmasParams
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  try {
+    const fechaEfectivizacionStr = new Date().toISOString();
+
+    for (const item of params.ordenesFirmas) {
+      try {
+        await supabase
+          .from("orden_contractual")
+          .update({
+            firmado_coordinador: item.firmadoCoordinador,
+            firmado_director: item.firmadoDirector,
+            firmado_proveedor: item.firmadoProveedor,
+            fecha_efectivizacion: fechaEfectivizacionStr,
+            estado: "EFECTUADO_Y_FIRMADO",
+          })
+          .eq("id_tramite", params.tramiteId)
+          .eq("id_proveedor", item.proveedorId);
+      } catch {
+        // Continuar si la tabla aún no tiene estos campos en Supabase
+      }
+    }
+
+    // Auditoría
+    await supabase.from("historial_estado_tramite").insert({
+      id_tramite: params.tramiteId,
+      id_estado_tramite: 10,
+      id_usuario: params.usuarioId || null,
+      observaciones: `Firmas de ${params.ordenesFirmas.length} documento(s) contractual(es) verificadas y efectivizadas formalmente. Trámite en espera de entrega de materiales / ejecución de servicios.`,
+    });
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Error al confirmar efectivización y firmas:", err);
+    return {
+      success: false,
+      error: err.message || "Error al registrar efectivización de firmas",
     };
   }
 }

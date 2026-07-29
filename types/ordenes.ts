@@ -1,5 +1,6 @@
 export type TipoDocumentoContractual = "ORDEN_COMPRA" | "ORDEN_SERVICIO" | "CONTRATO";
-export type EstadoOrdenContractual = "PENDIENTE_EMISION" | "EMITIDO" | "REGISTRADO";
+export type EstadoOrdenContractual =
+  "PENDIENTE_EMISION" | "EMITIDO" | "REGISTRADO" | "EFECTUADO_Y_FIRMADO";
 
 export interface ItemOrdenContractual {
   idItemTramite: number;
@@ -32,6 +33,10 @@ export interface OrdenContractualData {
   montoLiteral: string;
   estado: EstadoOrdenContractual;
   pdfContratoUrl?: string;
+  firmadoCoordinador?: boolean;
+  firmadoDirector?: boolean;
+  firmadoProveedor?: boolean;
+  fechaEfectivizacion?: string;
   items: ItemOrdenContractual[];
 }
 
@@ -53,6 +58,18 @@ export interface EmitirOrdenParams {
     detalle: string;
     precioUnitario: number;
     subtotal: number;
+  }>;
+  usuarioId?: number;
+}
+
+export interface ConfirmarFirmasParams {
+  tramiteId: number;
+  ordenesFirmas: Array<{
+    ordenId?: number;
+    proveedorId: number;
+    firmadoCoordinador: boolean;
+    firmadoDirector: boolean;
+    firmadoProveedor: boolean;
   }>;
   usuarioId?: number;
 }
