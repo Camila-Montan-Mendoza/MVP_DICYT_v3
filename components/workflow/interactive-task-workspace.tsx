@@ -39,7 +39,10 @@ export function InteractiveTaskWorkspace({
         <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-900 font-semibold shadow-2xs">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>✓ Tarea completada {selectedTarea.fechaCompletado ? `el ${selectedTarea.fechaCompletado}` : ""}</span>
+            <span>
+              ✓ Tarea completada{" "}
+              {selectedTarea.fechaCompletado ? `el ${selectedTarea.fechaCompletado}` : ""}
+            </span>
           </div>
           {selectedTarea.usuarioAsignado && selectedTarea.usuarioAsignado !== "—" && (
             <span className="text-[11px] text-emerald-700 bg-emerald-100/80 px-2.5 py-1 rounded-lg">

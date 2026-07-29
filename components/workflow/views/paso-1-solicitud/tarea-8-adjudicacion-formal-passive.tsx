@@ -54,7 +54,8 @@ export default function Tarea8AdjudicacionFormalPassive({ tramite }: TaskViewPro
         <div className="flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span className="font-extrabold text-[#001B47]">
-            Total Adjudicado: Bs. {calculos.montoTotalAdjudicado.toLocaleString("es-BO", { minimumFractionDigits: 2 })}
+            Total Adjudicado: Bs.{" "}
+            {calculos.montoTotalAdjudicado.toLocaleString("es-BO", { minimumFractionDigits: 2 })}
           </span>
         </div>
       </div>

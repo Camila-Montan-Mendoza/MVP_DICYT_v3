@@ -56,10 +56,7 @@ export async function obtenerCuadroComparativoTramite(
   const catalogMap = new Map<number, { id: number; nombre: string }>();
 
   if (catalogIds.length > 0) {
-    const { data: catData } = await supabase
-      .from("item")
-      .select("id, nombre")
-      .in("id", catalogIds);
+    const { data: catData } = await supabase.from("item").select("id, nombre").in("id", catalogIds);
     (catData || []).forEach((c) => catalogMap.set(c.id, c));
   }
 
@@ -88,7 +85,7 @@ export async function obtenerCuadroComparativoTramite(
   }
 
   // 3c. Consultar detalle de cotizaciones
-  let detallesMap = new Map<number, any[]>();
+  const detallesMap = new Map<number, any[]>();
   if (cotizacionIds.length > 0) {
     const { data: detData } = await supabase
       .from("detalle_cotizacion")

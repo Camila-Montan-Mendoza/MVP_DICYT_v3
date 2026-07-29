@@ -139,9 +139,7 @@ export async function cargarGrafoWorkflow(
     .in("id_estado_origen", estadoIds);
 
   // 4. Cargar roles responsables por nodo
-  const { data: rolesData } = await supabase
-    .from("rol")
-    .select("id, nombre");
+  const { data: rolesData } = await supabase.from("rol").select("id, nombre");
 
   const { data: rolesEstado } = await supabase
     .from("rol_estado_paso_flujo")

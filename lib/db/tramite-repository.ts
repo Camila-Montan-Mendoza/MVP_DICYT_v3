@@ -322,8 +322,11 @@ export class TramiteDBRepository {
 
         return rpcRows.map((r: any) => {
           const rawUser = r.usuario_responsable || "";
-          const userOpt = LOGIN_OPTIONS.find((o) => o.username.toLowerCase() === rawUser.toLowerCase());
-          const usuarioNom = userOpt?.nombreCompleto || (rawUser && rawUser !== "—" ? rawUser : "—");
+          const userOpt = LOGIN_OPTIONS.find(
+            (o) => o.username.toLowerCase() === rawUser.toLowerCase()
+          );
+          const usuarioNom =
+            userOpt?.nombreCompleto || (rawUser && rawUser !== "—" ? rawUser : "—");
 
           return {
             id: String(r.tarea_id),
