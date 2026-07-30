@@ -82,7 +82,7 @@ const DEFAULT_PROYECTOS: ProyectoSummary[] = [
     ejecutado: 157500,
     saldoDisponible: 292500,
     porcentajeAvance: 35,
-    partidas: TWELVE_PARTIDAS_REALISTAS,
+    partidas: TWELVE_PARTIDAS_REALISTAS, // 12 partidas (peor caso)
   },
   {
     id: 2,
@@ -94,7 +94,7 @@ const DEFAULT_PROYECTOS: ProyectoSummary[] = [
     ejecutado: 210000,
     saldoDisponible: 390000,
     porcentajeAvance: 35,
-    partidas: TWELVE_PARTIDAS_REALISTAS,
+    partidas: TWELVE_PARTIDAS_REALISTAS.slice(0, 6), // 6 partidas (caso mediano)
   },
   {
     id: 3,
@@ -106,7 +106,7 @@ const DEFAULT_PROYECTOS: ProyectoSummary[] = [
     ejecutado: 122500,
     saldoDisponible: 227500,
     porcentajeAvance: 35,
-    partidas: TWELVE_PARTIDAS_REALISTAS,
+    partidas: TWELVE_PARTIDAS_REALISTAS.slice(0, 3), // 3 partidas (caso pequeño)
   },
   {
     id: 4,
@@ -118,7 +118,7 @@ const DEFAULT_PROYECTOS: ProyectoSummary[] = [
     ejecutado: 122500,
     saldoDisponible: 227500,
     porcentajeAvance: 35,
-    partidas: TWELVE_PARTIDAS_REALISTAS,
+    partidas: TWELVE_PARTIDAS_REALISTAS.slice(0, 8), // 8 partidas (caso intermedio)
   },
 ];
 
@@ -247,9 +247,12 @@ export function useDashboardSeguimiento(options: UseDashboardSeguimientoOptions 
             };
           });
 
-          // Asignar las 12 partidas realistas a todos los proyectos para probar el peor caso
-          if (partidasSummary.length < 12) {
-            partidasSummary = TWELVE_PARTIDAS_REALISTAS;
+          // Asignar partidas mock variadas según el ID del proyecto si la BD no tiene suficientes
+          if (partidasSummary.length < 3) {
+            if (proy.id === 1) partidasSummary = TWELVE_PARTIDAS_REALISTAS;
+            else if (proy.id === 2) partidasSummary = TWELVE_PARTIDAS_REALISTAS.slice(0, 6);
+            else if (proy.id === 3) partidasSummary = TWELVE_PARTIDAS_REALISTAS.slice(0, 3);
+            else partidasSummary = TWELVE_PARTIDAS_REALISTAS.slice(0, 8);
           }
 
           const proyEjecutado = partidasSummary.reduce((acc, p) => acc + p.presupuestoEjecutado, 0);
