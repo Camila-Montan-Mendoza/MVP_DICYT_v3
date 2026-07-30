@@ -75,6 +75,27 @@ export default function SeguimientoGastosPage() {
           </h1>
 
           <div className="flex flex-wrap items-center justify-end gap-2.5 ms-auto">
+            {/* Selector Dinámico de Gestión Presupuestaria */}
+            <div className="flex items-center gap-1.5 bg-white border border-[#003770]/40 px-2.5 py-1.5 rounded-lg text-xs shadow-2xs">
+              <Calendar className="w-3.5 h-3.5 text-[#003770] shrink-0" />
+              <span className="text-muted-foreground font-medium shrink-0">Gestión:</span>
+              <select
+                value={selectedGestion}
+                onChange={(e) => {
+                  const val = e.target.value === "global" ? "global" : Number(e.target.value);
+                  if (setSelectedGestion) setSelectedGestion(val);
+                }}
+                className="bg-transparent font-bold text-[#001B47] focus:outline-hidden cursor-pointer shrink-0"
+              >
+                {availableGestiones.map((g) => (
+                  <option key={g} value={g}>
+                    Gestión {g}
+                  </option>
+                ))}
+                <option value="global">Histórico Global del Proyecto/Programa</option>
+              </select>
+            </div>
+
             {/* Selector Dinámico de Programa asignado */}
             {safeRawProgramas.length > 0 && (
               <div className="flex items-center gap-1.5 bg-white border border-border px-2.5 py-1.5 rounded-lg text-xs shadow-2xs max-w-[210px]">
@@ -120,27 +141,6 @@ export default function SeguimientoGastosPage() {
                 </select>
               </div>
             )}
-
-            {/* Selector Dinámico de Gestión Presupuestaria */}
-            <div className="flex items-center gap-1.5 bg-white border border-[#003770]/40 px-2.5 py-1.5 rounded-lg text-xs shadow-2xs">
-              <Calendar className="w-3.5 h-3.5 text-[#003770] shrink-0" />
-              <span className="text-muted-foreground font-medium shrink-0">Gestión:</span>
-              <select
-                value={selectedGestion}
-                onChange={(e) => {
-                  const val = e.target.value === "global" ? "global" : Number(e.target.value);
-                  if (setSelectedGestion) setSelectedGestion(val);
-                }}
-                className="bg-transparent font-bold text-[#001B47] focus:outline-hidden cursor-pointer shrink-0"
-              >
-                {availableGestiones.map((g) => (
-                  <option key={g} value={g}>
-                    Gestión {g}
-                  </option>
-                ))}
-                <option value="global">Histórico Global del Proyecto/Programa</option>
-              </select>
-            </div>
 
             <button
               onClick={() => refetch()}

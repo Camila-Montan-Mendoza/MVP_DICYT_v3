@@ -13,6 +13,7 @@ export interface PartidaConcretaSummary {
   presupuestoAsignado: number;
   presupuestoEjecutado: number;
   presupuestoDisponible: number;
+  gestion?: number;
 }
 
 export interface SubprogramaSummary {
@@ -23,6 +24,7 @@ export interface SubprogramaSummary {
   presupuestoVigente: number;
   ejecutadoVisual: number;
   saldoDisponible: number;
+  gestion?: number;
 }
 
 export interface ProgramaSummary {
@@ -34,6 +36,8 @@ export interface ProgramaSummary {
   ejecutadoVisual: number;
   saldoDisponible: number;
   subprogramas: SubprogramaSummary[];
+  gestion?: number;
+  isCerrada?: boolean;
 }
 
 export interface ProyectoSummary {
@@ -47,6 +51,7 @@ export interface ProyectoSummary {
   saldoDisponible: number;
   porcentajeAvance: number;
   partidas: PartidaConcretaSummary[];
+  isPlurianual?: boolean;
 }
 
 export interface UserRoleScope {

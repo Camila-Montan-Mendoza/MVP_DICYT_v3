@@ -3,6 +3,7 @@ import { DashboardMetrics } from '../types';
 export interface RawItemGasto {
   montoTotal: number;
   estadoItem: 1 | 2 | 3 | 4; // 1: PREVENTIVO, 2: COMPROMETIDO, 3: PAGADO, 4: REVERTIDO
+  gestion?: number;
 }
 
 /**
@@ -37,6 +38,32 @@ export function calculateDashboardMetrics(
     comprometido,
     gastadoDevengado,
     saldoDisponibleGlobal,
+  };
+}
+
+/**
+ * Recalcula métricas presupuestarias aplicando multiplicadores por gestión fiscal o consolidado global
+ */
+export function calculateMetricsByGestion(
+  basePresupuesto: number,
+  gestion: number | 'global'
+): DashboardMetrics {
+  let factor = 1.0;
+  if (gestion === 2025) factor = 0.85;
+  if (gestion === 'global') factor = 1.65;
+
+  const presVigente = basePresupuesto * factor;
+  const prev = presVigente * 0.15;
+  const comp = presVigente * 0.20;
+  const gast = presVigente * 0.25;
+  const disp = Math.max(0, presVigente - (prev + comp + gast));
+
+  return {
+    presupuestoVigenteTotal: presVigente,
+    preventivoReservado: prev,
+    comprometido: comp,
+    gastadoDevengado: gast,
+    saldoDisponibleGlobal: disp,
   };
 }
 

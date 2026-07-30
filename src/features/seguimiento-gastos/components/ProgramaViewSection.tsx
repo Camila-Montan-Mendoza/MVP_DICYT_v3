@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, Layers, ChevronRight } from 'lucide-react';
+import { Building2, Layers, ChevronRight, Clock } from 'lucide-react';
 import { ProgramaSummary } from '../types';
 import { formatBolivianos, calculatePercentage } from '../utils/metrics-calculator';
 
@@ -46,6 +46,12 @@ export function ProgramaViewSection({ programas }: ProgramaViewSectionProps) {
                       <span className="text-xs text-muted-foreground font-mono">
                         Clasificador: {prog.codigoClasificador}
                       </span>
+                      {prog.isCerrada && (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-amber-800" />
+                          Gestión Cerrada / Recursos Vencidos
+                        </span>
+                      )}
                     </div>
                     <h3 className="text-base font-bold text-[#001B47] mt-1">{prog.nombre}</h3>
                   </div>

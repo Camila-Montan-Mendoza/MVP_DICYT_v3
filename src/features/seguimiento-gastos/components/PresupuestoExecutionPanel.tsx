@@ -1,14 +1,19 @@
 import React from 'react';
-import { Wallet, PiggyBank, Clock, FileCheck, CheckCircle2 } from 'lucide-react';
+import { Wallet, PiggyBank, Clock, FileCheck, CheckCircle2, Calendar } from 'lucide-react';
 import { DashboardMetrics } from '../types';
 import { formatBolivianos } from '../utils/metrics-calculator';
 
 interface PresupuestoExecutionPanelProps {
   metrics: DashboardMetrics;
   isLoading?: boolean;
+  selectedGestion?: number | 'global';
 }
 
-export function PresupuestoExecutionPanel({ metrics, isLoading }: PresupuestoExecutionPanelProps) {
+export function PresupuestoExecutionPanel({
+  metrics,
+  isLoading,
+  selectedGestion = 2026,
+}: PresupuestoExecutionPanelProps) {
   const {
     presupuestoVigenteTotal,
     preventivoReservado,
@@ -72,22 +77,28 @@ export function PresupuestoExecutionPanel({ metrics, isLoading }: PresupuestoExe
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm space-y-6">
-      {/* Cabecera del Panel con Presupuesto Vigente Total */}
+      {/* Cabecera del Panel con Presupuesto Vigente Total e Indicador de Gestión */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
         <div>
-          <h2 className="text-lg font-bold text-[#001B47]">Ejecución Presupuestaria</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold text-[#001B47]">Ejecución Presupuestaria</h2>
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#003770]/10 text-[#003770] border border-[#003770]/20 flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-[#003770]" />
+              {selectedGestion === 'global' ? 'Histórico Global' : `Gestión ${selectedGestion}`}
+            </span>
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Distribución consolidada del presupuesto según su estado
+            Distribución consolidada del presupuesto según su estado ({selectedGestion === 'global' ? 'Acumulado Multianual' : `Año ${selectedGestion}`})
           </p>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5 flex items-center gap-3">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5 flex items-center gap-3 shrink-0">
           <div className="p-2 bg-[#003770] rounded-lg text-white">
             <Wallet className="w-5 h-5" />
           </div>
           <div>
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">
-              Presupuesto
+              Presupuesto Vigente
             </span>
             <span className="text-lg font-extrabold text-[#003770]">
               {formatBolivianos(presupuestoVigenteTotal)}
