@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Folder, FileText, LogOut, Bell, User, Menu } from "lucide-react";
+import { Folder, FileText, LogOut, Bell, User, Menu, PieChart } from "lucide-react";
 import { logoutSession } from "@/lib/auth/auth-service";
 import { AuthProvider, useAuth } from "@/lib/auth/auth-context";
 
@@ -112,6 +112,18 @@ function SigefiShellInner({ children }: SigefiShellProps) {
               >
                 <FileText className="w-4 h-4" />
                 Trámites
+              </Link>
+
+              <Link
+                href="/seguimiento-gastos"
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
+                  pathname.startsWith("/seguimiento-gastos")
+                    ? "bg-[#002855] text-white shadow-xs"
+                    : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
+                }`}
+              >
+                <PieChart className="w-4 h-4" />
+                Seguimiento de Gastos
               </Link>
             </nav>
           </div>

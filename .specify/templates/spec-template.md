@@ -17,7 +17,7 @@
 
   MVP & TESTING NOTE: This project is an MVP for fast validation. DO NOT request complex/exhaustive test suites.
   Limit testing to essential, targeted unit tests ("pruebas unitarias bien puntuales") for critical core logic.
-  DESIGN SYSTEM NOTE: All UI user stories and mockups MUST strictly adhere to DESIGN.md (colors, shadcn/ui setup, minimalism).
+  DESIGN SYSTEM NOTE: All UI user stories and mockups MUST strictly adhere to DESIGN.md (colors, shadcn/ui setup, minimalist wizard steppers, zero emojis - SVG icons only).
 
   Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
   Think of each story as a standalone slice of functionality that can be:
