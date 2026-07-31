@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Folder, FileText, LogOut, Bell, User, Menu, PieChart, GitCommit } from "lucide-react";
+import { Folder, FileText, LogOut, Bell, User, Menu, PieChart, GitCommit, History } from "lucide-react";
 import { logoutSession } from "@/lib/auth/auth-service";
 import { AuthProvider, useAuth } from "@/lib/auth/auth-context";
 
@@ -136,6 +136,18 @@ function SigefiShellInner({ children }: SigefiShellProps) {
               >
                 <GitCommit className="w-4 h-4" />
                 Seguimiento de Partidas
+              </Link>
+
+              <Link
+                href="/modificaciones-presupuestarias"
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
+                  pathname.startsWith("/modificaciones-presupuestarias")
+                    ? "bg-[#002855] text-white shadow-xs"
+                    : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
+                }`}
+              >
+                <History className="w-4 h-4" />
+                Historial de Modificaciones
               </Link>
             </nav>
           </div>
