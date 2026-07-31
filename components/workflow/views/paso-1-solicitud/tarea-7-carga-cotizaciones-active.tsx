@@ -263,7 +263,10 @@ export default function Tarea7CargaCotizacionesActive({
   }, [proformas]);
 
   const acciones = tarea.accionesDisponibles || [];
-  const transicionFinalizar = acciones[0];
+  const transicionFinalizar =
+    acciones.find(
+      (a) => a.idEstadoDestino === 8 || a.nombreAccion.toLowerCase().includes("adjudic")
+    ) || acciones[0];
 
   const handleFinalizarCotizaciones = async () => {
     if (!ejecutarTransicion || !transicionFinalizar) return;

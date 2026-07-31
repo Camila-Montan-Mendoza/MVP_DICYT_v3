@@ -115,7 +115,13 @@ export default function Tarea18ExpedienteDigitalActive({
       }
 
       const acciones = tarea.accionesDisponibles || [];
-      const transicionFinalizar = acciones[0];
+      const transicionFinalizar =
+        acciones.find(
+          (a) =>
+            a.idEstadoDestino === 19 ||
+            a.nombreAccion.toLowerCase().includes("complet") ||
+            a.nombreAccion.toLowerCase().includes("finaliz")
+        ) || acciones[0];
 
       if (ejecutarTransicion && transicionFinalizar) {
         const transRes = await ejecutarTransicion(

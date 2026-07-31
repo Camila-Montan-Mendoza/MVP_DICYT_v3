@@ -57,7 +57,13 @@ export default function Tarea10FirmaFormalizacionActive({
   };
 
   const acciones = tarea.accionesDisponibles || [];
-  const transicionFinalizar = acciones[0];
+  const transicionFinalizar =
+    acciones.find(
+      (a) =>
+        a.idEstadoDestino === 11 ||
+        a.nombreAccion.toLowerCase().includes("firm") ||
+        a.nombreAccion.toLowerCase().includes("recepc")
+    ) || acciones[0];
 
   const handleFinalizarEfectivizacion = async () => {
     if (ordenes.length === 0) {

@@ -63,7 +63,13 @@ export default function Tarea8AdjudicacionFormalActive({
     }));
 
   const acciones = tarea.accionesDisponibles || [];
-  const transicionFinalizar = acciones[0];
+  const transicionFinalizar =
+    acciones.find(
+      (a) =>
+        a.idEstadoDestino === 9 ||
+        a.nombreAccion.toLowerCase().includes("recepc") ||
+        a.nombreAccion.toLowerCase().includes("iniciar")
+    ) || acciones[0];
 
   const handleConfirmarFinal = async (justificacion: string) => {
     setIsSubmitting(true);

@@ -68,7 +68,13 @@ export default function Tarea9EmisionOrdenCompraActive({
   };
 
   const acciones = tarea.accionesDisponibles || [];
-  const transicionFinalizar = acciones[0];
+  const transicionFinalizar =
+    acciones.find(
+      (a) =>
+        a.idEstadoDestino === 10 ||
+        a.nombreAccion.toLowerCase().includes("orden") ||
+        a.nombreAccion.toLowerCase().includes("emitir")
+    ) || acciones[0];
 
   const handleFinalizarTarea = async () => {
     if (ordenes.length === 0) {

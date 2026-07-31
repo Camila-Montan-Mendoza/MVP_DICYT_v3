@@ -164,10 +164,30 @@ export default function Tarea6VerificacionMercadoVirtualActive({
   );
 
   const acciones = tarea.accionesDisponibles || [];
-  const transicionFinalizar = acciones[0];
+  const transicionCotizaciones =
+    acciones.find(
+      (a) => a.idEstadoDestino === 7 || a.nombreAccion.toLowerCase().includes("cotiz")
+    ) || acciones[0];
+
+  const transicionAdjudicarMV =
+    acciones.find(
+      (a) => a.idEstadoDestino === 9 || a.nombreAccion.toLowerCase().includes("adjudic")
+    ) || acciones[0];
 
   const handleFinalizarRevision = async () => {
-    if (!ejecutarTransicion || !transicionFinalizar) return;
+    if (!ejecutarTransicion) return;
+
+    // Determinar si hay algún ítem que NO exista en Mercado Virtual y requiera cotizaciones
+    const requiereCotizaciones = Object.values(itemStatuses).some(
+      (st) => st === "NO_ENCONTRADO" || st === "PENDIENTE"
+    );
+
+    const transicionElegida = requiereCotizaciones
+      ? transicionCotizaciones
+      : transicionAdjudicarMV;
+
+    if (!transicionElegida) return;
+
     setIsSubmitting(true);
     setFeedback(null);
 
@@ -176,7 +196,7 @@ export default function Tarea6VerificacionMercadoVirtualActive({
       .join(", ");
 
     const res = await ejecutarTransicion(
-      transicionFinalizar.idTransicion,
+      transicionElegida.idTransicion,
       `Revisión Mercado Virtual realizada. ${summary}`
     );
     setIsSubmitting(false);
@@ -586,7 +606,7 @@ export default function Tarea6VerificacionMercadoVirtualActive({
         <button
           type="button"
           onClick={handleFinalizarRevision}
-          disabled={isSubmitting || !transicionFinalizar}
+          disabled={isSubmitting || acciones.length === 0}
           className="px-8 py-3 bg-[#001B47] text-white font-extrabold text-xs rounded-xl hover:bg-[#002855] transition-all shadow-md flex items-center gap-2 disabled:opacity-50"
         >
           {isSubmitting ? (

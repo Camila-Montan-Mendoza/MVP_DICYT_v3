@@ -91,6 +91,22 @@ export default function Tarea11RecepcionProvisionalActive({
         throw new Error(res.error || "Error al registrar acta provisional");
       }
 
+      const acciones = tarea.accionesDisponibles || [];
+      const transicionProvisional =
+        acciones.find(
+          (a) =>
+            a.idEstadoDestino === 11 ||
+            a.nombreAccion.toLowerCase().includes("provisional") ||
+            String(a.idTransicion) === "14"
+        );
+
+      if (ejecutarTransicion && transicionProvisional) {
+        await ejecutarTransicion(
+          transicionProvisional.idTransicion,
+          `Acta de Recepción Provisional emitida para ${rec.proveedorNombre}.`
+        );
+      }
+
       setFeedback({
         type: "success",
         message: `¡Acta de Recepción Provisional emitida para ${rec.proveedorNombre}! Se guardó el estado parcial en Supabase.`,
@@ -141,11 +157,17 @@ export default function Tarea11RecepcionProvisionalActive({
       }
 
       const acciones = tarea.accionesDisponibles || [];
-      const transicionFinalizar = acciones[0];
+      const transicionDefinitiva =
+        acciones.find(
+          (a) =>
+            a.idEstadoDestino === 13 ||
+            a.nombreAccion.toLowerCase().includes("definitiv") ||
+            String(a.idTransicion) === "13"
+        ) || acciones[0];
 
-      if (ejecutarTransicion && transicionFinalizar) {
+      if (ejecutarTransicion && transicionDefinitiva) {
         const transRes = await ejecutarTransicion(
-          transicionFinalizar.idTransicion,
+          transicionDefinitiva.idTransicion,
           `Acta de Recepción Definitiva emitida 100% conforme para ${rec.proveedorNombre}. Trámite avanzado a Pago a Proveedor.`
         );
 
@@ -212,11 +234,17 @@ export default function Tarea11RecepcionProvisionalActive({
       }
 
       const acciones = tarea.accionesDisponibles || [];
-      const transicionFinalizar = acciones[0];
+      const transicionDefinitiva =
+        acciones.find(
+          (a) =>
+            a.idEstadoDestino === 13 ||
+            a.nombreAccion.toLowerCase().includes("definitiv") ||
+            String(a.idTransicion) === "13"
+        ) || acciones[0];
 
-      if (ejecutarTransicion && transicionFinalizar) {
+      if (ejecutarTransicion && transicionDefinitiva) {
         const transRes = await ejecutarTransicion(
-          transicionFinalizar.idTransicion,
+          transicionDefinitiva.idTransicion,
           `Recepción 100% conforme completada de ${recepciones.length} proveedor(es). Avance directo a Pago a Proveedor.`
         );
 

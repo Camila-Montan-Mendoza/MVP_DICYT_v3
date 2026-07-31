@@ -35,14 +35,15 @@ export default function Tarea2RevisionTecnicaActive({
   const transicionAprobar =
     acciones.find(
       (a) =>
-        !a.nombreAccion.toLowerCase().includes("rechaz") &&
-        !a.nombreAccion.toLowerCase().includes("observ")
+        a.idEstadoDestino === 6 ||
+        (!a.nombreAccion.toLowerCase().includes("rechaz") &&
+          !a.nombreAccion.toLowerCase().includes("observ"))
     ) || acciones[0];
 
   const transicionObservar =
     acciones.find(
       (a) =>
-        a.nombreAccion.toLowerCase().includes("rechaz") ||
+        a.idEstadoDestino === 3 ||
         a.nombreAccion.toLowerCase().includes("observ")
     ) || acciones[1];
 

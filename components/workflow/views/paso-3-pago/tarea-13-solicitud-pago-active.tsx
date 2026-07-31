@@ -116,7 +116,13 @@ export default function Tarea13SolicitudPagoActive({
       }
 
       const acciones = tarea.accionesDisponibles || [];
-      const transicionFinalizar = acciones[0];
+      const transicionFinalizar =
+        acciones.find(
+          (a) =>
+            a.idEstadoDestino === 18 ||
+            a.nombreAccion.toLowerCase().includes("pago") ||
+            a.nombreAccion.toLowerCase().includes("solicit")
+        ) || acciones[0];
 
       if (ejecutarTransicion && transicionFinalizar) {
         const transRes = await ejecutarTransicion(
@@ -216,7 +222,13 @@ export default function Tarea13SolicitudPagoActive({
       }
 
       const acciones = tarea.accionesDisponibles || [];
-      const transicionFinalizar = acciones[0];
+      const transicionFinalizar =
+        acciones.find(
+          (a) =>
+            a.idEstadoDestino === 18 ||
+            a.nombreAccion.toLowerCase().includes("pago") ||
+            a.nombreAccion.toLowerCase().includes("solicit")
+        ) || acciones[0];
 
       if (ejecutarTransicion && transicionFinalizar) {
         const transRes = await ejecutarTransicion(
