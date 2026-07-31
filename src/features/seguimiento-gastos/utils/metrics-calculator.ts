@@ -1,4 +1,4 @@
-import { DashboardMetrics } from '../types';
+import { DashboardMetrics } from "../types";
 
 export interface RawItemGasto {
   montoTotal: number;
@@ -46,15 +46,15 @@ export function calculateDashboardMetrics(
  */
 export function calculateMetricsByGestion(
   basePresupuesto: number,
-  gestion: number | 'global'
+  gestion: number | "global"
 ): DashboardMetrics {
   let factor = 1.0;
   if (gestion === 2025) factor = 0.85;
-  if (gestion === 'global') factor = 1.65;
+  if (gestion === "global") factor = 1.65;
 
   const presVigente = basePresupuesto * factor;
   const prev = presVigente * 0.15;
-  const comp = presVigente * 0.20;
+  const comp = presVigente * 0.2;
   const gast = presVigente * 0.25;
   const disp = Math.max(0, presVigente - (prev + comp + gast));
 
@@ -71,7 +71,7 @@ export function calculateMetricsByGestion(
  * Formatea valores numéricos en formato de moneda Bolivianos (Bs.)
  */
 export function formatBolivianos(amount: number): string {
-  const num = new Intl.NumberFormat('es-BO', {
+  const num = new Intl.NumberFormat("es-BO", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount || 0);

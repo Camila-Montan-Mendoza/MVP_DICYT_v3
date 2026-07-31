@@ -5,15 +5,15 @@
 ```typescript
 export interface UseDashboardSeguimientoReturn {
   // Filtro de Gestión
-  selectedGestion: number | 'global';
-  setSelectedGestion: (gestion: number | 'global') => void;
+  selectedGestion: number | "global";
+  setSelectedGestion: (gestion: number | "global") => void;
   availableGestiones: number[];
 
   // Filtros existentes
-  selectedProgramaId: number | 'all';
-  setSelectedProgramaId: (id: number | 'all') => void;
-  selectedProyectoId: number | 'all';
-  setSelectedProyectoId: (id: number | 'all') => void;
+  selectedProgramaId: number | "all";
+  setSelectedProgramaId: (id: number | "all") => void;
+  selectedProyectoId: number | "all";
+  setSelectedProyectoId: (id: number | "all") => void;
 
   // Datos filtrados según gestión
   metrics: DashboardMetrics;

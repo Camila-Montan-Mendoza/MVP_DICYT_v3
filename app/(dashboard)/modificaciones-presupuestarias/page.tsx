@@ -43,7 +43,8 @@ export default function ModificacionesPresupuestariasPage() {
               </h1>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Bitácora de auditoría informativa de reasignaciones de fondos (Datos en vivo desde Supabase)
+              Bitácora de auditoría informativa de reasignaciones de fondos (Datos en vivo desde
+              Supabase)
             </p>
           </div>
 
@@ -135,16 +136,21 @@ export default function ModificacionesPresupuestariasPage() {
               Selecciona un Programa o Proyecto
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Por favor, elige un Programa o Proyecto en el encabezado superior para desplegar su bitácora histórica de modificaciones presupuestarias.
+              Por favor, elige un Programa o Proyecto en el encabezado superior para desplegar su
+              bitácora histórica de modificaciones presupuestarias.
             </p>
           </div>
         ) : (
           <div className="flex gap-6">
-            <div className={`flex-1 transition-all duration-300 ${selectedModificacion ? "pr-0 md:pr-[550px]" : ""}`}>
+            <div
+              className={`flex-1 transition-all duration-300 ${selectedModificacion ? "pr-0 md:pr-[550px]" : ""}`}
+            >
               {isLoading ? (
                 <div className="bg-white border border-border rounded-xl p-12 text-center shadow-2xs animate-pulse">
                   <div className="h-6 bg-slate-200 rounded w-1/3 mx-auto mb-2" />
-                  <span className="text-xs text-muted-foreground">Cargando bitácora real desde Supabase...</span>
+                  <span className="text-xs text-muted-foreground">
+                    Cargando bitácora real desde Supabase...
+                  </span>
                 </div>
               ) : error ? (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center text-xs text-red-700">
@@ -160,10 +166,7 @@ export default function ModificacionesPresupuestariasPage() {
             </div>
 
             {/* Panel Lateral Estilo Jira (Drawer por la Derecha con Justificación Completa) */}
-            <BitacoraDetailSidebar
-              modificacion={selectedModificacion}
-              onClose={onCloseSidebar}
-            />
+            <BitacoraDetailSidebar modificacion={selectedModificacion} onClose={onCloseSidebar} />
           </div>
         )}
       </div>

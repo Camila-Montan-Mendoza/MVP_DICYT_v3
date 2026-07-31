@@ -116,9 +116,9 @@ export async function fetchBitacoraModificaciones(): Promise<ModificacionPresupu
   try {
     const supabase = createClient();
 
-    const { data: rawBitacora, error: bitacoraErr } = await supabase
-      .from("bitacora_modificacion_presupuestaria")
-      .select(`
+    const { data: rawBitacora, error: bitacoraErr } = await supabase.from(
+      "bitacora_modificacion_presupuestaria"
+    ).select(`
         id,
         codigo,
         justificacion,
@@ -142,8 +142,7 @@ export async function fetchBitacoraModificaciones(): Promise<ModificacionPresupu
 
     let detallesData: any[] = [];
     try {
-      const { data: rawDetalles } = await supabase
-        .from("detalle_modificacion_presupuestaria")
+      const { data: rawDetalles } = await supabase.from("detalle_modificacion_presupuestaria")
         .select(`
           id,
           id_bitacora,
@@ -176,7 +175,8 @@ export async function fetchBitacoraModificaciones(): Promise<ModificacionPresupu
         const p = pc?.partida;
         const monto = Number(d.monto_modificado) || 0;
         const ant = Number(d.presupuesto_anterior) || 0;
-        const nuevo = Number(d.presupuesto_nuevo) || ant + (d.tipo_impacto === "incremento" ? monto : -monto);
+        const nuevo =
+          Number(d.presupuesto_nuevo) || ant + (d.tipo_impacto === "incremento" ? monto : -monto);
 
         return {
           id: d.id,
@@ -194,8 +194,12 @@ export async function fetchBitacoraModificaciones(): Promise<ModificacionPresupu
         id: row.id,
         codigo: row.codigo || `MOD-2026-00${row.id}`,
         justificacion: row.justificacion || "Modificación de partidas presupuestarias.",
-        fechaSolicitud: row.fecha_solicitud ? new Date(row.fecha_solicitud).toLocaleDateString("es-BO") : "10/02/2026",
-        fechaAprobacion: row.fecha_aprobacion ? new Date(row.fecha_aprobacion).toLocaleDateString("es-BO") : "18/02/2026",
+        fechaSolicitud: row.fecha_solicitud
+          ? new Date(row.fecha_solicitud).toLocaleDateString("es-BO")
+          : "10/02/2026",
+        fechaAprobacion: row.fecha_aprobacion
+          ? new Date(row.fecha_aprobacion).toLocaleDateString("es-BO")
+          : "18/02/2026",
         solicitadoPor: row.solicitado_por || "Investigador Responsable",
         aprobadoPor: row.aprobado_por || "Director DICYT",
         documentoRespaldoUrl: row.documento_respaldo_url,
@@ -203,7 +207,10 @@ export async function fetchBitacoraModificaciones(): Promise<ModificacionPresupu
         idProyecto: row.proyecto?.id || row.id_proyecto || 1,
         idPrograma: row.proyecto?.id_programa || 1,
         nombreProyecto: row.proyecto?.nombre || "Proyecto DICYT",
-        partidasAfectadas: partidasAfectadas.length > 0 ? partidasAfectadas : FALLBACK_MODIFICACIONES[0].partidasAfectadas,
+        partidasAfectadas:
+          partidasAfectadas.length > 0
+            ? partidasAfectadas
+            : FALLBACK_MODIFICACIONES[0].partidasAfectadas,
       };
     });
 

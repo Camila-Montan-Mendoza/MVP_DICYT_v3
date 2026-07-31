@@ -17,13 +17,13 @@ Endpoint backend (Next.js Route Handler) que sirve la lista de proyectos con alc
 GET /api/proyectos?q=&estadoId=&investigadorId=&page=1&pageSize=10
 ```
 
-| Query param | Tipo | Requerido | Notas |
-| ----------- | ---- | --------- | ----- |
-| `q` | string | No | Búsqueda por `nombre` o `codigo` del proyecto (ILIKE) |
-| `estadoId` | number | No | Uno de los 4 IDs de `estado_proyecto` (ver data-model.md) |
-| `investigadorId` | number | No | Solo tiene efecto si `scope = "all"`; ignorado si `scope = "own"` |
-| `page` | number | No (default `1`) | 1-based |
-| `pageSize` | number | No (default `10`, máx `50`) | |
+| Query param      | Tipo   | Requerido                   | Notas                                                             |
+| ---------------- | ------ | --------------------------- | ----------------------------------------------------------------- |
+| `q`              | string | No                          | Búsqueda por `nombre` o `codigo` del proyecto (ILIKE)             |
+| `estadoId`       | number | No                          | Uno de los 4 IDs de `estado_proyecto` (ver data-model.md)         |
+| `investigadorId` | number | No                          | Solo tiene efecto si `scope = "all"`; ignorado si `scope = "own"` |
+| `page`           | number | No (default `1`)            | 1-based                                                           |
+| `pageSize`       | number | No (default `10`, máx `50`) |                                                                   |
 
 ## Response `200 OK`
 
@@ -49,13 +49,13 @@ GET /api/proyectos?q=&estadoId=&investigadorId=&page=1&pageSize=10
 
 ## Casos de Error / Vacío
 
-| Escenario | Respuesta |
-| --------- | --------- |
-| Sin sesión | `401 Unauthorized`, `{ "message": "No autenticado" }` |
-| Rol activo sin acceso a esta vista | `403 Forbidden`, `{ "message": "Rol sin acceso a la lista de proyectos" }` |
-| Sin proyectos en el alcance del rol (sin filtros aplicados) | `200 OK`, `{ "proyectos": [], "total": 0, ... }` — la UI renderiza el mensaje "sin proyectos" (FR-010) |
-| Filtros sin coincidencias sobre un alcance no vacío | `200 OK`, `{ "proyectos": [], "total": 0, ... }` — la UI renderiza el mensaje "sin coincidencias de filtro" (FR-011), distinguido en el cliente porque ya conoce (de una carga previa sin filtros) que el alcance no está vacío |
-| Error de Supabase (conexión, query) | `500 Internal Server Error`, `{ "message": "Error al consultar proyectos" }` — **nunca** un arreglo de respaldo |
+| Escenario                                                   | Respuesta                                                                                                                                                                                                                       |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sin sesión                                                  | `401 Unauthorized`, `{ "message": "No autenticado" }`                                                                                                                                                                           |
+| Rol activo sin acceso a esta vista                          | `403 Forbidden`, `{ "message": "Rol sin acceso a la lista de proyectos" }`                                                                                                                                                      |
+| Sin proyectos en el alcance del rol (sin filtros aplicados) | `200 OK`, `{ "proyectos": [], "total": 0, ... }` — la UI renderiza el mensaje "sin proyectos" (FR-010)                                                                                                                          |
+| Filtros sin coincidencias sobre un alcance no vacío         | `200 OK`, `{ "proyectos": [], "total": 0, ... }` — la UI renderiza el mensaje "sin coincidencias de filtro" (FR-011), distinguido en el cliente porque ya conoce (de una carga previa sin filtros) que el alcance no está vacío |
+| Error de Supabase (conexión, query)                         | `500 Internal Server Error`, `{ "message": "Error al consultar proyectos" }` — **nunca** un arreglo de respaldo                                                                                                                 |
 
 ## Hook consumidor: `useProyectosLista`
 

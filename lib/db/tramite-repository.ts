@@ -622,7 +622,9 @@ export class TramiteDBRepository {
       try {
         const { data: itemRows } = await this.supabase
           .from("item_tramite")
-          .select("id, id_item, cantidad_solicitada, precio_unitario, especificacion, item:item!id_item ( id, nombre )")
+          .select(
+            "id, id_item, cantidad_solicitada, precio_unitario, especificacion, item:item!id_item ( id, nombre )"
+          )
           .eq("id_tramite", tramite.id);
 
         if (itemRows && itemRows.length > 0) {

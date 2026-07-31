@@ -1,4 +1,4 @@
-export type TipoImpactoPartida = 'disminucion' | 'incremento';
+export type TipoImpactoPartida = "disminucion" | "incremento";
 
 export interface PartidaAfectadaDetail {
   id: number;

@@ -22,7 +22,9 @@ export default function Tarea18ExpedienteDigitalActive({
   const [loading, setLoading] = useState(true);
   const [archivos, setArchivos] = useState<ArchivoExpedienteData[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(
+    null
+  );
 
   const cargarArchivos = useCallback(async () => {
     setLoading(true);
@@ -136,7 +138,8 @@ export default function Tarea18ExpedienteDigitalActive({
 
       setFeedback({
         type: "success",
-        message: "¡Expediente digital archivado exitosamente! Avance automático a Trámite Completado.",
+        message:
+          "¡Expediente digital archivado exitosamente! Avance automático a Trámite Completado.",
       });
 
       await cargarArchivos();

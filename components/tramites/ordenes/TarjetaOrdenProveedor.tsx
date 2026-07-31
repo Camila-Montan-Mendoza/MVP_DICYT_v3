@@ -6,7 +6,6 @@ import {
   Building2,
   Printer,
   FileCheck2,
-  Upload,
   AlertTriangle,
   ChevronDown,
   ChevronUp,
@@ -24,7 +23,7 @@ export function TarjetaOrdenProveedor({
   onAdjuntarContrato,
 }: TarjetaOrdenProveedorProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [_selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const esContrato = orden.tipoDocumento === "CONTRATO";
   const esEmitido = orden.estado === "EMITIDO" || orden.estado === "REGISTRADO";

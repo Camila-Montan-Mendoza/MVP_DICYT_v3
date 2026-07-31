@@ -35,7 +35,13 @@ export function TaskTimeline({
         <div className="relative pl-6 space-y-4">
           {tareas.map((tarea, index) => {
             const isLast = index === tareas.length - 1;
-            const isFinalTask = Boolean(tarea.esFinal) || tarea.id === "19" || (!tarea.accionesDisponibles?.length && isLast && (pasoNombre.toLowerCase().includes("completado") || pasoNombre.toLowerCase().includes("evidencia")));
+            const isFinalTask =
+              Boolean(tarea.esFinal) ||
+              tarea.id === "19" ||
+              (!tarea.accionesDisponibles?.length &&
+                isLast &&
+                (pasoNombre.toLowerCase().includes("completado") ||
+                  pasoNombre.toLowerCase().includes("evidencia")));
             const isCompletadoRaw = tarea.estado === "COMPLETADO";
             const isCompletado = isCompletadoRaw || (isFinalTask && tarea.estado !== "PENDIENTE");
             const isEnCurso = !isCompletado && tarea.estado === "EN_CURSO";

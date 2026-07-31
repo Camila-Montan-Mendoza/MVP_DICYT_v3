@@ -23,7 +23,7 @@ export async function obtenerDatosRecepcionTramite(
     }
 
     // 2. Consultar si existen actas previamente registradas en Supabase (`acta_recepcion`)
-    let actasMap = new Map<number, any>();
+    const actasMap = new Map<number, any>();
     try {
       const { data: actasData } = await supabase
         .from("acta_recepcion")
@@ -37,7 +37,8 @@ export async function obtenerDatosRecepcionTramite(
     const resultado: RecepcionProveedorData[] = [];
 
     for (const ord of ordenes) {
-      const actaPrev = actasMap.get(ord.proveedorId) || (ord.id !== undefined ? actasMap.get(ord.id) : undefined);
+      const actaPrev =
+        actasMap.get(ord.proveedorId) || (ord.id !== undefined ? actasMap.get(ord.id) : undefined);
 
       const materiales: MaterialRecepcionItem[] = ord.items.map((it) => ({
         idItemTramite: it.idItemTramite,
@@ -61,7 +62,8 @@ export async function obtenerDatosRecepcionTramite(
         unidadSolicitante: "Facultad de Ciencias y Tecnología - Lab. Hidráulica",
         nombreCoordinador: actaPrev?.nombre_coordinador || "Dr. Winsor Orellana",
         nombreRepProveedor: actaPrev?.nombre_rep_proveedor || ord.proveedorNombre,
-        nombreRepBienes: actaPrev?.nombre_rep_bienes || "Ing. Mario Gutiérrez (Bienes e Inventarios)",
+        nombreRepBienes:
+          actaPrev?.nombre_rep_bienes || "Ing. Mario Gutiérrez (Bienes e Inventarios)",
         facturaUrl: actaPrev?.factura_url || undefined,
         evidenciaUrl: actaPrev?.evidencia_url || undefined,
         observaciones: actaPrev?.observaciones || "",

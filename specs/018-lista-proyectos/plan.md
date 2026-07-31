@@ -32,7 +32,7 @@ Construir la página `/proyectos` (`app/(dashboard)/proyectos/page.tsx`, ya enla
 
 _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
-- **I. RBAC Workflow-Driven**: El alcance (CA-1) y los filtros disponibles (CA-3) se derivan del rol activo resuelto en `GET /api/proyectos` a partir de `usuario`/`rol_usuario` en el servidor. PASS, condicionado a que ningún componente cliente decida el alcance de datos por sí mismo (solo decide qué controles de filtro *renderizar*).
+- **I. RBAC Workflow-Driven**: El alcance (CA-1) y los filtros disponibles (CA-3) se derivan del rol activo resuelto en `GET /api/proyectos` a partir de `usuario`/`rol_usuario` en el servidor. PASS, condicionado a que ningún componente cliente decida el alcance de datos por sí mismo (solo decide qué controles de filtro _renderizar_).
 - **II. Minimalist Wizard UI & Zero Emojis**: Lista tabular (no wizard, es una vista de consulta/monitoreo, no un proceso multi-paso) con badges de estado usando íconos `lucide-react` y tokens de `DESIGN.md`. PASS.
 - **III. Modular React Architecture**: Separación Container (`useProyectosLista` hook) / Presentacional (`ProyectosTable`, `ProyectosFilters`, `EstadoProyectoBadge`, `ProyectosEmptyState`); acceso a datos aislado en `lib/db/proyecto-repository.ts`. PASS.
 - **IV. Functional Core Scope (MVP First)**: Esta HU implementa exactamente el nodo `Lista de Proyectos` de la navegación mandatada por este principio. PASS.
@@ -96,4 +96,4 @@ components/ui/
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 | --------- | ---------- | ------------------------------------ |
-| Ninguna | N/A | N/A |
+| Ninguna   | N/A        | N/A                                  |

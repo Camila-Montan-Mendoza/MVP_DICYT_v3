@@ -1,7 +1,7 @@
-import React from 'react';
-import { Building2, Layers, ChevronRight, Clock } from 'lucide-react';
-import { ProgramaSummary } from '../types';
-import { formatBolivianos, calculatePercentage } from '../utils/metrics-calculator';
+import React from "react";
+import { Building2, Layers, ChevronRight, Clock } from "lucide-react";
+import { ProgramaSummary } from "../types";
+import { formatBolivianos, calculatePercentage } from "../utils/metrics-calculator";
 
 interface ProgramaViewSectionProps {
   programas: ProgramaSummary[];
@@ -16,7 +16,9 @@ export function ProgramaViewSection({ programas }: ProgramaViewSectionProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-[#001B47]">Visión Ejecutiva de Programas e Institucional</h2>
+          <h2 className="text-lg font-bold text-[#001B47]">
+            Visión Ejecutiva de Programas e Institucional
+          </h2>
           <p className="text-xs text-muted-foreground">
             Consolidado presupuestario de Programas Principales y Subprogramas asociados
           </p>
@@ -59,12 +61,20 @@ export function ProgramaViewSection({ programas }: ProgramaViewSectionProps) {
 
                 <div className="flex items-center gap-6 text-right">
                   <div>
-                    <span className="text-[11px] text-muted-foreground uppercase font-semibold">Presupuesto Vigente</span>
-                    <div className="text-lg font-bold text-[#001B47]">{formatBolivianos(prog.presupuestoVigente)}</div>
+                    <span className="text-[11px] text-muted-foreground uppercase font-semibold">
+                      Presupuesto Vigente
+                    </span>
+                    <div className="text-lg font-bold text-[#001B47]">
+                      {formatBolivianos(prog.presupuestoVigente)}
+                    </div>
                   </div>
                   <div>
-                    <span className="text-[11px] text-muted-foreground uppercase font-semibold">Saldo Disponible</span>
-                    <div className="text-lg font-bold text-emerald-700">{formatBolivianos(prog.saldoDisponible)}</div>
+                    <span className="text-[11px] text-muted-foreground uppercase font-semibold">
+                      Saldo Disponible
+                    </span>
+                    <div className="text-lg font-bold text-emerald-700">
+                      {formatBolivianos(prog.saldoDisponible)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -93,7 +103,10 @@ export function ProgramaViewSection({ programas }: ProgramaViewSectionProps) {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {prog.subprogramas.map((sub) => {
-                      const subPct = calculatePercentage(sub.ejecutadoVisual, sub.presupuestoVigente);
+                      const subPct = calculatePercentage(
+                        sub.ejecutadoVisual,
+                        sub.presupuestoVigente
+                      );
                       return (
                         <div
                           key={sub.id}
@@ -104,14 +117,18 @@ export function ProgramaViewSection({ programas }: ProgramaViewSectionProps) {
                               <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700">
                                 {sub.sigla}
                               </span>
-                              <h4 className="text-xs font-bold text-[#001B47] mt-1 line-clamp-1">{sub.nombre}</h4>
+                              <h4 className="text-xs font-bold text-[#001B47] mt-1 line-clamp-1">
+                                {sub.nombre}
+                              </h4>
                             </div>
                             <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                           </div>
 
                           <div className="space-y-1">
                             <div className="flex justify-between text-[11px]">
-                              <span className="text-muted-foreground">Vigente: {formatBolivianos(sub.presupuestoVigente)}</span>
+                              <span className="text-muted-foreground">
+                                Vigente: {formatBolivianos(sub.presupuestoVigente)}
+                              </span>
                               <span className="font-bold text-[#003770]">{subPct}%</span>
                             </div>
                             <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">

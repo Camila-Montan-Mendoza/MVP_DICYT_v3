@@ -128,7 +128,6 @@ function Seccion(num: number, divisor: number, strSingular: string, strPlural: s
 
 function Miles(num: number): string {
   const divisor = 1000;
-  const cientos = Math.floor(num / divisor);
   const resto = num % divisor;
 
   const strMiles = Seccion(num, divisor, "UN MIL", "MIL");
@@ -140,7 +139,6 @@ function Miles(num: number): string {
 
 function Millones(num: number): string {
   const divisor = 1000000;
-  const cientos = Math.floor(num / divisor);
   const resto = num % divisor;
 
   const strMillones = Seccion(num, divisor, "UN MILLON", "MILLONES");

@@ -13,7 +13,8 @@ export default function Tarea11RecepcionProvisionalPassive({ tramite }: TaskView
 
   const [loading, setLoading] = useState(true);
   const [recepciones, setRecepciones] = useState<RecepcionProveedorData[]>([]);
-  const [selectedRecepcionModal, setSelectedRecepcionModal] = useState<RecepcionProveedorData | null>(null);
+  const [selectedRecepcionModal, setSelectedRecepcionModal] =
+    useState<RecepcionProveedorData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const cargarRecepciones = useCallback(async () => {
@@ -41,7 +42,9 @@ export default function Tarea11RecepcionProvisionalPassive({ tramite }: TaskView
     return (
       <div className="flex flex-col items-center justify-center p-8 gap-2 bg-white rounded-xl border border-slate-200 shadow-2xs">
         <Loader2 className="w-6 h-6 animate-spin text-[#001B47]" />
-        <p className="text-xs font-semibold text-slate-500">Cargando actas de recepción desde Supabase...</p>
+        <p className="text-xs font-semibold text-slate-500">
+          Cargando actas de recepción desde Supabase...
+        </p>
       </div>
     );
   }

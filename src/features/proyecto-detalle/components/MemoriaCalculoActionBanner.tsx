@@ -10,7 +10,10 @@ interface MemoriaCalculoActionBannerProps {
   permisos: PermisosDetalleProyecto;
 }
 
-export function MemoriaCalculoActionBanner({ proyectoId, permisos }: MemoriaCalculoActionBannerProps) {
+export function MemoriaCalculoActionBanner({
+  proyectoId,
+  permisos,
+}: MemoriaCalculoActionBannerProps) {
   const router = useRouter();
 
   if (permisos.soloLectura) return null;

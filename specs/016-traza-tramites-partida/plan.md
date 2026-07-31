@@ -25,6 +25,7 @@ Implementar la visualización y auditoría de la traza de trámites por partida 
 **Performance Goals**: Carga de la traza desde Supabase en menos de 800ms.
 
 **Constraints**:
+
 - UI Tipo Jira: Panel lateral deslizable a la derecha (`w-full md:w-96 lg:w-[480px]`).
 - Consulta 100% real a Supabase (sin fallbacks mockeados).
 - Cumplimiento de `DESIGN.md` (colores UMSS `#003770` y `#001B47`, cero emojis, badges de estado semánticos).
@@ -72,4 +73,4 @@ src/features/traza-tramites/
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 | --------- | ---------- | ------------------------------------ |
-| Ninguna | N/A | N/A |
+| Ninguna   | N/A        | N/A                                  |

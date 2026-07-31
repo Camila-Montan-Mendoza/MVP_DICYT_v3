@@ -4,7 +4,10 @@ export function validarRequisitosActaDefinitiva(
   materialesSinVerificar: number = 0
 ): { valida: boolean; motivo?: string } {
   if (!facturaUrl) {
-    return { valida: false, motivo: "La factura oficial del proveedor es obligatoria para el Acta Definitiva" };
+    return {
+      valida: false,
+      motivo: "La factura oficial del proveedor es obligatoria para el Acta Definitiva",
+    };
   }
   if (materialesSinVerificar > 0) {
     return { valida: false, motivo: "Existen materiales sin verificar en la tabla" };

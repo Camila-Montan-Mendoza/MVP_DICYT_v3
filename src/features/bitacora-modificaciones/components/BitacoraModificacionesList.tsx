@@ -46,9 +46,7 @@ export function BitacoraModificacionesList({
                   key={m.id}
                   onClick={() => onSelectModificacion(m)}
                   className={`cursor-pointer transition-colors ${
-                    isSelected
-                      ? "bg-blue-50/70 border-l-4 border-l-[#003770]"
-                      : "hover:bg-slate-50"
+                    isSelected ? "bg-blue-50/70 border-l-4 border-l-[#003770]" : "hover:bg-slate-50"
                   }`}
                 >
                   {/* 1. Correlativo */}
@@ -86,12 +84,18 @@ export function BitacoraModificacionesList({
                   </td>
 
                   {/* 5. Solicitante */}
-                  <td className="py-3 px-3 align-top text-[#001B47] text-[11px] truncate max-w-[160px]" title={m.solicitadoPor}>
+                  <td
+                    className="py-3 px-3 align-top text-[#001B47] text-[11px] truncate max-w-[160px]"
+                    title={m.solicitadoPor}
+                  >
                     {m.solicitadoPor}
                   </td>
 
                   {/* 6. Aprobador */}
-                  <td className="py-3 px-3 align-top text-[#003770] font-bold text-[11px] truncate max-w-[160px]" title={m.aprobadoPor}>
+                  <td
+                    className="py-3 px-3 align-top text-[#003770] font-bold text-[11px] truncate max-w-[160px]"
+                    title={m.aprobadoPor}
+                  >
                     {m.aprobadoPor}
                   </td>
 

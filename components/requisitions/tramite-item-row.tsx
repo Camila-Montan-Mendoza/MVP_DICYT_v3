@@ -20,7 +20,7 @@ export function TramiteItemRow({ item, onUpdateItem, onRemoveItem }: TramiteItem
         onUpdateItem(item.id, { partidaPresupuestaria: res.partidaCode });
       });
     }
-  }, [item.nombre, item.categoria]);
+  }, [item.nombre, item.categoria, item.id, item.partidaPresupuestaria, onUpdateItem]);
 
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;

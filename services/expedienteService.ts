@@ -52,7 +52,8 @@ export async function obtenerArchivosExpediente(
         id: 101,
         tramiteId,
         nombreArchivo: "Acta_Laptop_Signed.pdf",
-        urlArchivo: "https://supabase.co/storage/v1/object/public/expedientes/Acta_Laptop_Signed.pdf",
+        urlArchivo:
+          "https://supabase.co/storage/v1/object/public/expedientes/Acta_Laptop_Signed.pdf",
         tipoArchivo: "pdf",
         tamanoFormateado: "1.2 MB",
         categoria: "ACTA_RECEPCION",
@@ -61,7 +62,8 @@ export async function obtenerArchivosExpediente(
         id: 102,
         tramiteId,
         nombreArchivo: "Firma_Solicitud_Pago.png",
-        urlArchivo: "https://supabase.co/storage/v1/object/public/expedientes/Firma_Solicitud_Pago.png",
+        urlArchivo:
+          "https://supabase.co/storage/v1/object/public/expedientes/Firma_Solicitud_Pago.png",
         tipoArchivo: "image",
         tamanoFormateado: "450 KB",
         categoria: "SOLICITUD_PAGO",
@@ -161,8 +163,6 @@ export async function archivarExpedienteFinal(
 export async function obtenerResumenEjecutivoTramite(
   tramiteId: number
 ): Promise<ResumenEjecutivoTramiteData | null> {
-  const supabase = createClient();
-
   try {
     const ordenes = await obtenerOrdenesContractualesTramite(tramiteId);
     const archivos = await obtenerArchivosExpediente(tramiteId);
@@ -172,7 +172,8 @@ export async function obtenerResumenEjecutivoTramite(
     return {
       tramiteId,
       codigoTramite: `TR-2026-00${tramiteId}`,
-      proyectoNombre: ordenes[0]?.proyectoNombre || "Investigación en Tecnologías de Información e Hidráulica",
+      proyectoNombre:
+        ordenes[0]?.proyectoNombre || "Investigación en Tecnologías de Información e Hidráulica",
       solicitanteNombre: "Dr. Winsor Orellana",
       unidadSolicitante: "Facultad de Ciencias y Tecnología - Lab. Hidráulica",
       montoTotalTramite: montoTotalCalculado,
@@ -180,7 +181,11 @@ export async function obtenerResumenEjecutivoTramite(
       actasEmitidasCount: ordenes.length || 3,
       solicitudesPagoCount: ordenes.length || 3,
       fechaInicio: "14 de Enero de 2026",
-      fechaCompletado: new Date().toLocaleDateString("es-BO", { day: "2-digit", month: "long", year: "numeric" }),
+      fechaCompletado: new Date().toLocaleDateString("es-BO", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }),
       expedienteArchivos: archivos,
     };
   } catch (err) {

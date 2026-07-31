@@ -33,7 +33,7 @@ export async function obtenerSolicitudesPagoTramite(
     }
 
     // 2. Consultar actas de recepción previas para extraer factura y respaldos
-    let actasMap = new Map<number, any>();
+    const actasMap = new Map<number, any>();
     try {
       const { data: actasData } = await supabase
         .from("acta_recepcion")
@@ -45,7 +45,7 @@ export async function obtenerSolicitudesPagoTramite(
     }
 
     // 3. Consultar solicitudes de pago previamente registradas en Supabase (`solicitud_pago`)
-    let solicitudesMap = new Map<number, any>();
+    const solicitudesMap = new Map<number, any>();
     try {
       const { data: solData } = await supabase
         .from("solicitud_pago")
@@ -65,7 +65,8 @@ export async function obtenerSolicitudesPagoTramite(
     const resultado: SolicitudPagoProveedorData[] = [];
 
     for (const ord of ordenes) {
-      const actaPrev = actasMap.get(ord.proveedorId) || (ord.id !== undefined ? actasMap.get(ord.id) : undefined);
+      const actaPrev =
+        actasMap.get(ord.proveedorId) || (ord.id !== undefined ? actasMap.get(ord.id) : undefined);
       const solPrev = solicitudesMap.get(ord.proveedorId);
 
       const montoCalculado = ord.montoTotal || ord.items.reduce((acc, i) => acc + i.subtotal, 0);
@@ -92,8 +93,14 @@ export async function obtenerSolicitudesPagoTramite(
         fechaSolicitud: solPrev?.fecha_solicitud || fechaActualStr,
         montoTotal: solPrev?.monto_total || montoCalculado,
         montoLiteral: solPrev?.monto_literal || numeroAMontoLiteral(montoCalculado),
-        facturaUrl: solPrev?.factura_url || actaPrev?.factura_url || "https://supabase.co/storage/v1/object/public/facturas/FACTURA_OFICIAL_EJEMPLO.pdf",
-        notaEntregaUrl: solPrev?.nota_entrega_url || actaPrev?.evidencia_url || "https://supabase.co/storage/v1/object/public/evidencias/NOTA_ENTREGA_EJEMPLO.jpg",
+        facturaUrl:
+          solPrev?.factura_url ||
+          actaPrev?.factura_url ||
+          "https://supabase.co/storage/v1/object/public/facturas/FACTURA_OFICIAL_EJEMPLO.pdf",
+        notaEntregaUrl:
+          solPrev?.nota_entrega_url ||
+          actaPrev?.evidencia_url ||
+          "https://supabase.co/storage/v1/object/public/evidencias/NOTA_ENTREGA_EJEMPLO.jpg",
         evidenciaExtraUrl: solPrev?.evidencia_extra_url,
         estado: solPrev?.estado || "SIN_ENVIAR",
         motivoObservacion: solPrev?.motivo_observacion,
@@ -195,7 +202,10 @@ export async function observarSolicitudPago(
   params: ObservarSolicitudPagoParams
 ): Promise<{ success: boolean; error?: string }> {
   if (!params.motivoObservacion || params.motivoObservacion.trim() === "") {
-    return { success: false, error: "El motivo de la observación es obligatorio y no puede estar vacío." };
+    return {
+      success: false,
+      error: "El motivo de la observación es obligatorio y no puede estar vacío.",
+    };
   }
 
   const supabase = createClient();

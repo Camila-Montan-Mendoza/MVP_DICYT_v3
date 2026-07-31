@@ -22,7 +22,8 @@ const FALLBACK_TRAZA_PARTIDAS: PartidaTrazaSummary[] = [
         estadoItem: 3, // Gastado
         cantidadAdquirida: 15,
         fechaRecepcion: "14/02/2026",
-        especificacion: "Kits de alta pureza 99.9% para genotipado de muestras agrícolas en laboratorio central",
+        especificacion:
+          "Kits de alta pureza 99.9% para genotipado de muestras agrícolas en laboratorio central",
       },
       {
         id: 102,
@@ -32,7 +33,8 @@ const FALLBACK_TRAZA_PARTIDAS: PartidaTrazaSummary[] = [
         estadoItem: 2, // Comprometido
         cantidadAdquirida: 4,
         fechaRecepcion: "20/02/2026",
-        especificacion: "Solventes cromatográficos analíticos importados en frascos de vidrio de 2.5 Litros",
+        especificacion:
+          "Solventes cromatográficos analíticos importados en frascos de vidrio de 2.5 Litros",
       },
       {
         id: 103,
@@ -42,7 +44,8 @@ const FALLBACK_TRAZA_PARTIDAS: PartidaTrazaSummary[] = [
         estadoItem: 4, // Revertido
         cantidadAdquirida: 0, // En caso de reversión es 0
         fechaRecepcion: "05/01/2026",
-        especificacion: "Orden de compra anulada por proveedor no disponible. Fondos devueltos al saldo de la partida",
+        especificacion:
+          "Orden de compra anulada por proveedor no disponible. Fondos devueltos al saldo de la partida",
       },
     ],
   },
@@ -66,8 +69,10 @@ const FALLBACK_TRAZA_PARTIDAS: PartidaTrazaSummary[] = [
         estadoItem: 3, // Gastado
         cantidadAdquirida: 1,
         fechaRecepcion: "10/02/2026",
-        especificacionTecnica: "Servidor procesador doble Xeon 32 núcleos, 64GB RAM ECC, 2x RTX 4090 GPU",
-        especificacion: "Servidor de alto rendimiento para procesamiento numérico de imágenes satelitales",
+        especificacionTecnica:
+          "Servidor procesador doble Xeon 32 núcleos, 64GB RAM ECC, 2x RTX 4090 GPU",
+        especificacion:
+          "Servidor de alto rendimiento para procesamiento numérico de imágenes satelitales",
         custodio: "Dr. Marcelo Rodríguez Parra (Investigador Principal)",
         lugar: "Laboratorio de Geomática e Inteligencia Artificial DICYT (Piso 2)",
       },
@@ -79,8 +84,10 @@ const FALLBACK_TRAZA_PARTIDAS: PartidaTrazaSummary[] = [
         estadoItem: 3, // Gastado
         cantidadAdquirida: 1,
         fechaRecepcion: "12/02/2026",
-        especificacionTecnica: "Laptop rugerizada de campo, Intel i9 13th Gen, 32GB RAM DDR5, SSD 2TB",
-        especificacion: "Equipo de cómputo móvil para adquisición de datos meteorológicos en estación experimental",
+        especificacionTecnica:
+          "Laptop rugerizada de campo, Intel i9 13th Gen, 32GB RAM DDR5, SSD 2TB",
+        especificacion:
+          "Equipo de cómputo móvil para adquisición de datos meteorológicos en estación experimental",
         custodio: "Ing. Sofía Vargas Camacho (Técnico de Campo)",
         lugar: "Estación Agrometeorológica Valle Sacta",
       },
@@ -118,7 +125,8 @@ const FALLBACK_TRAZA_PARTIDAS: PartidaTrazaSummary[] = [
         montoTotal: 22000,
         estadoItem: 3, // Gastado
         fechaConformidad: "25/02/2026",
-        especificacion: "Servicio de espectrometría de masa y determinación de oligoelementos por laboratorio acreditado ISO 17025",
+        especificacion:
+          "Servicio de espectrometría de masa y determinación de oligoelementos por laboratorio acreditado ISO 17025",
       },
       {
         id: 302,
@@ -127,7 +135,8 @@ const FALLBACK_TRAZA_PARTIDAS: PartidaTrazaSummary[] = [
         montoTotal: 10000,
         estadoItem: 2, // Comprometido
         fechaConformidad: "En proceso de informe técnico",
-        especificacion: "Calibración in situ de 12 sensores térmicos y pluviómetros digitales en estación de prueba",
+        especificacion:
+          "Calibración in situ de 12 sensores térmicos y pluviómetros digitales en estación de prueba",
       },
       {
         id: 303,
@@ -136,7 +145,8 @@ const FALLBACK_TRAZA_PARTIDAS: PartidaTrazaSummary[] = [
         montoTotal: 8500,
         estadoItem: 1, // Preventivo
         fechaConformidad: "Pendiente de inicio",
-        especificacion: "Servicio de consultoría previa para estructuración de bases de datos espacio-temporales",
+        especificacion:
+          "Servicio de consultoría previa para estructuración de bases de datos espacio-temporales",
       },
     ],
   },
@@ -146,8 +156,7 @@ export async function fetchPartidasConTraza(): Promise<PartidaTrazaSummary[]> {
   try {
     const supabase = createClient();
 
-    const { data: rawPartidas, error: partidaErr } = await supabase
-      .from("partida_concreta")
+    const { data: rawPartidas, error: partidaErr } = await supabase.from("partida_concreta")
       .select(`
         id,
         presupuesto,
@@ -170,9 +179,7 @@ export async function fetchPartidasConTraza(): Promise<PartidaTrazaSummary[]> {
 
     let itemsData: any[] = [];
     try {
-      const { data: rawItems } = await supabase
-        .from("item_tramite")
-        .select(`
+      const { data: rawItems } = await supabase.from("item_tramite").select(`
           id,
           id_partida_concreta,
           monto_total,
@@ -203,7 +210,7 @@ export async function fetchPartidasConTraza(): Promise<PartidaTrazaSummary[]> {
 
         return {
           id: it.id,
-          nombreItem: `Ítem #${it.id} - ${row.partida?.nombre || 'Insumo de Investigación'}`,
+          nombreItem: `Ítem #${it.id} - ${row.partida?.nombre || "Insumo de Investigación"}`,
           tipoItem,
           montoTotal: monto,
           estadoItem: estado,

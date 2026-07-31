@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Folder, FileText, LogOut, Bell, User, Menu, PieChart, GitCommit, History } from "lucide-react";
+import {
+  Folder,
+  FileText,
+  LogOut,
+  Bell,
+  User,
+  Menu,
+  PieChart,
+  GitCommit,
+  History,
+} from "lucide-react";
 import { logoutSession } from "@/lib/auth/auth-service";
 import { AuthProvider, useAuth } from "@/lib/auth/auth-context";
 

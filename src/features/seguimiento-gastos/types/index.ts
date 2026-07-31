@@ -58,5 +58,5 @@ export interface UserRoleScope {
   isCoordinador: boolean;
   isInvestigadorOrTutor: boolean;
   isMultiRole: boolean;
-  activeScope: 'programa' | 'proyectos';
+  activeScope: "programa" | "proyectos";
 }

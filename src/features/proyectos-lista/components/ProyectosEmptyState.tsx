@@ -6,7 +6,10 @@ interface ProyectosEmptyStateProps {
   variant: ProyectosEmptyStateVariant;
 }
 
-const CONFIG: Record<ProyectosEmptyStateVariant, { icon: typeof FolderOpen; title: string; description: string }> = {
+const CONFIG: Record<
+  ProyectosEmptyStateVariant,
+  { icon: typeof FolderOpen; title: string; description: string }
+> = {
   "sin-proyectos": {
     icon: FolderOpen,
     title: "Sin proyectos registrados",
@@ -15,7 +18,8 @@ const CONFIG: Record<ProyectosEmptyStateVariant, { icon: typeof FolderOpen; titl
   "sin-coincidencias": {
     icon: SearchX,
     title: "Sin coincidencias para los filtros aplicados",
-    description: "Ningún proyecto cumple con los filtros seleccionados. Intenta ajustarlos o límpialos.",
+    description:
+      "Ningún proyecto cumple con los filtros seleccionados. Intenta ajustarlos o límpialos.",
   },
 };
 

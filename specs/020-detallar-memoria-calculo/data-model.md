@@ -3,6 +3,7 @@
 ## Entities & Interfaces
 
 ### 1. `ProyectoDetalle`
+
 Represents the full detailed state of a project.
 
 ```ts
@@ -33,6 +34,7 @@ export interface ProyectoDetalle {
 ```
 
 ### 2. `PartidaMemoriaCalculo`
+
 Representing a single partida entry in the memoria de cálculo.
 
 ```ts
@@ -45,6 +47,7 @@ export interface PartidaMemoriaCalculo {
 ```
 
 ### 3. `PartidaCatalogo`
+
 Catalog entry for searching partidas.
 
 ```ts
@@ -77,7 +80,12 @@ export const MOCK_PROJECT_SEED: ProyectoDetalle = {
   },
   memoriaCalculo: [
     { id: 101, codigoPartida: "101", nombrePartida: "Materiales y Suministros", monto: 45000 },
-    { id: 205, codigoPartida: "205", nombrePartida: "Servicios Técnicos Profesionales", monto: 55000 },
+    {
+      id: 205,
+      codigoPartida: "205",
+      nombrePartida: "Servicios Técnicos Profesionales",
+      monto: 55000,
+    },
   ],
   totalMemoriaCalculo: 100000,
   permisos: {

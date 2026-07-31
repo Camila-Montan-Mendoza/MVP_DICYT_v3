@@ -217,9 +217,7 @@ export function TrazaPartidasList({
                           {/* Importe Afectado del Ítem */}
                           <td className="py-2.5 px-4 text-right font-bold text-[#001B47]">
                             <span
-                              className={
-                                item.estadoItem === 4 ? "line-through text-slate-400" : ""
-                              }
+                              className={item.estadoItem === 4 ? "line-through text-slate-400" : ""}
                             >
                               {formatBolivianos(item.montoTotal)}
                             </span>

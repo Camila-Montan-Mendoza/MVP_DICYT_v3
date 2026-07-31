@@ -63,11 +63,13 @@ export function PartidaSearchModal({
         <div className="p-4 overflow-y-auto flex-1 divide-y divide-slate-100 max-h-80">
           {resultados.length === 0 ? (
             <p className="text-xs text-slate-400 italic text-center py-6">
-              No se encontraron partidas coincidentes con "{query}".
+              No se encontraron partidas coincidentes con &quot;{query}&quot;.
             </p>
           ) : (
             resultados.map((partida) => {
-              const yaIncluida = partidasYaIncluidasIds.has(partida.id) || partidasYaIncluidasIds.has(partida.codigo);
+              const yaIncluida =
+                partidasYaIncluidasIds.has(partida.id) ||
+                partidasYaIncluidasIds.has(partida.codigo);
 
               return (
                 <div
@@ -79,13 +81,14 @@ export function PartidaSearchModal({
                       <span className="text-[11px] font-bold text-[#002855] bg-[#002855]/10 px-2 py-0.5 rounded-md">
                         {partida.codigo}
                       </span>
-                      <span className="text-xs font-bold text-[#001B47]">
-                        {partida.nombre}
-                      </span>
+                      <span className="text-xs font-bold text-[#001B47]">{partida.nombre}</span>
                     </div>
                     <div className="flex flex-wrap gap-1 pt-0.5">
                       {partida.itemsRelacionados.map((it) => (
-                        <span key={it} className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                        <span
+                          key={it}
+                          className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded"
+                        >
                           {it}
                         </span>
                       ))}

@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { RecepcionProveedorData, MaterialRecepcionItem, EstadoMaterial } from "@/types/recepcion";
+import { RecepcionProveedorData, EstadoMaterial } from "@/types/recepcion";
 import {
   Building2,
   FileCheck2,
   ChevronDown,
   ChevronUp,
   FileText,
-  Upload,
   CheckCircle2,
   FileSpreadsheet,
 } from "lucide-react";
@@ -232,11 +231,15 @@ export function TarjetaRecepcionProveedor({
                       <td className="p-3 font-medium">
                         <strong className="block text-[#001B47]">{it.detalle}</strong>
                         {it.especificacion && (
-                          <span className="text-[10px] text-slate-400 block">{it.especificacion}</span>
+                          <span className="text-[10px] text-slate-400 block">
+                            {it.especificacion}
+                          </span>
                         )}
                       </td>
                       <td className="p-3 text-center font-mono font-bold">{it.cantidad}</td>
-                      <td className="p-3 text-center uppercase font-bold text-[11px]">{it.unidad}</td>
+                      <td className="p-3 text-center uppercase font-bold text-[11px]">
+                        {it.unidad}
+                      </td>
                       <td className="p-3 text-right font-mono font-extrabold text-[#001B47]">
                         {it.precioTotal.toLocaleString("es-BO", { minimumFractionDigits: 2 })}
                       </td>
@@ -264,7 +267,7 @@ export function TarjetaRecepcionProveedor({
           {/* Sección 4: Carga de Factura Oficial y Evidencias Fotográficas */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
             <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-              <label className="block font-bold text-slate-700 text-[11px] flex items-center justify-between">
+              <label className="font-bold text-slate-700 text-[11px] flex items-center justify-between">
                 <span>Factura Oficial del Proveedor (PDF/Imagen) *</span>
                 {formData.facturaUrl && (
                   <span className="text-[10px] text-emerald-700 font-extrabold flex items-center gap-1">
@@ -283,7 +286,7 @@ export function TarjetaRecepcionProveedor({
             </div>
 
             <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-              <label className="block font-bold text-slate-700 text-[11px] flex items-center justify-between">
+              <label className="font-bold text-slate-700 text-[11px] flex items-center justify-between">
                 <span>Fotografías / Evidencias de Recepción</span>
                 {formData.evidenciaUrl && (
                   <span className="text-[10px] text-emerald-700 font-extrabold flex items-center gap-1">

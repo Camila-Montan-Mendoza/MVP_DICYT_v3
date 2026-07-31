@@ -17,9 +17,9 @@
 
 **Purpose**: Componentes ShadCN faltantes, catálogo de estados y tipos base.
 
-- [X] T001 [P] Añadir los componentes ShadCN `table`, `select` y `pagination` (escritos a mano, sin CLI ni nuevas dependencias Radix, siguiendo el estilo de `components/ui/button.tsx`/`badge.tsx`), verificando que se crean `components/ui/table.tsx`, `components/ui/select.tsx` y `components/ui/pagination.tsx`
-- [X] T002 Actualizar el catálogo `estado_proyecto` en `docs/01_seed_catalogos_base.sql` con los 4 estados de memoria de cálculo ("Pendiente de memoria de cálculo", "En revisión de memoria de cálculo", "Observado", "Habilitado para ejecutar partidas"), reemplazando las filas genéricas de ciclo de vida sin uso actual, según `research.md` §2 (también se varió `id_estado_proyecto` en `docs/03_seed_estructura_financiera.sql` para que los 4 proyectos de seed cubran los 4 estados)
-- [X] T003 [P] Crear las interfaces TypeScript `ProyectoListItem`, `EstadoProyectoId`, `ProyectosListFilters` y `ProyectosListResponse` en `src/features/proyectos-lista/types/index.ts`, según `data-model.md`
+- [x] T001 [P] Añadir los componentes ShadCN `table`, `select` y `pagination` (escritos a mano, sin CLI ni nuevas dependencias Radix, siguiendo el estilo de `components/ui/button.tsx`/`badge.tsx`), verificando que se crean `components/ui/table.tsx`, `components/ui/select.tsx` y `components/ui/pagination.tsx`
+- [x] T002 Actualizar el catálogo `estado_proyecto` en `docs/01_seed_catalogos_base.sql` con los 4 estados de memoria de cálculo ("Pendiente de memoria de cálculo", "En revisión de memoria de cálculo", "Observado", "Habilitado para ejecutar partidas"), reemplazando las filas genéricas de ciclo de vida sin uso actual, según `research.md` §2 (también se varió `id_estado_proyecto` en `docs/03_seed_estructura_financiera.sql` para que los 4 proyectos de seed cubran los 4 estados)
+- [x] T003 [P] Crear las interfaces TypeScript `ProyectoListItem`, `EstadoProyectoId`, `ProyectosListFilters` y `ProyectosListResponse` en `src/features/proyectos-lista/types/index.ts`, según `data-model.md`
 
 ---
 
@@ -29,10 +29,10 @@
 
 **⚠️ CRITICAL**: Ninguna historia de usuario puede empezar hasta que esta fase esté completa.
 
-- [X] T004 Crear `lib/auth/server-auth-service.ts` que resuelva `{ usuarioId, rolActivo, scope }` en el servidor a partir de la sesión Supabase (reutilizando el patrón de resolución `usuario`/`rol_usuario`/`LOGIN_OPTIONS` ya usado en `app/api/tramites/[id]/transicion/route.ts`)
-- [X] T005 Extender `lib/db/proyecto-repository.ts` con `listProyectosParaUsuario(supabase, params)`: consulta real a Supabase uniendo `proyecto`, `estado_proyecto`, `proyecto_usuario` (rol Investigador Principal `id_rol = 1`) y `usuario`, aplicando alcance (`scope`), filtros `q`/`estadoId`/`investigadorId` y paginación con `.range()` + `count: "exact"`, **sin ningún arreglo de respaldo** (depends on T002, T003)
-- [X] T006 Implementar `GET /api/proyectos` en `app/api/proyectos/route.ts` usando T004 y T005, devolviendo exactamente las respuestas de `contracts/proyectos-api-contract.md` (`401` sin sesión, `403` rol sin acceso, `200` con `{ proyectos, total, page, pageSize, scope }`, `500` ante error de Supabase sin fallback) (depends on T004, T005)
-- [X] T007 [P] Crear el fetcher cliente `fetchProyectos` en `src/features/proyectos-lista/api/fetchProyectos.ts`, construyendo el query-string hacia `/api/proyectos` a partir de `ProyectosListFilters` (depends on T003)
+- [x] T004 Crear `lib/auth/server-auth-service.ts` que resuelva `{ usuarioId, rolActivo, scope }` en el servidor a partir de la sesión Supabase (reutilizando el patrón de resolución `usuario`/`rol_usuario`/`LOGIN_OPTIONS` ya usado en `app/api/tramites/[id]/transicion/route.ts`)
+- [x] T005 Extender `lib/db/proyecto-repository.ts` con `listProyectosParaUsuario(supabase, params)`: consulta real a Supabase uniendo `proyecto`, `estado_proyecto`, `proyecto_usuario` (rol Investigador Principal `id_rol = 1`) y `usuario`, aplicando alcance (`scope`), filtros `q`/`estadoId`/`investigadorId` y paginación con `.range()` + `count: "exact"`, **sin ningún arreglo de respaldo** (depends on T002, T003)
+- [x] T006 Implementar `GET /api/proyectos` en `app/api/proyectos/route.ts` usando T004 y T005, devolviendo exactamente las respuestas de `contracts/proyectos-api-contract.md` (`401` sin sesión, `403` rol sin acceso, `200` con `{ proyectos, total, page, pageSize, scope }`, `500` ante error de Supabase sin fallback) (depends on T004, T005)
+- [x] T007 [P] Crear el fetcher cliente `fetchProyectos` en `src/features/proyectos-lista/api/fetchProyectos.ts`, construyendo el query-string hacia `/api/proyectos` a partir de `ProyectosListFilters` (depends on T003)
 
 **Checkpoint**: El backend está listo — `/api/proyectos` puede probarse directamente (ej. con `curl` usando una cookie de sesión válida) para cada rol antes de construir cualquier UI.
 
@@ -46,13 +46,13 @@
 
 ### Implementation for User Story 1
 
-- [X] T008 [US1] Crear el hook `useProyectosLista` (fetch inicial, estado de `page`/`pageSize`) en `src/features/proyectos-lista/hooks/useProyectosLista.ts` (depends on T007)
-- [X] T009 [P] [US1] Crear `EstadoProyectoBadge` (4 variantes de color/ícono según `data-model.md`, iconos `lucide-react`, tokens de `DESIGN.md`, cero emojis) en `src/features/proyectos-lista/components/EstadoProyectoBadge.tsx`
-- [X] T010 [P] [US1] Crear `ProyectosTable` (columnas N°, Proyecto, Presupuesto, Estado con `EstadoProyectoBadge`, Investigador Principal, usando ShadCN `Table`) en `src/features/proyectos-lista/components/ProyectosTable.tsx`
-- [X] T011 [US1] Añadir controles de paginación ("Mostrando X-Y de Z" + Anterior/Siguiente, ShadCN `Pagination`) conectados a `page`/`total` del hook, dentro de `src/features/proyectos-lista/components/ProyectosTable.tsx` (depends on T008, T010)
-- [X] T012 [US1] Crear `ProyectosListaContainer` que integra hook + tabla + paginación en `src/features/proyectos-lista/components/ProyectosListaContainer.tsx` (depends on T008, T009, T010, T011)
-- [X] T013 [US1] Crear `app/(dashboard)/proyectos/page.tsx` montando `<ProyectosListaContainer />` (ruta ya enlazada en el sidebar de `components/sigefi-shell.tsx`) (depends on T012)
-- [X] T014 [P] [US1] Prueba unitaria puntual del alcance por rol ("own" vs "all") en `lib/db/proyecto-repository.test.ts` (depends on T005)
+- [x] T008 [US1] Crear el hook `useProyectosLista` (fetch inicial, estado de `page`/`pageSize`) en `src/features/proyectos-lista/hooks/useProyectosLista.ts` (depends on T007)
+- [x] T009 [P] [US1] Crear `EstadoProyectoBadge` (4 variantes de color/ícono según `data-model.md`, iconos `lucide-react`, tokens de `DESIGN.md`, cero emojis) en `src/features/proyectos-lista/components/EstadoProyectoBadge.tsx`
+- [x] T010 [P] [US1] Crear `ProyectosTable` (columnas N°, Proyecto, Presupuesto, Estado con `EstadoProyectoBadge`, Investigador Principal, usando ShadCN `Table`) en `src/features/proyectos-lista/components/ProyectosTable.tsx`
+- [x] T011 [US1] Añadir controles de paginación ("Mostrando X-Y de Z" + Anterior/Siguiente, ShadCN `Pagination`) conectados a `page`/`total` del hook, dentro de `src/features/proyectos-lista/components/ProyectosTable.tsx` (depends on T008, T010)
+- [x] T012 [US1] Crear `ProyectosListaContainer` que integra hook + tabla + paginación en `src/features/proyectos-lista/components/ProyectosListaContainer.tsx` (depends on T008, T009, T010, T011)
+- [x] T013 [US1] Crear `app/(dashboard)/proyectos/page.tsx` montando `<ProyectosListaContainer />` (ruta ya enlazada en el sidebar de `components/sigefi-shell.tsx`) (depends on T012)
+- [x] T014 [P] [US1] Prueba unitaria puntual del alcance por rol ("own" vs "all") en `lib/db/proyecto-repository.test.ts` (depends on T005)
 
 **Checkpoint**: User Story 1 completamente funcional y demostrable de forma independiente — MVP.
 
@@ -66,10 +66,10 @@
 
 ### Implementation for User Story 2
 
-- [X] T015 [US2] Añadir estado `search`, `estadoId`, `investigadorId` y `clearFilters()` a `useProyectosLista`, re-consultando `/api/proyectos` con los filtros combinados en `src/features/proyectos-lista/hooks/useProyectosLista.ts` (depends on T008)
-- [X] T016 [US2] Crear `ProyectosFilters` (Buscar `Input`, Estado `Select`, Investigador `Select` renderizado solo si `rolActivo !== "Investigador Principal"`, botón "Limpiar filtros") en `src/features/proyectos-lista/components/ProyectosFilters.tsx`
-- [X] T017 [US2] Integrar `ProyectosFilters` sobre la tabla en `src/features/proyectos-lista/components/ProyectosListaContainer.tsx` (depends on T015, T016, T012)
-- [X] T018 [P] [US2] Prueba unitaria puntual de combinación de filtros y de la regla "el `investigadorId` enviado por un Investigador Principal se ignora" en `lib/db/proyecto-repository.test.ts` (depends on T005)
+- [x] T015 [US2] Añadir estado `search`, `estadoId`, `investigadorId` y `clearFilters()` a `useProyectosLista`, re-consultando `/api/proyectos` con los filtros combinados en `src/features/proyectos-lista/hooks/useProyectosLista.ts` (depends on T008)
+- [x] T016 [US2] Crear `ProyectosFilters` (Buscar `Input`, Estado `Select`, Investigador `Select` renderizado solo si `rolActivo !== "Investigador Principal"`, botón "Limpiar filtros") en `src/features/proyectos-lista/components/ProyectosFilters.tsx`
+- [x] T017 [US2] Integrar `ProyectosFilters` sobre la tabla en `src/features/proyectos-lista/components/ProyectosListaContainer.tsx` (depends on T015, T016, T012)
+- [x] T018 [P] [US2] Prueba unitaria puntual de combinación de filtros y de la regla "el `investigadorId` enviado por un Investigador Principal se ignora" en `lib/db/proyecto-repository.test.ts` (depends on T005)
 
 **Checkpoint**: User Story 1 y 2 funcionan juntas de forma independiente.
 
@@ -83,7 +83,7 @@
 
 ### Implementation for User Story 3
 
-- [X] T019 [P] [US3] Prueba unitaria puntual que verifique que los 4 valores de `estadoId` producen combinaciones de color/ícono distintas entre sí en `src/features/proyectos-lista/components/EstadoProyectoBadge.test.tsx` (depends on T009)
+- [x] T019 [P] [US3] Prueba unitaria puntual que verifique que los 4 valores de `estadoId` producen combinaciones de color/ícono distintas entre sí en `src/features/proyectos-lista/components/EstadoProyectoBadge.test.tsx` (depends on T009)
 
 **Checkpoint**: La distinción visual de estados (ya entregada en US1 vía `EstadoProyectoBadge`) queda formalmente verificada.
 
@@ -97,9 +97,9 @@
 
 ### Implementation for User Story 4
 
-- [X] T020 [US4] Extraer la función pura `resolveProyectoNavigationTarget(proyecto, rolActivo)` (retorna `/proyectos/{id}` o la ruta de memoria de cálculo cuando `rolActivo === "Investigador Principal"` y el estado es "Pendiente de memoria de cálculo" u "Observado") en `src/features/proyectos-lista/hooks/useProyectosLista.ts`
-- [X] T021 [US4] Conectar el `onClick` de fila en `src/features/proyectos-lista/components/ProyectosTable.tsx` para invocar `onSelectProyecto` → `router.push(resolveProyectoNavigationTarget(...))` (el `onClick` de fila ya invocaba `onSelectProyecto` desde T010; el handler real con `useRouter` + `resolveProyectoNavigationTarget` se conectó en `ProyectosListaContainer.tsx`, que es quien tiene acceso al rol del usuario vía `useAuth`, y se lo pasa a `ProyectosTable` como prop)
-- [X] T022 [P] [US4] Prueba unitaria puntual de `resolveProyectoNavigationTarget` cubriendo ambas ramas en `src/features/proyectos-lista/hooks/useProyectosLista.test.ts` (depends on T020)
+- [x] T020 [US4] Extraer la función pura `resolveProyectoNavigationTarget(proyecto, rolActivo)` (retorna `/proyectos/{id}` o la ruta de memoria de cálculo cuando `rolActivo === "Investigador Principal"` y el estado es "Pendiente de memoria de cálculo" u "Observado") en `src/features/proyectos-lista/hooks/useProyectosLista.ts`
+- [x] T021 [US4] Conectar el `onClick` de fila en `src/features/proyectos-lista/components/ProyectosTable.tsx` para invocar `onSelectProyecto` → `router.push(resolveProyectoNavigationTarget(...))` (el `onClick` de fila ya invocaba `onSelectProyecto` desde T010; el handler real con `useRouter` + `resolveProyectoNavigationTarget` se conectó en `ProyectosListaContainer.tsx`, que es quien tiene acceso al rol del usuario vía `useAuth`, y se lo pasa a `ProyectosTable` como prop)
+- [x] T022 [P] [US4] Prueba unitaria puntual de `resolveProyectoNavigationTarget` cubriendo ambas ramas en `src/features/proyectos-lista/hooks/useProyectosLista.test.ts` (depends on T020)
 
 **Checkpoint**: User Stories 1 a 4 funcionan de forma independiente.
 
@@ -113,8 +113,8 @@
 
 ### Implementation for User Story 5
 
-- [X] T023 [US5] Crear `ProyectosEmptyState` con dos variantes ("Sin proyectos registrados" / "Sin coincidencias para los filtros aplicados", ícono `lucide-react`, sin emojis) en `src/features/proyectos-lista/components/ProyectosEmptyState.tsx`
-- [X] T024 [US5] Renderizar `ProyectosEmptyState` en `src/features/proyectos-lista/components/ProyectosListaContainer.tsx` cuando `total === 0`, eligiendo la variante según si hay algún filtro activo (depends on T023, T012)
+- [x] T023 [US5] Crear `ProyectosEmptyState` con dos variantes ("Sin proyectos registrados" / "Sin coincidencias para los filtros aplicados", ícono `lucide-react`, sin emojis) en `src/features/proyectos-lista/components/ProyectosEmptyState.tsx`
+- [x] T024 [US5] Renderizar `ProyectosEmptyState` en `src/features/proyectos-lista/components/ProyectosListaContainer.tsx` cuando `total === 0`, eligiendo la variante según si hay algún filtro activo (depends on T023, T012)
 
 **Checkpoint**: Las 5 historias de usuario funcionan de forma independiente.
 
@@ -125,7 +125,7 @@
 **Purpose**: Verificación final end-to-end.
 
 - [~] T025 (Omitida a pedido del usuario) Ejecutar los escenarios de validación manual de `specs/018-lista-proyectos/quickstart.md` con los tres roles (`daniel`, `alan`, `eva`) — pendiente de validación manual por el usuario
-- [X] T026 Verificar la compilación de TypeScript con `npx tsc --noEmit`
+- [x] T026 Verificar la compilación de TypeScript con `npx tsc --noEmit`
 
 ---
 

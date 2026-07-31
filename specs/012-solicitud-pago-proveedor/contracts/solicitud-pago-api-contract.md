@@ -66,8 +66,16 @@ export interface ObservarSolicitudPagoParams {
 }
 
 // Métodos expuestos por el servicio Supabase
-export async function obtenerSolicitudesPagoTramite(tramiteId: number): Promise<SolicitudPagoProveedorData[]>;
-export async function enviarSolicitudPago(params: EnviarSolicitudPagoParams): Promise<{ success: boolean; error?: string }>;
-export async function validarSolicitudPago(params: ValidarSolicitudPagoParams): Promise<{ success: boolean; error?: string }>;
-export async function observarSolicitudPago(params: ObservarSolicitudPagoParams): Promise<{ success: boolean; error?: string }>;
+export async function obtenerSolicitudesPagoTramite(
+  tramiteId: number
+): Promise<SolicitudPagoProveedorData[]>;
+export async function enviarSolicitudPago(
+  params: EnviarSolicitudPagoParams
+): Promise<{ success: boolean; error?: string }>;
+export async function validarSolicitudPago(
+  params: ValidarSolicitudPagoParams
+): Promise<{ success: boolean; error?: string }>;
+export async function observarSolicitudPago(
+  params: ObservarSolicitudPagoParams
+): Promise<{ success: boolean; error?: string }>;
 ```

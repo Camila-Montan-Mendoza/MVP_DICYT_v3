@@ -114,7 +114,9 @@ export function ProyectosFilters({
             className="sm:w-64"
             value={estadoId}
             onChange={(e) =>
-              onEstadoIdChange(e.target.value === "all" ? "all" : (Number(e.target.value) as EstadoProyectoId))
+              onEstadoIdChange(
+                e.target.value === "all" ? "all" : (Number(e.target.value) as EstadoProyectoId)
+              )
             }
           >
             <option value="all">Todos</option>

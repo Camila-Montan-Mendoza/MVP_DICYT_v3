@@ -27,9 +27,7 @@ export function MemoriaCalculoReadView({
     <div className="space-y-4">
       {/* Encabezado de la Sección */}
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-bold text-[#001B47]">
-          Memoria de calculo del proyecto
-        </h3>
+        <h3 className="text-base font-bold text-[#001B47]">Memoria de calculo del proyecto</h3>
 
         <div className="flex items-center gap-2">
           {puedeDetallar && onEditarClick && (
@@ -73,7 +71,9 @@ export function MemoriaCalculoReadView({
             ) : (
               partidas.map((partida) => (
                 <tr key={partida.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 text-slate-500">{partida.codigoPartida || partida.id}</td>
+                  <td className="px-6 py-4 text-slate-500">
+                    {partida.codigoPartida || partida.id}
+                  </td>
                   <td className="px-6 py-4 font-bold text-[#001B47]">{partida.nombrePartida}</td>
                   <td className="px-6 py-4 text-right font-mono font-bold text-slate-800">
                     {formatMonto(partida.monto)}

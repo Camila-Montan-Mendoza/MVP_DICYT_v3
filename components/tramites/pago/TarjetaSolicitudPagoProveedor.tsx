@@ -10,10 +10,8 @@ import {
   Upload,
   CheckCircle2,
   AlertTriangle,
-  Send,
   FileCheck2,
   Paperclip,
-  Printer,
   ShieldCheck,
 } from "lucide-react";
 
@@ -30,12 +28,14 @@ export function TarjetaSolicitudPagoProveedor({
   solicitud,
   onGenerarNota,
   onEnviarSolicitud,
-  onValidarSolicitud,
-  onObservarSolicitud,
+  onValidarSolicitud: _onValidarSolicitud,
+  onObservarSolicitud: _onObservarSolicitud,
   readOnly = false,
 }: TarjetaSolicitudPagoProveedorProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const [evidenciaFile, setEvidenciaFile] = useState<string | undefined>(solicitud.evidenciaExtraUrl);
+  const [evidenciaFile, setEvidenciaFile] = useState<string | undefined>(
+    solicitud.evidenciaExtraUrl
+  );
 
   const handleEvidenciaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -119,7 +119,9 @@ export function TarjetaSolicitudPagoProveedor({
               </div>
               <p className="text-amber-800 font-medium pl-6">
                 Motivo:{" "}
-                <strong>{solicitud.motivoObservacion || "Por favor adjunte la nota de entrega firmada."}</strong>
+                <strong>
+                  {solicitud.motivoObservacion || "Por favor adjunte la nota de entrega firmada."}
+                </strong>
               </p>
             </div>
           )}
@@ -134,7 +136,9 @@ export function TarjetaSolicitudPagoProveedor({
                 <p className="text-[11px] text-slate-500 uppercase font-bold tracking-wider">
                   PROYECTO / UNIDAD
                 </p>
-                <p className="text-xs font-semibold text-slate-700">{solicitud.unidadSolicitante}</p>
+                <p className="text-xs font-semibold text-slate-700">
+                  {solicitud.unidadSolicitante}
+                </p>
               </div>
 
               {/* Documentos Adjuntos */}
@@ -160,7 +164,9 @@ export function TarjetaSolicitudPagoProveedor({
                         >
                           FACTURA.pdf
                         </a>
-                        <span className="text-[10px] text-slate-400 font-mono">2.4 MB • Adjunto oficial</span>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          2.4 MB • Adjunto oficial
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -180,7 +186,9 @@ export function TarjetaSolicitudPagoProveedor({
                         >
                           NOTA_ENTREGA.jpg
                         </a>
-                        <span className="text-[10px] text-slate-400 font-mono">5.1 MB • Recepción conforme</span>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          5.1 MB • Recepción conforme
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -190,7 +198,9 @@ export function TarjetaSolicitudPagoProveedor({
                     <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs">
                       <div className="flex items-center gap-3">
                         <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span className="font-bold text-emerald-900">Evidencia Adicional Subida</span>
+                        <span className="font-bold text-emerald-900">
+                          Evidencia Adicional Subida
+                        </span>
                       </div>
                     </div>
                   )}
@@ -238,8 +248,12 @@ export function TarjetaSolicitudPagoProveedor({
                 {/* Header Membretado Mini */}
                 <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-bold text-slate-500 uppercase block">UMSS • DICyT</span>
-                    <h4 className="font-extrabold text-xs text-slate-900">Nota de Solicitud de Pago</h4>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase block">
+                      UMSS • DICyT
+                    </span>
+                    <h4 className="font-extrabold text-xs text-slate-900">
+                      Nota de Solicitud de Pago
+                    </h4>
                   </div>
 
                   <div className="text-right text-[10px] text-slate-500">
@@ -251,11 +265,15 @@ export function TarjetaSolicitudPagoProveedor({
                 {/* Subprograma y Fecha */}
                 <div className="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                   <div>
-                    <span className="text-slate-500 font-bold block text-[10px]">PROYECTO / SUBPROGRAMA</span>
+                    <span className="text-slate-500 font-bold block text-[10px]">
+                      PROYECTO / SUBPROGRAMA
+                    </span>
                     <span className="font-semibold text-slate-800">{solicitud.proyectoNombre}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-slate-500 font-bold block text-[10px]">FECHA DE SOLICITUD</span>
+                    <span className="text-slate-500 font-bold block text-[10px]">
+                      FECHA DE SOLICITUD
+                    </span>
                     <span className="font-semibold text-slate-800">{solicitud.fechaSolicitud}</span>
                   </div>
                 </div>
@@ -271,9 +289,13 @@ export function TarjetaSolicitudPagoProveedor({
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       <tr>
-                        <td className="p-2 font-bold text-[#001B47]">{solicitud.proveedorNombre}</td>
+                        <td className="p-2 font-bold text-[#001B47]">
+                          {solicitud.proveedorNombre}
+                        </td>
                         <td className="p-2 text-right font-mono font-extrabold text-[#001B47]">
-                          {solicitud.montoTotal.toLocaleString("es-BO", { minimumFractionDigits: 2 })}
+                          {solicitud.montoTotal.toLocaleString("es-BO", {
+                            minimumFractionDigits: 2,
+                          })}
                         </td>
                       </tr>
                       {solicitud.materiales.map((m, idx) => (
@@ -313,7 +335,9 @@ export function TarjetaSolicitudPagoProveedor({
                   >
                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
                     <span>
-                      {esObservado ? "RE-ENVIAR SOLICITUD DE PAGO A REVISIÓN" : "ENVIAR SOLICITUD DE PAGO"}
+                      {esObservado
+                        ? "RE-ENVIAR SOLICITUD DE PAGO A REVISIÓN"
+                        : "ENVIAR SOLICITUD DE PAGO"}
                     </span>
                   </button>
                 </div>

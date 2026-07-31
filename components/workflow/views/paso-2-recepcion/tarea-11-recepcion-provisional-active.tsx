@@ -3,21 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { TaskViewProps } from "../view-types";
 import { RecepcionProveedorData } from "@/types/recepcion";
-import {
-  obtenerDatosRecepcionTramite,
-  guardarActaRecepcion,
-} from "@/services/recepcionService";
+import { obtenerDatosRecepcionTramite, guardarActaRecepcion } from "@/services/recepcionService";
 import { TarjetaRecepcionProveedor } from "@/components/tramites/ordenes/TarjetaRecepcionProveedor";
 import { ModalImpresionActaRecepcion } from "@/components/tramites/ordenes/ModalImpresionActaRecepcion";
 import { Button } from "@/components/ui/button";
-import {
-  FileCheck2,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Zap,
-  Send,
-} from "lucide-react";
+import { FileCheck2, CheckCircle2, AlertCircle, Loader2, Zap, Send } from "lucide-react";
 
 export default function Tarea11RecepcionProvisionalActive({
   tarea,
@@ -28,10 +18,13 @@ export default function Tarea11RecepcionProvisionalActive({
 
   const [loading, setLoading] = useState(true);
   const [recepciones, setRecepciones] = useState<RecepcionProveedorData[]>([]);
-  const [selectedRecepcionModal, setSelectedRecepcionModal] = useState<RecepcionProveedorData | null>(null);
+  const [selectedRecepcionModal, setSelectedRecepcionModal] =
+    useState<RecepcionProveedorData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(
+    null
+  );
 
   const cargarRecepciones = useCallback(async () => {
     setLoading(true);
@@ -92,13 +85,12 @@ export default function Tarea11RecepcionProvisionalActive({
       }
 
       const acciones = tarea.accionesDisponibles || [];
-      const transicionProvisional =
-        acciones.find(
-          (a) =>
-            a.idEstadoDestino === 11 ||
-            a.nombreAccion.toLowerCase().includes("provisional") ||
-            String(a.idTransicion) === "14"
-        );
+      const transicionProvisional = acciones.find(
+        (a) =>
+          a.idEstadoDestino === 11 ||
+          a.nombreAccion.toLowerCase().includes("provisional") ||
+          String(a.idTransicion) === "14"
+      );
 
       if (ejecutarTransicion && transicionProvisional) {
         await ejecutarTransicion(
@@ -143,7 +135,9 @@ export default function Tarea11RecepcionProvisionalActive({
         nombreRepProveedor: rec.nombreRepProveedor || rec.proveedorNombre,
         nombreRepBienes: rec.nombreRepBienes || "Ing. Mario Gutiérrez (Bienes)",
         facturaUrl: facturaFinal,
-        evidenciaUrl: rec.evidenciaUrl || "https://supabase.co/storage/v1/object/public/evidencias/foto_entrega_ejemplo.jpg",
+        evidenciaUrl:
+          rec.evidenciaUrl ||
+          "https://supabase.co/storage/v1/object/public/evidencias/foto_entrega_ejemplo.jpg",
         observaciones: rec.observaciones,
         materiales: rec.materiales.map((m) => ({
           idItemTramite: m.idItemTramite,
@@ -217,7 +211,8 @@ export default function Tarea11RecepcionProvisionalActive({
           proveedorId: rec.proveedorId,
           ordenId: rec.ordenId,
           tipoActa: "DEFINITIVA",
-          nombreCoordinador: rec.nombreCoordinador || "Dr. Winsor Orellana (Investigador Principal)",
+          nombreCoordinador:
+            rec.nombreCoordinador || "Dr. Winsor Orellana (Investigador Principal)",
           nombreRepProveedor: rec.nombreRepProveedor || rec.proveedorNombre,
           nombreRepBienes: rec.nombreRepBienes || "Ing. Mario Gutiérrez (Bienes e Inventarios)",
           facturaUrl: facturaFinal,
@@ -255,7 +250,8 @@ export default function Tarea11RecepcionProvisionalActive({
 
       setFeedback({
         type: "success",
-        message: "¡Happy Path exitoso! Todas las recepciones se registraron como Actas Definitivas y el trámite avanzó al Paso 3 (Pago a Proveedor).",
+        message:
+          "¡Happy Path exitoso! Todas las recepciones se registraron como Actas Definitivas y el trámite avanzó al Paso 3 (Pago a Proveedor).",
       });
 
       await cargarRecepciones();
@@ -314,7 +310,8 @@ export default function Tarea11RecepcionProvisionalActive({
                 Recepción de Materiales
               </h3>
               <p className="text-xs text-slate-500">
-                Inspección de insumos, verificación de participantes y emisión de Acta Provisional o Definitiva.
+                Inspección de insumos, verificación de participantes y emisión de Acta Provisional o
+                Definitiva.
               </p>
             </div>
           </div>

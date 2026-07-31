@@ -1,11 +1,9 @@
 import React from "react";
 import {
   X,
-  Tag,
   Clock,
   CheckCircle2,
   ArrowLeftRight,
-  Filter,
   Box,
   HardDrive,
   Wrench,
@@ -29,8 +27,8 @@ interface TrazaDetailSidebarProps {
 export function TrazaDetailSidebar({
   partida,
   item,
-  statusFilter,
-  onStatusFilterChange,
+  statusFilter: _statusFilter,
+  onStatusFilterChange: _onStatusFilterChange,
   onClose,
 }: TrazaDetailSidebarProps) {
   if (!partida || !item) return null;
@@ -227,16 +225,24 @@ export function TrazaDetailSidebar({
               <div className="flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-purple-700 shrink-0" />
                 <div>
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">Custodio:</span>
-                  <span className="text-xs font-bold text-[#001B47]">{item.custodio || "Sin custodio asignado"}</span>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                    Custodio:
+                  </span>
+                  <span className="text-xs font-bold text-[#001B47]">
+                    {item.custodio || "Sin custodio asignado"}
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 pt-2 border-t border-border/50">
                 <MapPin className="w-4 h-4 text-purple-700 shrink-0" />
                 <div>
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">Lugar / Ubicación:</span>
-                  <span className="text-xs font-bold text-[#001B47]">{item.lugar || "Sin ubicación especificada"}</span>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                    Lugar / Ubicación:
+                  </span>
+                  <span className="text-xs font-bold text-[#001B47]">
+                    {item.lugar || "Sin ubicación especificada"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -246,7 +252,9 @@ export function TrazaDetailSidebar({
                 Especificación Técnica:
               </span>
               <p className="bg-slate-50 p-3 rounded-xl border border-border/80 text-xs font-medium text-[#001B47] leading-relaxed">
-                {item.especificacionTecnica || item.especificacion || "Sin especificación técnica registrada"}
+                {item.especificacionTecnica ||
+                  item.especificacion ||
+                  "Sin especificación técnica registrada"}
               </p>
             </div>
           </div>
@@ -294,7 +302,9 @@ export function TrazaDetailSidebar({
             </div>
             <div className="text-right">
               <span className="text-[10px] text-muted-foreground block">Saldo Disp.</span>
-              <span className="font-bold text-emerald-700">{formatBolivianos(partida.presupuestoDisponible)}</span>
+              <span className="font-bold text-emerald-700">
+                {formatBolivianos(partida.presupuestoDisponible)}
+              </span>
             </div>
           </div>
         </div>

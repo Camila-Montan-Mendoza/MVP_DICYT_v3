@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import { calculateDashboardMetrics, calculatePercentage, formatBolivianos } from '../metrics-calculator';
+import { describe, it, expect } from "vitest";
+import {
+  calculateDashboardMetrics,
+  calculatePercentage,
+  formatBolivianos,
+} from "../metrics-calculator";
 
-describe('metrics-calculator', () => {
-  it('calculates the 5 global metrics correctly', () => {
+describe("metrics-calculator", () => {
+  it("calculates the 5 global metrics correctly", () => {
     const items = [
       { montoTotal: 1000, estadoItem: 1 as const }, // Preventivo
       { montoTotal: 2500, estadoItem: 2 as const }, // Comprometido
@@ -17,20 +21,20 @@ describe('metrics-calculator', () => {
     expect(metrics.saldoDisponibleGlobal).toBe(5000); // 10000 - (1000+2500+1500)
   });
 
-  it('handles empty items correctly', () => {
+  it("handles empty items correctly", () => {
     const metrics = calculateDashboardMetrics(5000, []);
     expect(metrics.saldoDisponibleGlobal).toBe(5000);
     expect(metrics.preventivoReservado).toBe(0);
   });
 
-  it('calculates percentage correctly', () => {
+  it("calculates percentage correctly", () => {
     expect(calculatePercentage(2500, 10000)).toBe(25);
     expect(calculatePercentage(0, 10000)).toBe(0);
     expect(calculatePercentage(100, 0)).toBe(0);
   });
 
-  it('formats currency correctly', () => {
+  it("formats currency correctly", () => {
     const formatted = formatBolivianos(1250.5);
-    expect(formatted).toContain('Bs.');
+    expect(formatted).toContain("Bs.");
   });
 });

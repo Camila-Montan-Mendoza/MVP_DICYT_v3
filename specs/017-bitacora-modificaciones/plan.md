@@ -25,6 +25,7 @@ Implementar la vista de auditoría para el **Historial de Modificaciones Presupu
 **Performance Goals**: Carga del historial y apertura del sidebar lateral en menos de 500ms.
 
 **Constraints**:
+
 - UI Tipo Jira: Tabla principal + Panel lateral deslizable a la derecha (`w-full md:w-96 lg:w-[540px]`).
 - Selectores triples en cabecera: Programa, Proyecto y Gestión Fiscal.
 - Cumplimiento estricto de `DESIGN.md` (sin emojis, colores institucional UMSS `#003770` y `#001B47`).
@@ -72,4 +73,4 @@ src/features/bitacora-modificaciones/
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 | --------- | ---------- | ------------------------------------ |
-| Ninguna | N/A | N/A |
+| Ninguna   | N/A        | N/A                                  |

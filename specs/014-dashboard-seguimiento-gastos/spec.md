@@ -68,7 +68,7 @@
 **Acceptance Scenarios**:
 
 1. **Dado** un usuario con registros en ambos roles (`programa_usuario` como Coordinador y `proyecto_usuario` como Investigador), **cuando** el Dashboard carga, **entonces** el sistema habilita el conmutador de ámbito ("Visión Programa" / "Mis Proyectos").
-2. **Dado** el conmutador visible, **cuando** el usuario hace clic en "Mis Proyectos", **entonces** el contenido del Dashboard se actualiza dinámicamente mostrando el listado de proyectos sin hacer una recarga completa de la página (*client-side state switch*).
+2. **Dado** el conmutador visible, **cuando** el usuario hace clic en "Mis Proyectos", **entonces** el contenido del Dashboard se actualiza dinámicamente mostrando el listado de proyectos sin hacer una recarga completa de la página (_client-side state switch_).
 
 ---
 
@@ -92,7 +92,7 @@
   - **Gráfico Donut**: Proporción del presupuesto según estado de ejecución (Disponible, Preventivo, Comprometido, Pagado).
 - **FR-006**: El sistema MUST incluir un botón de exportación rápida para generar un reporte de resumen financiero ejecutivo en formato PDF o imprimir la vista.
 - **FR-007**: El sistema MUST utilizar exclusivamente **iconos vectoriales de `lucide-react`** (`BarChart3`, `PieChart`, `Wallet`, `TrendingUp`, `Building2`, `FolderGit2`, `ArrowRightLeft`, `Download`) y prohibir estrictamente el uso de emojis.
-- **FR-008**: El sistema MUST renderizar estados vacíos limpios (*Fail-Fast Database Renders*) con mensajes sobrios cuando el usuario no tenga programas o proyectos asignados en Supabase.
+- **FR-008**: El sistema MUST renderizar estados vacíos limpios (_Fail-Fast Database Renders_) con mensajes sobrios cuando el usuario no tenga programas o proyectos asignados en Supabase.
 
 ### Key Entities
 

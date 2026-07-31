@@ -40,7 +40,8 @@ export function useTrazaTramites() {
       if (p.idPrograma) {
         map.set(p.idPrograma, {
           id: p.idPrograma,
-          nombre: p.idPrograma === 1 ? "Programa ASDI Fortalecimiento" : `Programa #${p.idPrograma}`,
+          nombre:
+            p.idPrograma === 1 ? "Programa ASDI Fortalecimiento" : `Programa #${p.idPrograma}`,
         });
       }
     });

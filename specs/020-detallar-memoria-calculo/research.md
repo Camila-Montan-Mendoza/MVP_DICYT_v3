@@ -3,9 +3,11 @@
 ## 1. Mock Data Strategy
 
 ### Decision
+
 Implement a client/server unified mock service (`mockProyectoService.ts`) pre-seeded with sample projects (e.g., ID 1: "Implementación de Inteligencia Artificial en Procesos Agrícolas", IP: "Dr. Ricardo Villarroel", Budget: 100.000,00 Bs., Program: "Innovación Tecnológica 2024", Fuente: "Recursos Propios IDH", Fechas: "15/01/2024" - "15/07/2025").
 
 ### Rationale
+
 - Allows 100% full interactive testing (Search partidas, Add partida, Remove partida, Edit amount, Validate total budget overflow, Submit to review).
 - If Supabase DB is offline or table lacks items, system seamlessly falls back to mock service without throwing 500/404 errors.
 - Syncs mutated state in `localStorage` so refreshing page preserves edited/submitted state.
@@ -15,6 +17,7 @@ Implement a client/server unified mock service (`mockProyectoService.ts`) pre-se
 ## 2. UI Component Architecture (Matching Images)
 
 ### Decision
+
 Split the view into distinct modular components matching the design screenshots:
 
 1. **`ProyectoHeaderNav`**:
@@ -40,7 +43,9 @@ Split the view into distinct modular components matching the design screenshots:
 ## 3. State Management & Real-time Validation
 
 ### Decision
+
 Create custom React Hook `useMemoriaCalculoEditor`:
+
 - Manages draft partidas array: `[{ id: 101, codigo: "101", nombre: "Materiales y Suministros", monto: 45000 }]`.
 - Computes `totalConsolidado = sum(partidas.monto)`.
 - Computes `excedente = max(0, totalConsolidado - presupuestoTotal)`.

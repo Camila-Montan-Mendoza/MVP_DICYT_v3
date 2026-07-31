@@ -19,11 +19,25 @@
             "estado": { "id": 1, "nombre": "Memoria de cálculo pendiente" },
             "investigadorPrincipal": { "id": 1, "nombre": "Dr. Ricardo Villarroel" },
             "memoriaCalculo": [
-              { "id": 101, "codigoPartida": "101", "nombrePartida": "Materiales y Suministros", "monto": 45000.0 },
-              { "id": 205, "codigoPartida": "205", "nombrePartida": "Servicios Técnicos Profesionales", "monto": 55000.0 }
+              {
+                "id": 101,
+                "codigoPartida": "101",
+                "nombrePartida": "Materiales y Suministros",
+                "monto": 45000.0
+              },
+              {
+                "id": 205,
+                "codigoPartida": "205",
+                "nombrePartida": "Servicios Técnicos Profesionales",
+                "monto": 55000.0
+              }
             ],
             "totalMemoriaCalculo": 100000.0,
-            "permisos": { "puedeDetallarMemoria": true, "puedeEvaluar": false, "soloLectura": false }
+            "permisos": {
+              "puedeDetallarMemoria": true,
+              "puedeEvaluar": false,
+              "soloLectura": false
+            }
           }
         }
       }

@@ -13,7 +13,8 @@ interface ProyectoDetalleContainerProps {
 }
 
 export function ProyectoDetalleContainer({ proyectoId }: ProyectoDetalleContainerProps) {
-  const { proyecto, isLoading, error, notFound, forbidden, refetch } = useProyectoDetalle(proyectoId);
+  const { proyecto, isLoading, error, notFound, forbidden, refetch } =
+    useProyectoDetalle(proyectoId);
   const [activeTab, setActiveTab] = useState<"detalle" | "ejecucion">("detalle");
   const [isEditingOverride, setIsEditingOverride] = useState<boolean | null>(null);
 
@@ -31,7 +32,8 @@ export function ProyectoDetalleContainer({ proyectoId }: ProyectoDetalleContaine
         <ShieldAlert className="h-10 w-10 text-[#BC000C]" />
         <p className="text-sm font-extrabold text-[#001B47]">No tiene acceso a este proyecto</p>
         <p className="text-xs text-slate-500 max-w-sm">
-          El acceso está restringido únicamente al Investigador Principal asignado o al Administrador.
+          El acceso está restringido únicamente al Investigador Principal asignado o al
+          Administrador.
         </p>
       </div>
     );
@@ -69,7 +71,9 @@ export function ProyectoDetalleContainer({ proyectoId }: ProyectoDetalleContaine
 
       {activeTab === "ejecucion" ? (
         <div className="p-8 bg-white rounded-2xl border border-slate-200 text-center text-xs text-slate-500">
-          <p className="font-bold text-[#001B47]">Módulo de Ejecución Presupuestaria del Proyecto</p>
+          <p className="font-bold text-[#001B47]">
+            Módulo de Ejecución Presupuestaria del Proyecto
+          </p>
           <p className="text-[11px] mt-1 text-slate-400">
             Consolidado de gastos ejecutados y trámites iniciados en este proyecto.
           </p>
@@ -83,7 +87,7 @@ export function ProyectoDetalleContainer({ proyectoId }: ProyectoDetalleContaine
           {isEditing ? (
             <MemoriaCalculoEditView
               proyecto={proyecto}
-              onProyectoUpdated={(updated) => {
+              onProyectoUpdated={(_updated) => {
                 setIsEditingOverride(false);
                 refetch();
               }}

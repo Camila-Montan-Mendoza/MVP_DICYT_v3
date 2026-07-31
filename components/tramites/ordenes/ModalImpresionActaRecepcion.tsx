@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { RecepcionProveedorData } from "@/types/recepcion";
-import { Printer, X, Download, ZoomIn, ZoomOut } from "lucide-react";
+import { Printer, X, ZoomIn, ZoomOut } from "lucide-react";
 
 interface ModalImpresionActaRecepcionProps {
   isOpen: boolean;
@@ -41,7 +41,9 @@ export function ModalImpresionActaRecepcion({
         {/* Navy Top Header Bar */}
         <div className="bg-[#001B47] text-white px-6 py-4 flex items-center justify-between shrink-0 print:hidden">
           <div className="flex items-center gap-2 font-extrabold text-sm">
-            <span className="bg-[#BC000C] text-white px-2.5 py-0.5 rounded-md text-xs">UMSS - DAF</span>
+            <span className="bg-[#BC000C] text-white px-2.5 py-0.5 rounded-md text-xs">
+              UMSS - DAF
+            </span>
             <span>Documento Oficial: Acta de Recepción de Materiales</span>
           </div>
 
@@ -204,15 +206,23 @@ export function ModalImpresionActaRecepcion({
                 <tbody className="divide-y divide-slate-900 text-[11px]">
                   {recepcion.materiales.map((it, idx) => (
                     <tr key={idx} className="divide-x divide-slate-900">
-                      <td className="p-2.5 text-center align-top font-mono font-bold">{it.nroItem}</td>
+                      <td className="p-2.5 text-center align-top font-mono font-bold">
+                        {it.nroItem}
+                      </td>
                       <td className="p-2.5 align-top">
                         <strong className="block font-bold text-slate-900">{it.detalle}</strong>
                         {it.especificacion && (
-                          <span className="text-[10px] text-slate-500 block">{it.especificacion}</span>
+                          <span className="text-[10px] text-slate-500 block">
+                            {it.especificacion}
+                          </span>
                         )}
                       </td>
-                      <td className="p-2.5 text-center align-top font-mono font-bold">{it.cantidad}</td>
-                      <td className="p-2.5 text-center align-top uppercase font-bold">{it.unidad}</td>
+                      <td className="p-2.5 text-center align-top font-mono font-bold">
+                        {it.cantidad}
+                      </td>
+                      <td className="p-2.5 text-center align-top uppercase font-bold">
+                        {it.unidad}
+                      </td>
                       <td className="p-2.5 text-right align-top font-mono font-extrabold">
                         {it.precioTotal.toLocaleString("es-BO", { minimumFractionDigits: 2 })}
                       </td>

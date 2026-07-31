@@ -10,7 +10,6 @@ import {
   TrendingUp,
   Tag,
   ExternalLink,
-  Info,
 } from "lucide-react";
 import { ModificacionPresupuestariaSummary } from "../types";
 import { formatBolivianos } from "@/src/features/seguimiento-gastos/utils/metrics-calculator";
@@ -20,10 +19,7 @@ interface BitacoraDetailSidebarProps {
   onClose: () => void;
 }
 
-export function BitacoraDetailSidebar({
-  modificacion,
-  onClose,
-}: BitacoraDetailSidebarProps) {
+export function BitacoraDetailSidebar({ modificacion, onClose }: BitacoraDetailSidebarProps) {
   if (!modificacion) return null;
 
   const partidasDisminuidas = modificacion.partidasAfectadas.filter(
@@ -75,7 +71,10 @@ export function BitacoraDetailSidebar({
               <Clock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
               {modificacion.fechaSolicitud}
             </div>
-            <p className="text-[11px] text-muted-foreground truncate" title={modificacion.solicitadoPor}>
+            <p
+              className="text-[11px] text-muted-foreground truncate"
+              title={modificacion.solicitadoPor}
+            >
               {modificacion.solicitadoPor}
             </p>
           </div>
@@ -89,7 +88,10 @@ export function BitacoraDetailSidebar({
               <Calendar className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
               {modificacion.fechaAprobacion}
             </div>
-            <p className="text-[11px] font-semibold text-[#003770] truncate" title={modificacion.aprobadoPor}>
+            <p
+              className="text-[11px] font-semibold text-[#003770] truncate"
+              title={modificacion.aprobadoPor}
+            >
               {modificacion.aprobadoPor}
             </p>
           </div>
@@ -100,7 +102,9 @@ export function BitacoraDetailSidebar({
           <div className="bg-blue-50/40 p-3 rounded-xl border border-blue-100 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <UserCheck className="w-4 h-4 text-[#003770] shrink-0" />
-              <span className="font-semibold text-[#001B47]">Resolución / Documento Respaldatorio</span>
+              <span className="font-semibold text-[#001B47]">
+                Resolución / Documento Respaldatorio
+              </span>
             </div>
             <a
               href={modificacion.documentoRespaldoUrl}

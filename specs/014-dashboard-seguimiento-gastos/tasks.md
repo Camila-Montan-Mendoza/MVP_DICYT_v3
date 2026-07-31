@@ -116,11 +116,13 @@ description: "Lista de tareas para la implementación del Dashboard Principal Ad
 ## Implementation Strategy
 
 ### MVP First (User Story 1 Only)
+
 1. Complete Setup (Phase 1) & Foundational (Phase 2).
 2. Complete User Story 1 (Phase 3).
 3. Validate Visión Programa for Coordinadores on `/seguimiento-gastos`.
 
 ### Incremental Delivery
+
 1. Deliver US1 (Visión Programa) → MVP!
 2. Deliver US2 (Visión Proyectos para Investigadores).
 3. Deliver US3 (Conmutador Multirrol & Exportación PDF).

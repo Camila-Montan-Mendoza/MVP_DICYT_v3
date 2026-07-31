@@ -14,11 +14,12 @@ const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
 );
 Pagination.displayName = "Pagination";
 
-const PaginationInfo = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
-  )
-);
+const PaginationInfo = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
+));
 PaginationInfo.displayName = "PaginationInfo";
 
 const PaginationControls = ({ className, ...props }: React.ComponentProps<"div">) => (
@@ -26,7 +27,7 @@ const PaginationControls = ({ className, ...props }: React.ComponentProps<"div">
 );
 PaginationControls.displayName = "PaginationControls";
 
-interface PaginationPreviousProps extends React.ComponentProps<typeof Button> {}
+type PaginationPreviousProps = React.ComponentProps<typeof Button>;
 
 const PaginationPrevious = React.forwardRef<HTMLButtonElement, PaginationPreviousProps>(
   ({ className, ...props }, ref) => (
@@ -44,7 +45,7 @@ const PaginationPrevious = React.forwardRef<HTMLButtonElement, PaginationPreviou
 );
 PaginationPrevious.displayName = "PaginationPrevious";
 
-interface PaginationNextProps extends React.ComponentProps<typeof Button> {}
+type PaginationNextProps = React.ComponentProps<typeof Button>;
 
 const PaginationNext = React.forwardRef<HTMLButtonElement, PaginationNextProps>(
   ({ className, ...props }, ref) => (

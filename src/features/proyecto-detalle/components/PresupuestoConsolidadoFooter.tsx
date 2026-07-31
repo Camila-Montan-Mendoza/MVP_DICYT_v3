@@ -48,9 +48,7 @@ export function PresupuestoConsolidadoFooter({
             <ShieldCheck className="w-5 h-5 text-[#003770] shrink-0" />
           )}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider">
-              Presupuesto Consolidado
-            </h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider">Presupuesto Consolidado</h4>
             {tieneExcedente && (
               <p className="text-[11px] font-semibold text-red-700">
                 ¡Atención! La suma excede el presupuesto total por{" "}

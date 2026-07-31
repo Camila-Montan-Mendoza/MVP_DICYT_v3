@@ -3,7 +3,9 @@
 ## 1. Patrón de Desglose de Modificaciones y Evolución de Partidas
 
 ### Decision
+
 Implementar una tabla principal que resuma los movimientos de modificación (Correlativo, Fecha, Tipo, Justificación corta, Monto total ajustado). Al hacer clic en una fila, se despliega el panel lateral derecho (Jira Drawer) que expone:
+
 - Justificación completa y extensa del traspaso o incremento.
 - Usuario autorizador y documento respaldo en PDF (si existe).
 - **Tabla de Evolución de Partidas Afectadas**:
@@ -11,6 +13,7 @@ Implementar una tabla principal que resuma los movimientos de modificación (Cor
   - Muestra la fórmula explicativa: `Presupuesto Inicial +/- Monto Modificado = Presupuesto Vigente Resultante`.
 
 ### Rationale
+
 - Permite leer justificaciones largas sin saturar ni deformar la tabla principal.
 - Ofrece transparencia total para auditorías financieras de la UMSS/DICYT.
 
@@ -19,9 +22,11 @@ Implementar una tabla principal que resuma los movimientos de modificación (Cor
 ## 2. Consulta Real a Supabase (Con Fallback Resiliente)
 
 ### Decision
+
 Realizar la consulta relacional vía `createClient()`:
+
 ```sql
-SELECT 
+SELECT
   bm.id,
   bm.codigo,
   bm.justificacion,
@@ -42,5 +47,6 @@ JOIN partida p ON pc.id_partida = p.id;
 ```
 
 ### Rationale
+
 - Si Supabase tiene datos reales registrados en dichas tablas, la aplicación los muestra directamente.
 - Si las tablas de producción están vacías en la base local, la vista conmuta suavemente a registros ilustrativos de prueba sin lanzar errores en la consola.

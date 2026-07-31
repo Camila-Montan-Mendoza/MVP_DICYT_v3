@@ -6,7 +6,9 @@ export interface FetchProyectoDetalleResult {
   forbidden: boolean;
 }
 
-export async function fetchProyectoDetalle(proyectoId: number): Promise<FetchProyectoDetalleResult> {
+export async function fetchProyectoDetalle(
+  proyectoId: number
+): Promise<FetchProyectoDetalleResult> {
   const response = await fetch(`/api/proyectos/${proyectoId}`, {
     method: "GET",
     credentials: "include",
@@ -21,7 +23,9 @@ export async function fetchProyectoDetalle(proyectoId: number): Promise<FetchPro
   }
 
   if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as ProyectoDetalleApiErrorResponse | null;
+    const errorBody = (await response
+      .json()
+      .catch(() => null)) as ProyectoDetalleApiErrorResponse | null;
     throw new Error(errorBody?.message ?? "Error al consultar el proyecto");
   }
 

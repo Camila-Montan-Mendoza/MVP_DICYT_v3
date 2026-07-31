@@ -3,8 +3,8 @@
 ## Interfaces TypeScript (`types/index.ts`)
 
 ```typescript
-export type TipoModificacion = 'traspaso' | 'incremento';
-export type TipoImpactoPartida = 'disminucion' | 'incremento';
+export type TipoModificacion = "traspaso" | "incremento";
+export type TipoImpactoPartida = "disminucion" | "incremento";
 
 export interface PartidaAfectadaDetail {
   id: number;

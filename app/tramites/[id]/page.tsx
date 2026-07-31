@@ -98,9 +98,9 @@ function TramiteWorkflowDetailContent() {
   }, [currentStep]);
 
   const activeStep = pasosList.find((p) => p.id === activeStepId) || currentStep;
-  const nodosDelPaso = activeStep
-    ? Object.values(grafo).filter((n) => n.pasoNumero === activeStep.numero)
-    : [];
+  const nodosDelPaso = useMemo(() => {
+    return activeStep ? Object.values(grafo).filter((n) => n.pasoNumero === activeStep.numero) : [];
+  }, [activeStep, grafo]);
   const nodoActualResuelto = nodoActual || (Object.values(grafo)[0] ?? null);
 
   const tareasDelPaso: TareaWorkflow[] = useMemo(() => {

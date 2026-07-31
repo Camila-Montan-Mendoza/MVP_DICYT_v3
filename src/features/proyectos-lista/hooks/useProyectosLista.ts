@@ -43,7 +43,8 @@ export function useProyectosLista() {
   const [estadoId, setEstadoId] = useState<EstadoProyectoId | typeof SIN_FILTRO>(SIN_FILTRO);
   const [investigadorId, setInvestigadorId] = useState<number | typeof SIN_FILTRO>(SIN_FILTRO);
 
-  const hasActiveFilters = search.trim() !== "" || estadoId !== SIN_FILTRO || investigadorId !== SIN_FILTRO;
+  const hasActiveFilters =
+    search.trim() !== "" || estadoId !== SIN_FILTRO || investigadorId !== SIN_FILTRO;
 
   const loadData = useCallback(async () => {
     setIsLoading(true);

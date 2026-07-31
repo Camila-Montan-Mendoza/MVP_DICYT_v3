@@ -13,7 +13,9 @@ export default function Tarea13SolicitudPagoPassive({ tramite }: TaskViewProps) 
 
   const [loading, setLoading] = useState(true);
   const [solicitudes, setSolicitudes] = useState<SolicitudPagoProveedorData[]>([]);
-  const [selectedNotaModal, setSelectedNotaModal] = useState<SolicitudPagoProveedorData | null>(null);
+  const [selectedNotaModal, setSelectedNotaModal] = useState<SolicitudPagoProveedorData | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const cargarSolicitudes = useCallback(async () => {
@@ -41,7 +43,9 @@ export default function Tarea13SolicitudPagoPassive({ tramite }: TaskViewProps) 
     return (
       <div className="flex flex-col items-center justify-center p-8 gap-2 bg-white rounded-xl border border-slate-200 shadow-2xs">
         <Loader2 className="w-6 h-6 animate-spin text-[#001B47]" />
-        <p className="text-xs font-semibold text-slate-500">Cargando solicitudes de pago desde Supabase...</p>
+        <p className="text-xs font-semibold text-slate-500">
+          Cargando solicitudes de pago desde Supabase...
+        </p>
       </div>
     );
   }

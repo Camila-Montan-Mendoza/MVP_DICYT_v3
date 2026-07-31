@@ -33,7 +33,9 @@ export default function Tarea18ExpedienteDigitalPassive({ tramite }: TaskViewPro
     return (
       <div className="flex flex-col items-center justify-center p-8 gap-2 bg-white rounded-xl border border-slate-200 shadow-2xs">
         <Loader2 className="w-6 h-6 animate-spin text-[#001B47]" />
-        <p className="text-xs font-semibold text-slate-500">Cargando expediente desde Supabase...</p>
+        <p className="text-xs font-semibold text-slate-500">
+          Cargando expediente desde Supabase...
+        </p>
       </div>
     );
   }

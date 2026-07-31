@@ -2,15 +2,7 @@
 
 import { useState } from "react";
 import { ArchivoExpedienteData } from "@/types/expediente";
-import {
-  FileText,
-  Upload,
-  Eye,
-  Trash2,
-  Image as ImageIcon,
-  CheckCircle2,
-  X,
-} from "lucide-react";
+import { FileText, Upload, Eye, Trash2, Image as ImageIcon, X } from "lucide-react";
 
 interface TarjetaResumenArchivosProps {
   archivos: ArchivoExpedienteData[];
@@ -40,9 +32,7 @@ export function TarjetaResumenArchivos({
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-8 max-w-sm w-full mx-auto shadow-sm space-y-6 font-sans">
       {/* Header Fiel a la Maqueta */}
-      <h3 className="text-lg font-extrabold text-[#001B47] tracking-tight">
-        Resumen de archivos
-      </h3>
+      <h3 className="text-lg font-extrabold text-[#001B47] tracking-tight">Resumen de archivos</h3>
 
       {/* Zona de Carga con Borde Punteado (Adjuntar archivo) */}
       {!readOnly && (
@@ -63,7 +53,8 @@ export function TarjetaResumenArchivos({
       {/* Lista de Archivos Adjuntos */}
       <div className="space-y-3">
         {archivos.map((item, idx) => {
-          const esPdf = item.tipoArchivo === "pdf" || item.nombreArchivo.toLowerCase().endsWith(".pdf");
+          const esPdf =
+            item.tipoArchivo === "pdf" || item.nombreArchivo.toLowerCase().endsWith(".pdf");
 
           return (
             <div

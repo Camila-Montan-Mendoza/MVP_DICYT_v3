@@ -1,5 +1,5 @@
-import React from 'react';
-import { Database, AlertCircle } from 'lucide-react';
+import React from "react";
+import { Database, AlertCircle } from "lucide-react";
 
 interface EmptyDashboardStateProps {
   title?: string;
@@ -8,8 +8,8 @@ interface EmptyDashboardStateProps {
 }
 
 export function EmptyDashboardState({
-  title = 'Sin datos asignados en Supabase',
-  description = 'No se encontraron registros activos de programas o proyectos de investigación asociados a tu usuario.',
+  title = "Sin datos asignados en Supabase",
+  description = "No se encontraron registros activos de programas o proyectos de investigación asociados a tu usuario.",
   onRetry,
 }: EmptyDashboardStateProps) {
   return (

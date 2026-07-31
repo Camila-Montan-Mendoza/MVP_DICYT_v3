@@ -1,4 +1,7 @@
-import { EstadoProyectoInfo, InvestigadorPrincipalInfo } from "@/src/features/proyectos-lista/types";
+import {
+  EstadoProyectoInfo,
+  InvestigadorPrincipalInfo,
+} from "@/src/features/proyectos-lista/types";
 
 export interface PartidaMemoriaCalculo {
   id: number;

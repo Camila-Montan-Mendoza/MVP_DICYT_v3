@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Search, SlidersHorizontal, Trash2, Plus, AlertCircle, CheckCircle2 } from "lucide-react";
-import { PartidaMemoriaCalculo, ProyectoDetalle } from "../types";
+import { ProyectoDetalle } from "../types";
 import { useMemoriaCalculoEditor } from "../hooks/useMemoriaCalculoEditor";
 import { PartidaSearchModal } from "./PartidaSearchModal";
 import { PresupuestoConsolidadoFooter } from "./PresupuestoConsolidadoFooter";
@@ -129,9 +129,7 @@ export function MemoriaCalculoEditView({
                   <td className="px-6 py-4 text-slate-500 font-mono">
                     {partida.codigoPartida || partida.id}
                   </td>
-                  <td className="px-6 py-4 font-bold text-[#001B47]">
-                    {partida.nombrePartida}
-                  </td>
+                  <td className="px-6 py-4 font-bold text-[#001B47]">{partida.nombrePartida}</td>
                   <td className="px-6 py-3 text-right">
                     <input
                       type="number"

@@ -31,10 +31,14 @@ export default function Tarea13SolicitudPagoActive({
 
   const [loading, setLoading] = useState(true);
   const [solicitudes, setSolicitudes] = useState<SolicitudPagoProveedorData[]>([]);
-  const [selectedNotaModal, setSelectedNotaModal] = useState<SolicitudPagoProveedorData | null>(null);
+  const [selectedNotaModal, setSelectedNotaModal] = useState<SolicitudPagoProveedorData | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(
+    null
+  );
   const [motivoObsInput, setMotivoObsInput] = useState("");
   const [showObsModal, setShowObsModal] = useState<SolicitudPagoProveedorData | null>(null);
 
@@ -243,7 +247,8 @@ export default function Tarea13SolicitudPagoActive({
 
       setFeedback({
         type: "success",
-        message: "¡Happy Path exitoso! Todas las solicitudes de pago fueron validadas y el trámite avanzó al siguiente paso.",
+        message:
+          "¡Happy Path exitoso! Todas las solicitudes de pago fueron validadas y el trámite avanzó al siguiente paso.",
       });
 
       await cargarSolicitudes();
@@ -302,7 +307,8 @@ export default function Tarea13SolicitudPagoActive({
                 Solicitud de Pago a Proveedor
               </h3>
               <p className="text-xs text-slate-500">
-                Generación automática de notas de pago, revisión de respaldos y validación por Compras / Contabilidad.
+                Generación automática de notas de pago, revisión de respaldos y validación por
+                Compras / Contabilidad.
               </p>
             </div>
           </div>
@@ -389,7 +395,8 @@ export default function Tarea13SolicitudPagoActive({
 
             <p className="text-xs text-slate-600">
               Ingrese el motivo de la observación para el proveedor{" "}
-              <strong>{showObsModal.proveedorNombre}</strong>. El investigador deberá subsanar este punto.
+              <strong>{showObsModal.proveedorNombre}</strong>. El investigador deberá subsanar este
+              punto.
             </p>
 
             <textarea

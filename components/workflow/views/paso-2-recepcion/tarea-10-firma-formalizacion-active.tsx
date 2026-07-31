@@ -10,13 +10,7 @@ import {
 import { TarjetaEfectivizacionProveedor } from "@/components/tramites/ordenes/TarjetaEfectivizacionProveedor";
 import { ModalImpresionOrden } from "@/components/tramites/ordenes/ModalImpresionOrden";
 import { Button } from "@/components/ui/button";
-import {
-  FileCheck2,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Send,
-} from "lucide-react";
+import { FileCheck2, CheckCircle2, AlertCircle, Loader2, Send } from "lucide-react";
 
 export default function Tarea10FirmaFormalizacionActive({
   tarea,
@@ -30,7 +24,9 @@ export default function Tarea10FirmaFormalizacionActive({
   const [selectedOrdenModal, setSelectedOrdenModal] = useState<OrdenContractualData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(
+    null
+  );
 
   const cargarOrdenes = useCallback(async () => {
     setLoading(true);
@@ -167,7 +163,8 @@ export default function Tarea10FirmaFormalizacionActive({
                 Firma y Formalización de Orden de Compra o Contrato
               </h3>
               <p className="text-xs text-slate-500">
-                Impresión directa, confirmación de firmas oficiales y pase a espera de entrega de materiales / servicios.
+                Impresión directa, confirmación de firmas oficiales y pase a espera de entrega de
+                materiales / servicios.
               </p>
             </div>
           </div>

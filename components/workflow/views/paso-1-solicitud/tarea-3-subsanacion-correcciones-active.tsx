@@ -24,7 +24,8 @@ export default function Tarea3SubsanacionCorreccionesActive({
 
     const res = await ejecutarTransicion(
       idTransicion,
-      observaciones.trim() || `Correcciones realizadas y subsanadas mediante acción: ${nombreAccion}`
+      observaciones.trim() ||
+        `Correcciones realizadas y subsanadas mediante acción: ${nombreAccion}`
     );
 
     setIsSubmitting(false);
@@ -55,8 +56,8 @@ export default function Tarea3SubsanacionCorreccionesActive({
           <span>Solicitud con Observaciones Realizadas</span>
         </div>
         <p className="text-xs text-amber-800 leading-relaxed">
-          Como Solicitante/Investigador, revise las observaciones indicadas anteriormente, realice las
-          correcciones necesarias y reenvíe la solicitud para una nueva revisión.
+          Como Solicitante/Investigador, revise las observaciones indicadas anteriormente, realice
+          las correcciones necesarias y reenvíe la solicitud para una nueva revisión.
         </p>
       </div>
 

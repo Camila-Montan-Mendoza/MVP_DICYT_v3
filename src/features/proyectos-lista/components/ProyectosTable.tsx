@@ -1,4 +1,11 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Pagination,
   PaginationControls,
@@ -59,7 +66,10 @@ export function ProyectosTable({
               <TableCell className="font-semibold text-[#001B47]">{proyecto.nombre}</TableCell>
               <TableCell>{formatPresupuesto(proyecto.presupuesto)}</TableCell>
               <TableCell>
-                <EstadoProyectoBadge estadoId={proyecto.estado.id} nombre={proyecto.estado.nombre} />
+                <EstadoProyectoBadge
+                  estadoId={proyecto.estado.id}
+                  nombre={proyecto.estado.nombre}
+                />
               </TableCell>
               <TableCell>{proyecto.investigadorPrincipal?.nombre ?? "Sin asignar"}</TableCell>
             </TableRow>
@@ -73,14 +83,8 @@ export function ProyectosTable({
             Mostrando {from}-{to} de {total} proyectos
           </PaginationInfo>
           <PaginationControls>
-            <PaginationPrevious
-              disabled={page <= 1}
-              onClick={() => onPageChange(page - 1)}
-            />
-            <PaginationNext
-              disabled={page >= totalPages}
-              onClick={() => onPageChange(page + 1)}
-            />
+            <PaginationPrevious disabled={page <= 1} onClick={() => onPageChange(page - 1)} />
+            <PaginationNext disabled={page >= totalPages} onClick={() => onPageChange(page + 1)} />
           </PaginationControls>
         </Pagination>
       )}

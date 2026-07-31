@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import { resolveProyectoNavigationTarget } from "./useProyectosLista";
 import { ProyectoListItem } from "../types";
 
-function makeProyecto(estadoId: ProyectoListItem["estado"]["id"]): Pick<ProyectoListItem, "id" | "estado"> {
+function makeProyecto(
+  estadoId: ProyectoListItem["estado"]["id"]
+): Pick<ProyectoListItem, "id" | "estado"> {
   return { id: 42, estado: { id: estadoId, nombre: "" } };
 }
 

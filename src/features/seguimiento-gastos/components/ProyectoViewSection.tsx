@@ -1,8 +1,8 @@
-import React from 'react';
-import { FolderGit2, FileText, Calendar } from 'lucide-react';
-import { ProyectoSummary } from '../types';
-import { formatBolivianos } from '../utils/metrics-calculator';
-import { ProyectoPartidasDetail } from './ProyectoPartidasDetail';
+import React from "react";
+import { FolderGit2, FileText, Calendar } from "lucide-react";
+import { ProyectoSummary } from "../types";
+import { formatBolivianos } from "../utils/metrics-calculator";
+import { ProyectoPartidasDetail } from "./ProyectoPartidasDetail";
 
 interface ProyectoViewSectionProps {
   proyectos: ProyectoSummary[];

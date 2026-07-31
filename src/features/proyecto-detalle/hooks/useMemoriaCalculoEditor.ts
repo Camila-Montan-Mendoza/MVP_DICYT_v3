@@ -12,7 +12,9 @@ export function useMemoriaCalculoEditor(
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(
+    null
+  );
 
   const presupuestoTotal = proyecto.presupuestoTotal || 100000;
 
@@ -70,7 +72,8 @@ export function useMemoriaCalculoEditor(
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error al guardar");
 
-      const updated = data.proyecto || mockProyectoService.updateMemoriaCalculo(proyecto.id, partidas);
+      const updated =
+        data.proyecto || mockProyectoService.updateMemoriaCalculo(proyecto.id, partidas);
       if (onProyectoUpdated) onProyectoUpdated(updated);
 
       setFeedback({ type: "success", message: "Memoria de cálculo guardada correctamente." });

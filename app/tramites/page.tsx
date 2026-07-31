@@ -259,7 +259,9 @@ export default function ListaTramitesPage() {
               <div className="w-14 h-14 bg-slate-100 text-[#64748b] rounded-full flex items-center justify-center mx-auto">
                 <Inbox className="w-7 h-7" />
               </div>
-              <h3 className="font-bold text-base text-[#001B47]">No se encontraron compras/contrataciones</h3>
+              <h3 className="font-bold text-base text-[#001B47]">
+                No se encontraron compras/contrataciones
+              </h3>
               <p className="text-xs text-[#6b7280] max-w-sm mx-auto leading-relaxed">
                 Pruebe ajustando o limpiando los filtros de búsqueda.
               </p>

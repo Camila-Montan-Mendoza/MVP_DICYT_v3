@@ -6,6 +6,7 @@
 ## Integration in Workflow Stepper
 
 La gestión del expediente digital y resumen final se ejecuta en el **Paso 4 (Evidencia)**:
+
 - **Tarea 18**: `components/workflow/views/paso-4-evidencia/tarea-18-expediente-digital-active.tsx`
 - **Tarea 19**: `components/workflow/views/paso-4-evidencia/tarea-19-tramite-completado-active.tsx`
 

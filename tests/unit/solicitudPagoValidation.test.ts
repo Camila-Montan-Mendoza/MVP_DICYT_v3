@@ -1,6 +1,9 @@
 export function validarMotivoObservacion(motivo?: string): { valida: boolean; error?: string } {
   if (!motivo || motivo.trim().length === 0) {
-    return { valida: false, error: "El motivo de la observación es obligatorio y no puede estar vacío." };
+    return {
+      valida: false,
+      error: "El motivo de la observación es obligatorio y no puede estar vacío.",
+    };
   }
   return { valida: true };
 }

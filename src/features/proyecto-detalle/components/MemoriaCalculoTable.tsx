@@ -1,4 +1,11 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { PartidaMemoriaCalculo } from "../types";
 
 interface MemoriaCalculoTableProps {
@@ -39,7 +46,9 @@ export function MemoriaCalculoTable({ partidas, total }: MemoriaCalculoTableProp
         <TableRow className="bg-[#f0f4f8] hover:bg-[#f0f4f8]">
           <TableCell />
           <TableCell className="font-bold text-[#001B47]">Total Consolidado</TableCell>
-          <TableCell className="text-right font-bold text-[#001B47]">{formatMonto(total)}</TableCell>
+          <TableCell className="text-right font-bold text-[#001B47]">
+            {formatMonto(total)}
+          </TableCell>
         </TableRow>
       </TableBody>
     </Table>

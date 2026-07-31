@@ -18,7 +18,8 @@ export function WorkflowStepper({ pasos, activeStepId, onSelectStep }: WorkflowS
           const isCompletadoRaw = paso.estado === "COMPLETADO";
           // Si el paso ya está completado en BD o si estamos en el último paso (Paso 4) y no está PENDIENTE
           const isCompletado = isCompletadoRaw || (isLast && paso.estado !== "PENDIENTE");
-          const isEnCurso = !isCompletado && (paso.estado === "EN_CURSO" || (paso.estado as string) === "EN CURSO");
+          const isEnCurso =
+            !isCompletado && (paso.estado === "EN_CURSO" || (paso.estado as string) === "EN CURSO");
           const isPendiente = paso.estado === "PENDIENTE";
           const isSelected = paso.id === activeStepId;
 

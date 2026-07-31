@@ -32,7 +32,7 @@ Construir `app/(dashboard)/proyectos/[id]/page.tsx` (carpeta ya existente y vac�
 
 _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
-- **I. RBAC Workflow-Driven**: El acceso (CA-6) y las banderas de acción por rol+estado (CA-3/CA-4/CA-5) se resuelven en `GET /api/proyectos/[id]` reutilizando `resolveServerAuthContext` de la HU 018 más una verificación adicional de "¿es este usuario el IP de *este* proyecto?". PASS.
+- **I. RBAC Workflow-Driven**: El acceso (CA-6) y las banderas de acción por rol+estado (CA-3/CA-4/CA-5) se resuelven en `GET /api/proyectos/[id]` reutilizando `resolveServerAuthContext` de la HU 018 más una verificación adicional de "¿es este usuario el IP de _este_ proyecto?". PASS.
 - **II. Minimalist Wizard UI & Zero Emojis**: Pantalla de consulta (no wizard) con tarjeta de información general + tabla de partidas, banners de acción con íconos `lucide-react`, cero emojis, tokens `DESIGN.md`. PASS.
 - **III. Modular React Architecture**: Container (`useProyectoDetalle` hook) / Presentacional (`ProyectoInfoCard`, `MemoriaCalculoTable`, `MemoriaCalculoActionBanner`); acceso a datos en `lib/db/proyecto-repository.ts` (mismo archivo que HU 018, coherente con el patrón ya establecido). PASS.
 - **IV. Functional Core Scope (MVP First)**: Implementa el segundo tramo de la navegación mandatada por este principio: `Lista de Proyectos` → `Detalle de Proyecto`. PASS.
@@ -90,4 +90,4 @@ docs/
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 | --------- | ---------- | ------------------------------------ |
-| Ninguna | N/A | N/A |
+| Ninguna   | N/A        | N/A                                  |

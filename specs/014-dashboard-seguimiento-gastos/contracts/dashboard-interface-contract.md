@@ -16,7 +16,7 @@ export interface UseDashboardSeguimientoReturn {
   metrics: DashboardMetrics;
   programas: ProgramaSummary[];
   proyectos: ProyectoSummary[];
-  setActiveScope: (scope: 'programa' | 'proyectos') => void;
+  setActiveScope: (scope: "programa" | "proyectos") => void;
   refetch: () => Promise<void>;
 }
 ```

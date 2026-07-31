@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
-import type { EstadoProyectoId, ProyectoListItem, RolActivoScope } from "@/src/features/proyectos-lista/types";
+import type {
+  EstadoProyectoId,
+  ProyectoListItem,
+  RolActivoScope,
+} from "@/src/features/proyectos-lista/types";
 import type { ProyectoDetalle } from "@/src/features/proyecto-detalle/types";
 
 export interface ProyectoDBItem {
@@ -101,9 +105,11 @@ export async function listProyectosParaUsuario(
     query = query.eq("id_estado_proyecto", estadoId);
   }
 
-  const { data: proyectosRaw, error: proyectosError, count } = await query
-    .order("id", { ascending: true })
-    .range(from, to);
+  const {
+    data: proyectosRaw,
+    error: proyectosError,
+    count,
+  } = await query.order("id", { ascending: true }).range(from, to);
 
   if (proyectosError) throw proyectosError;
 
@@ -198,7 +204,8 @@ function calcularPermisos(estadoId: EstadoProyectoId, rolActivo: string) {
     rolActivo === "Administradora DICyT" || rolActivo === "Administrador del Sistema SIGEFI";
 
   const soloLectura = esAdministrador || estadoId === 4;
-  const puedeDetallarMemoria = !soloLectura && esInvestigadorPrincipal && (estadoId === 1 || estadoId === 3);
+  const puedeDetallarMemoria =
+    !soloLectura && esInvestigadorPrincipal && (estadoId === 1 || estadoId === 3);
   const puedeEvaluar = !soloLectura && esRespPresupuestos && estadoId === 2;
 
   return { puedeDetallarMemoria, puedeEvaluar, soloLectura };

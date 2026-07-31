@@ -4,7 +4,8 @@ import { fetchBitacoraModificaciones } from "../api/fetchBitacoraModificaciones"
 
 export function useBitacoraModificaciones() {
   const [modificaciones, setModificaciones] = useState<ModificacionPresupuestariaSummary[]>([]);
-  const [selectedModificacion, setSelectedModificacion] = useState<ModificacionPresupuestariaSummary | null>(null);
+  const [selectedModificacion, setSelectedModificacion] =
+    useState<ModificacionPresupuestariaSummary | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -39,7 +40,8 @@ export function useBitacoraModificaciones() {
       if (m.idPrograma) {
         map.set(m.idPrograma, {
           id: m.idPrograma,
-          nombre: m.idPrograma === 1 ? "Programa ASDI Fortalecimiento" : `Programa #${m.idPrograma}`,
+          nombre:
+            m.idPrograma === 1 ? "Programa ASDI Fortalecimiento" : `Programa #${m.idPrograma}`,
         });
       }
     });

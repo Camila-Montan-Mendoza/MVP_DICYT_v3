@@ -14,7 +14,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const { partidas } = body;
 
     if (!Array.isArray(partidas)) {
-      return NextResponse.json({ message: "Se requiere un arreglo de 'partidas'" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Se requiere un arreglo de 'partidas'" },
+        { status: 400 }
+      );
     }
 
     const updatedProyecto = mockProyectoService.updateMemoriaCalculo(proyectoId, partidas);

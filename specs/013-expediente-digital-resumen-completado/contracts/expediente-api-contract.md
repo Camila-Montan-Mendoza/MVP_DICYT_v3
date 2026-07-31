@@ -43,9 +43,20 @@ export interface GuardarArchivoExpedienteParams {
 }
 
 // Métodos del servicio Supabase
-export async function obtenerArchivosExpediente(tramiteId: number): Promise<ArchivoExpedienteData[]>;
-export async function guardarArchivoExpediente(params: GuardarArchivoExpedienteParams): Promise<{ success: boolean; id?: number; error?: string }>;
-export async function eliminarArchivoExpediente(archivoId: number): Promise<{ success: boolean; error?: string }>;
-export async function archivarExpedienteFinal(tramiteId: number, usuarioId?: number): Promise<{ success: boolean; error?: string }>;
-export async function obtenerResumenEjecutivoTramite(tramiteId: number): Promise<ResumenEjecutivoTramiteData | null>;
+export async function obtenerArchivosExpediente(
+  tramiteId: number
+): Promise<ArchivoExpedienteData[]>;
+export async function guardarArchivoExpediente(
+  params: GuardarArchivoExpedienteParams
+): Promise<{ success: boolean; id?: number; error?: string }>;
+export async function eliminarArchivoExpediente(
+  archivoId: number
+): Promise<{ success: boolean; error?: string }>;
+export async function archivarExpedienteFinal(
+  tramiteId: number,
+  usuarioId?: number
+): Promise<{ success: boolean; error?: string }>;
+export async function obtenerResumenEjecutivoTramite(
+  tramiteId: number
+): Promise<ResumenEjecutivoTramiteData | null>;
 ```

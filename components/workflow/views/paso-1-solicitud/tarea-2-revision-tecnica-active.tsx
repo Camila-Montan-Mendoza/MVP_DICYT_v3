@@ -42,9 +42,7 @@ export default function Tarea2RevisionTecnicaActive({
 
   const transicionObservar =
     acciones.find(
-      (a) =>
-        a.idEstadoDestino === 3 ||
-        a.nombreAccion.toLowerCase().includes("observ")
+      (a) => a.idEstadoDestino === 3 || a.nombreAccion.toLowerCase().includes("observ")
     ) || acciones[1];
 
   const items = (tramite as any)?.items || [];

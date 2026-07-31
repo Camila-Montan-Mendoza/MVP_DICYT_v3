@@ -42,7 +42,8 @@ export default function TrazaTramitesPage() {
               </h1>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Consulta relacional de partidas presupuestarias e ítems afectantes (Datos en vivo desde Supabase)
+              Consulta relacional de partidas presupuestarias e ítems afectantes (Datos en vivo
+              desde Supabase)
             </p>
           </div>
 
@@ -105,11 +106,15 @@ export default function TrazaTramitesPage() {
 
         {/* Layout Ajustable Split-View Estilo Jira */}
         <div className="flex gap-6">
-          <div className={`flex-1 transition-all duration-300 ${selectedItem ? "pr-0 md:pr-[550px]" : ""}`}>
+          <div
+            className={`flex-1 transition-all duration-300 ${selectedItem ? "pr-0 md:pr-[550px]" : ""}`}
+          >
             {isLoading ? (
               <div className="bg-white border border-border rounded-xl p-12 text-center shadow-2xs animate-pulse">
                 <div className="h-6 bg-slate-200 rounded w-1/3 mx-auto mb-2" />
-                <span className="text-xs text-muted-foreground">Cargando partidas reales desde Supabase...</span>
+                <span className="text-xs text-muted-foreground">
+                  Cargando partidas reales desde Supabase...
+                </span>
               </div>
             ) : error ? (
               <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center text-xs text-red-700">

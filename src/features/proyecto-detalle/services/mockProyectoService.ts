@@ -3,13 +3,48 @@ import { PartidaCatalogo, PartidaMemoriaCalculo, ProyectoDetalle } from "../type
 const STORAGE_KEY = "sigefi_mock_proyecto_";
 
 export const CATALOGO_PARTIDAS_SEED: PartidaCatalogo[] = [
-  { id: 101, codigo: "101", nombre: "Materiales y Suministros", itemsRelacionados: ["papeleria", "escritorio", "suministros", "hojas"] },
-  { id: 205, codigo: "205", nombre: "Servicios Técnicos Profesionales", itemsRelacionados: ["consultoria", "servicios", "honorarios", "desarrollo"] },
-  { id: 301, codigo: "301", nombre: "Equipamiento de Laboratorio", itemsRelacionados: ["equipos", "microscopio", "centrifuga", "gpu", "hardware", "servidores"] },
-  { id: 405, codigo: "405", nombre: "Insumos Químicos", itemsRelacionados: ["reactivos", "adn", "insumos", "laboratorio", "quimica"] },
-  { id: 512, codigo: "512", nombre: "Capacitación Técnica", itemsRelacionados: ["talleres", "cursos", "formacion", "capacitacion", "seminarios"] },
-  { id: 601, codigo: "601", nombre: "Impresiones y Publicaciones", itemsRelacionados: ["banners", "afiches", "folletos", "libros", "publicaciones"] },
-  { id: 702, codigo: "702", nombre: "Pasajes y Viáticos", itemsRelacionados: ["viajes", "transporte", "pasajes", "hotel", "viaticos"] },
+  {
+    id: 101,
+    codigo: "101",
+    nombre: "Materiales y Suministros",
+    itemsRelacionados: ["papeleria", "escritorio", "suministros", "hojas"],
+  },
+  {
+    id: 205,
+    codigo: "205",
+    nombre: "Servicios Técnicos Profesionales",
+    itemsRelacionados: ["consultoria", "servicios", "honorarios", "desarrollo"],
+  },
+  {
+    id: 301,
+    codigo: "301",
+    nombre: "Equipamiento de Laboratorio",
+    itemsRelacionados: ["equipos", "microscopio", "centrifuga", "gpu", "hardware", "servidores"],
+  },
+  {
+    id: 405,
+    codigo: "405",
+    nombre: "Insumos Químicos",
+    itemsRelacionados: ["reactivos", "adn", "insumos", "laboratorio", "quimica"],
+  },
+  {
+    id: 512,
+    codigo: "512",
+    nombre: "Capacitación Técnica",
+    itemsRelacionados: ["talleres", "cursos", "formacion", "capacitacion", "seminarios"],
+  },
+  {
+    id: 601,
+    codigo: "601",
+    nombre: "Impresiones y Publicaciones",
+    itemsRelacionados: ["banners", "afiches", "folletos", "libros", "publicaciones"],
+  },
+  {
+    id: 702,
+    codigo: "702",
+    nombre: "Pasajes y Viáticos",
+    itemsRelacionados: ["viajes", "transporte", "pasajes", "hotel", "viaticos"],
+  },
 ];
 
 export const MOCK_PROYECTOS_SEED: Record<number, ProyectoDetalle> = {
@@ -31,7 +66,12 @@ export const MOCK_PROYECTOS_SEED: Record<number, ProyectoDetalle> = {
     },
     memoriaCalculo: [
       { id: 101, codigoPartida: "101", nombrePartida: "Materiales y Suministros", monto: 45000 },
-      { id: 205, codigoPartida: "205", nombrePartida: "Servicios Técnicos Profesionales", monto: 55000 },
+      {
+        id: 205,
+        codigoPartida: "205",
+        nombrePartida: "Servicios Técnicos Profesionales",
+        monto: 55000,
+      },
       { id: 301, codigoPartida: "301", nombrePartida: "Equipamiento de Laboratorio", monto: 25000 },
       { id: 405, codigoPartida: "405", nombrePartida: "Insumos Químicos", monto: 15000 },
       { id: 512, codigoPartida: "512", nombrePartida: "Capacitación Técnica", monto: 10000 },
@@ -61,7 +101,12 @@ export const MOCK_PROYECTOS_SEED: Record<number, ProyectoDetalle> = {
     },
     memoriaCalculo: [
       { id: 101, codigoPartida: "101", nombrePartida: "Materiales y Suministros", monto: 35000 },
-      { id: 205, codigoPartida: "205", nombrePartida: "Servicios Técnicos Profesionales", monto: 40000 },
+      {
+        id: 205,
+        codigoPartida: "205",
+        nombrePartida: "Servicios Técnicos Profesionales",
+        monto: 40000,
+      },
       { id: 301, codigoPartida: "301", nombrePartida: "Equipamiento de Laboratorio", monto: 50000 },
       { id: 405, codigoPartida: "405", nombrePartida: "Insumos Químicos", monto: 25000 },
     ],
@@ -90,7 +135,12 @@ export const MOCK_PROYECTOS_SEED: Record<number, ProyectoDetalle> = {
     },
     memoriaCalculo: [
       { id: 101, codigoPartida: "101", nombrePartida: "Materiales y Suministros", monto: 50000 },
-      { id: 301, codigoPartida: "301", nombrePartida: "Equipamiento de Laboratorio", monto: 100000 },
+      {
+        id: 301,
+        codigoPartida: "301",
+        nombrePartida: "Equipamiento de Laboratorio",
+        monto: 100000,
+      },
       { id: 702, codigoPartida: "702", nombrePartida: "Pasajes y Viáticos", monto: 30000 },
     ],
     totalMemoriaCalculo: 180000,
@@ -166,8 +216,11 @@ export class MockProyectoService {
   }
 
   public saveProyecto(proyecto: ProyectoDetalle): void {
-    proyecto.totalMemoriaCalculo = proyecto.memoriaCalculo.reduce((acc, item) => acc + (Number(item.monto) || 0), 0);
-    
+    proyecto.totalMemoriaCalculo = proyecto.memoriaCalculo.reduce(
+      (acc, item) => acc + (Number(item.monto) || 0),
+      0
+    );
+
     // Auto-update permissions according to state
     const estadoId = proyecto.estado.id;
     proyecto.permisos = {
@@ -185,7 +238,10 @@ export class MockProyectoService {
     }
   }
 
-  public updateMemoriaCalculo(proyectoId: number, partidas: PartidaMemoriaCalculo[]): ProyectoDetalle {
+  public updateMemoriaCalculo(
+    proyectoId: number,
+    partidas: PartidaMemoriaCalculo[]
+  ): ProyectoDetalle {
     const proyecto = this.getProyecto(proyectoId);
     proyecto.memoriaCalculo = partidas;
     this.saveProyecto(proyecto);
@@ -202,7 +258,11 @@ export class MockProyectoService {
     return proyecto;
   }
 
-  public evaluarMemoriaCalculo(proyectoId: number, decision: "aprobar" | "observar", observaciones?: string): ProyectoDetalle {
+  public evaluarMemoriaCalculo(
+    proyectoId: number,
+    decision: "aprobar" | "observar",
+    _observaciones?: string
+  ): ProyectoDetalle {
     const proyecto = this.getProyecto(proyectoId);
     if (decision === "aprobar") {
       proyecto.estado = {

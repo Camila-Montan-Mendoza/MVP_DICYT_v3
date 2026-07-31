@@ -8,17 +8,17 @@ Este documento establece las directrices fundamentales del sistema de diseño pa
 
 Las variables en [`src/app/globals.css`](./src/app/globals.css) definen el tema visual de la aplicación:
 
-| Variable CSS         | Propósito                           | Valor Hex en globals.css | Equivalente Tailwind              |
-| :------------------- | :---------------------------------- | :----------------------- | :-------------------------------- |
-| `--background`       | Fondo principal de la interfaz      | `#fdfdfd`                | `bg-background`                   |
-| `--foreground`       | Color de texto primario             | `#2c3e50`                | `text-foreground`                 |
-| `--primary`          | Azul Institucional UMSS             | `#003770`                | `bg-primary` o `text-primary`     |
-| `--secondary`        | Rojo Institucional UMSS             | `#BC000C`                | `bg-secondary` o `text-secondary` |
-| `--muted`            | Fondo secundario / deshabilitado    | `#f0f4f8`                | `bg-muted`                        |
-| `--muted-foreground` | Texto secundario suave              | `#6b7280`                | `text-muted-foreground`           |
-| `--border`           | Bordes de tarjetas y divisiones     | `#e5e7eb`                | `border-border`                   |
-| `--umss-dark-blue`   | Azul oscuro para títulos y acentos  | `#001B47`                | Variables de acento               |
-| `--umss-btn-blue`    | Color para botones de acción        | `#002855`                | Variables de interacción          |
+| Variable CSS         | Propósito                          | Valor Hex en globals.css | Equivalente Tailwind              |
+| :------------------- | :--------------------------------- | :----------------------- | :-------------------------------- |
+| `--background`       | Fondo principal de la interfaz     | `#fdfdfd`                | `bg-background`                   |
+| `--foreground`       | Color de texto primario            | `#2c3e50`                | `text-foreground`                 |
+| `--primary`          | Azul Institucional UMSS            | `#003770`                | `bg-primary` o `text-primary`     |
+| `--secondary`        | Rojo Institucional UMSS            | `#BC000C`                | `bg-secondary` o `text-secondary` |
+| `--muted`            | Fondo secundario / deshabilitado   | `#f0f4f8`                | `bg-muted`                        |
+| `--muted-foreground` | Texto secundario suave             | `#6b7280`                | `text-muted-foreground`           |
+| `--border`           | Bordes de tarjetas y divisiones    | `#e5e7eb`                | `border-border`                   |
+| `--umss-dark-blue`   | Azul oscuro para títulos y acentos | `#001B47`                | Variables de acento               |
+| `--umss-btn-blue`    | Color para botones de acción       | `#002855`                | Variables de interacción          |
 
 ---
 
@@ -29,7 +29,8 @@ Las variables en [`src/app/globals.css`](./src/app/globals.css) definen el tema 
 > Todas las vistas complejas, procesos de trámites, cargas de documentos y flujos de aprobación MUST estructurarse como un **Wizard Minimalista por Pasos**.
 
 ### Reglas de Diseño del Wizard:
-1. **Un Solo Objetivo por Paso**: Cada pantalla o estado del wizard debe concentrar la atención del usuario en una sola tarea clara (ej: *Cargar Cotizaciones*, *Revisar Presupuesto*, *Firmar Acta*), eliminando el ruido visual o la saturación de formularios extensos.
+
+1. **Un Solo Objetivo por Paso**: Cada pantalla o estado del wizard debe concentrar la atención del usuario en una sola tarea clara (ej: _Cargar Cotizaciones_, _Revisar Presupuesto_, _Firmar Acta_), eliminando el ruido visual o la saturación de formularios extensos.
 2. **Barra de Progreso Clara (Stepper Indicator)**: Mostrar un indicador horizontal de pasos en la parte superior con números o iconos de estado (`Completado`, `En Curso`, `Pendiente`), utilizando los tokens de color azul institucional (`#003770`) para el paso activo.
 3. **Controles de Navegación Transparentes**: Botones de navegación explícitos (`Anterior` / `Siguiente` / `Confirmar`) ubicados en la parte inferior o esquina superior derecha del contenedor principal.
 4. **Espaciado y Aire Visual**: Márgenes amplios (`p-6`, `gap-6`), tarjetas sin anidamientos innecesarios y divisiones limpias utilizando `border-border`.
@@ -43,6 +44,7 @@ Las variables en [`src/app/globals.css`](./src/app/globals.css) definen el tema 
 > Está **estrictamente prohibido** utilizar caracteres emoji en cualquier parte del sistema (encabezados, botones, etiquetas, alertas, tablas, badges o notificaciones).
 
 ### Directrices para Iconos:
+
 - **Librería Oficial**: Usar únicamente iconos SVG de `lucide-react` (ej: `CheckCircle2`, `Clock`, `AlertTriangle`, `FileText`, `UploadCloud`, `UserCheck`, `ChevronRight`).
 - **Tamaño Estándar**:
   - Iconos dentro de botones o badges: `w-4 h-4` o `w-3.5 h-3.5`.

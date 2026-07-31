@@ -15,6 +15,7 @@
 Como Investigador Principal quiero ver únicamente los proyectos donde soy investigador principal, y como Administrador de la DICyT o Responsable de Presupuestos quiero ver todos los proyectos existentes en el sistema, cada uno mostrando su nombre, investigador principal, presupuesto total y estado actual, para tener una vista de seguimiento acorde a mi responsabilidad.
 
 **Mockups**:
+
 - Administrador: ![Mockup HU1 - Administrador](mockups/hu1-administrador.png)
 - Responsable de Presupuestos: ![Mockup HU1 - Presupuestos](mockups/hu1-presupuestos.png)
 - Investigador: ![Mockup HU1 - Investigador](mockups/hu1-investigador.png)
@@ -36,6 +37,7 @@ Como Investigador Principal quiero ver únicamente los proyectos donde soy inves
 Como Investigador Principal quiero filtrar por proyecto y por estado, y como Administrador de la DICyT o Responsable de Presupuestos quiero filtrar además por investigador principal, de forma combinable entre sí, para ubicar el proyecto que busco sin recorrer manualmente toda la lista.
 
 **Mockups**:
+
 - Administrador (filtros Buscar / Investigador / Estado): ![Mockup HU2 - Administrador](mockups/hu2-administrador.png)
 - Investigador (filtros Buscar / Estado): ![Mockup HU2 - Investigador](mockups/hu2-investigador.png)
 
@@ -56,6 +58,7 @@ Como Investigador Principal quiero filtrar por proyecto y por estado, y como Adm
 Como usuario de cualquiera de los tres roles quiero que cada proyecto muestre una etiqueta de estado con color e ícono distintivos, para reconocer inmediatamente en qué punto del proceso se encuentra sin tener que leer el detalle.
 
 **Mockups**:
+
 - ![Mockup HU3 - Etiquetas de estado](mockups/hu3-etiquetas-estado.png)
 
 **Why this priority**: Acelera el seguimiento y la priorización de proyectos, pero depende de que la lista (HU1) y sus filtros (HU2) ya existan.
@@ -73,6 +76,7 @@ Como usuario de cualquiera de los tres roles quiero que cada proyecto muestre un
 Como usuario de cualquiera de los tres roles quiero hacer clic en un proyecto de la lista para ir a su vista de detalle, y como Investigador Principal quiero que, si mi proyecto está pendiente u observado, el clic me lleve directo a completar o corregir la memoria de cálculo, para actuar sin pasos intermedios innecesarios.
 
 **Mockups**:
+
 - ![Mockup HU4 - Navegación al detalle](mockups/hu4-navegacion-detalle.png)
 
 **Why this priority**: Es la puerta de entrada a las acciones sobre un proyecto específico, pero solo tiene sentido una vez que la lista, los filtros y los estados visuales ya están disponibles.
@@ -91,6 +95,7 @@ Como usuario de cualquiera de los tres roles quiero hacer clic en un proyecto de
 Como usuario de cualquiera de los tres roles quiero recibir un mensaje claro cuando no existan proyectos en mi alcance o cuando mis filtros no encuentren coincidencias, para saber si el problema es la falta de datos o los criterios de búsqueda que apliqué.
 
 **Mockups**:
+
 - ![Mockup HU5 - Estado vacío](mockups/hu5-estado-vacio.png)
 
 **Why this priority**: Mejora la claridad de la experiencia pero es el caso menos frecuente y no bloquea el uso principal de la lista.

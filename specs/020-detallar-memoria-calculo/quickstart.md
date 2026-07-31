@@ -1,18 +1,21 @@
 # Quickstart & Manual Testing Guide: Detallar Memoria de Cálculo
 
 ## 1. Prerequisites
+
 - Dev server running on `http://localhost:3000` (or `npm run dev`)
 - Browser navigation to `/proyectos/1`
 
 ## 2. Test Scenarios
 
 ### Scenario A: View Project Detail & Memoria de Cálculo (Image 2 View Mode)
+
 1. Open `http://localhost:3000/proyectos/1`
 2. Verify Header with "Detalles del Proyecto" and top right button "Trámites del Proyecto"
 3. Verify Info Card with Dr. Ricardo Villarroel, Presupuesto Total: 100.000,00 Bs., Program, Fuente, Dates.
 4. Verify Table with columns (ID, Nombre de Partida, Monto Bs.) and Total Consolidado row.
 
 ### Scenario B: Edit Memoria de Cálculo (Image 1 Interactive Mode)
+
 1. If status is "Memoria de cálculo pendiente", click "Detallar memoria de cálculo" or toggle edit mode.
 2. Search bar with filter icon: Type "Equipamiento" or "101" to filter partidas.
 3. Edit partida amounts:

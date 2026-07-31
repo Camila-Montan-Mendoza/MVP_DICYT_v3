@@ -182,9 +182,7 @@ export default function Tarea6VerificacionMercadoVirtualActive({
       (st) => st === "NO_ENCONTRADO" || st === "PENDIENTE"
     );
 
-    const transicionElegida = requiereCotizaciones
-      ? transicionCotizaciones
-      : transicionAdjudicarMV;
+    const transicionElegida = requiereCotizaciones ? transicionCotizaciones : transicionAdjudicarMV;
 
     if (!transicionElegida) return;
 

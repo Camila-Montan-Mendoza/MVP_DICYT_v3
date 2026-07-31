@@ -1,17 +1,7 @@
 "use client";
 
 import { ResumenEjecutivoTramiteData } from "@/types/expediente";
-import {
-  CheckCircle2,
-  FileCheck2,
-  Building2,
-  DollarSign,
-  FolderArchive,
-  Award,
-  Calendar,
-  User,
-  ShieldCheck,
-} from "lucide-react";
+import { CheckCircle2, FileCheck2, Building2, DollarSign, FolderArchive } from "lucide-react";
 
 interface FichaResumenEjecutivoTramiteProps {
   resumen: ResumenEjecutivoTramiteData;
@@ -64,7 +54,8 @@ export function FichaResumenEjecutivoTramite({ resumen }: FichaResumenEjecutivoT
               <strong className="text-slate-900">Proyecto:</strong> {resumen.proyectoNombre}
             </p>
             <p>
-              <strong className="text-slate-900">Solicitante / IP:</strong> {resumen.solicitanteNombre}
+              <strong className="text-slate-900">Solicitante / IP:</strong>{" "}
+              {resumen.solicitanteNombre}
             </p>
             <p>
               <strong className="text-slate-900">Unidad:</strong> {resumen.unidadSolicitante}
@@ -90,13 +81,16 @@ export function FichaResumenEjecutivoTramite({ resumen }: FichaResumenEjecutivoT
 
           <div className="space-y-1.5 text-slate-700">
             <p>
-              <strong className="text-slate-900">Órdenes Contractuales:</strong> Emitidas y efectivizadas
+              <strong className="text-slate-900">Órdenes Contractuales:</strong> Emitidas y
+              efectivizadas
             </p>
             <p>
-              <strong className="text-slate-900">Actas de Recepción:</strong> {resumen.actasEmitidasCount} acta(s) definitivas
+              <strong className="text-slate-900">Actas de Recepción:</strong>{" "}
+              {resumen.actasEmitidasCount} acta(s) definitivas
             </p>
             <p>
-              <strong className="text-slate-900">Conformidad:</strong> 100% de ítems entregados y verificados
+              <strong className="text-slate-900">Conformidad:</strong> 100% de ítems entregados y
+              verificados
             </p>
           </div>
         </div>
@@ -115,12 +109,14 @@ export function FichaResumenEjecutivoTramite({ resumen }: FichaResumenEjecutivoT
 
           <div className="space-y-1.5 text-slate-700">
             <p>
-              <strong className="text-slate-900">Solicitudes de Pago:</strong> {resumen.solicitudesPagoCount} validada(s)
+              <strong className="text-slate-900">Solicitudes de Pago:</strong>{" "}
+              {resumen.solicitudesPagoCount} validada(s)
             </p>
             <p>
               <strong className="text-slate-900">Monto Total Ejecutado:</strong>{" "}
               <span className="font-mono font-extrabold text-[#001B47]">
-                Bs. {resumen.montoTotalTramite.toLocaleString("es-BO", { minimumFractionDigits: 2 })}
+                Bs.{" "}
+                {resumen.montoTotalTramite.toLocaleString("es-BO", { minimumFractionDigits: 2 })}
               </span>
             </p>
             <p>

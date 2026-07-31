@@ -15,9 +15,7 @@ describe("EstadoProyectoBadge - distinción visual de los 4 estados", () => {
   });
 
   it("usa íconos distintos entre sí para cada estado", () => {
-    const icons = ([1, 2, 3, 4] as EstadoProyectoId[]).map(
-      (id) => getEstadoVisualConfig(id).icon
-    );
+    const icons = ([1, 2, 3, 4] as EstadoProyectoId[]).map((id) => getEstadoVisualConfig(id).icon);
     const uniqueIcons = new Set(icons);
     expect(uniqueIcons.size).toBe(4);
   });

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Tag, Search, LayoutGrid, List } from 'lucide-react';
-import { PartidaConcretaSummary } from '../types';
-import { formatBolivianos } from '../utils/metrics-calculator';
+import React, { useState } from "react";
+import { Tag, Search, LayoutGrid, List } from "lucide-react";
+import { PartidaConcretaSummary } from "../types";
+import { formatBolivianos } from "../utils/metrics-calculator";
 
 interface ProyectoPartidasDetailProps {
   partidas: PartidaConcretaSummary[];
@@ -9,13 +9,17 @@ interface ProyectoPartidasDetailProps {
 
 export function ProyectoPartidasDetail({ partidas }: ProyectoPartidasDetailProps) {
   // Proyectos pequeños (<=4 partidas) usan tarjetas por defecto; grandes (>4 partidas) usan tabla minimalista
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>(
-    partidas && partidas.length > 4 ? 'table' : 'grid'
+  const [viewMode, setViewMode] = useState<"table" | "grid">(
+    partidas && partidas.length > 4 ? "table" : "grid"
   );
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   if (!partidas || partidas.length === 0) {
-    return <p className="text-xs text-muted-foreground italic">Sin partidas asignadas en este proyecto.</p>;
+    return (
+      <p className="text-xs text-muted-foreground italic">
+        Sin partidas asignadas en este proyecto.
+      </p>
+    );
   }
 
   // Filtrado reactivo en búsqueda
@@ -23,8 +27,7 @@ export function ProyectoPartidasDetail({ partidas }: ProyectoPartidasDetailProps
     const query = searchQuery.toLowerCase().trim();
     if (!query) return true;
     return (
-      p.codigoPartida.toString().includes(query) ||
-      p.nombrePartida.toLowerCase().includes(query)
+      p.codigoPartida.toString().includes(query) || p.nombrePartida.toLowerCase().includes(query)
     );
   });
 
@@ -46,22 +49,22 @@ export function ProyectoPartidasDetail({ partidas }: ProyectoPartidasDetailProps
 
           <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border shrink-0">
             <button
-              onClick={() => setViewMode('table')}
+              onClick={() => setViewMode("table")}
               className={`p-1.5 rounded-md text-xs transition-colors flex items-center gap-1 ${
-                viewMode === 'table'
-                  ? 'bg-white text-[#003770] shadow-2xs font-semibold'
-                  : 'text-muted-foreground hover:text-[#001B47]'
+                viewMode === "table"
+                  ? "bg-white text-[#003770] shadow-2xs font-semibold"
+                  : "text-muted-foreground hover:text-[#001B47]"
               }`}
               title="Vista Lista Tabla"
             >
               <List className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => setViewMode('grid')}
+              onClick={() => setViewMode("grid")}
               className={`p-1.5 rounded-md text-xs transition-colors flex items-center gap-1 ${
-                viewMode === 'grid'
-                  ? 'bg-white text-[#003770] shadow-2xs font-semibold'
-                  : 'text-muted-foreground hover:text-[#001B47]'
+                viewMode === "grid"
+                  ? "bg-white text-[#003770] shadow-2xs font-semibold"
+                  : "text-muted-foreground hover:text-[#001B47]"
               }`}
               title="Vista Tarjetas"
             >
@@ -72,7 +75,7 @@ export function ProyectoPartidasDetail({ partidas }: ProyectoPartidasDetailProps
       )}
 
       {/* Renderizado de Modo Tabla Minimalista (Wizard Pattern para >4 partidas) */}
-      {viewMode === 'table' ? (
+      {viewMode === "table" ? (
         <div className="bg-white border border-border rounded-lg overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
@@ -130,7 +133,10 @@ export function ProyectoPartidasDetail({ partidas }: ProyectoPartidasDetailProps
                   Partida {p.codigoPartida}
                 </span>
               </div>
-              <div className="text-xs font-semibold text-[#001B47] truncate" title={p.nombrePartida}>
+              <div
+                className="text-xs font-semibold text-[#001B47] truncate"
+                title={p.nombrePartida}
+              >
                 {p.nombrePartida}
               </div>
               <div className="text-[11px] text-muted-foreground flex justify-between pt-1 border-t border-border/50">

@@ -9,10 +9,12 @@ function createFakeSupabase(tableResponses: Record<string, TableResponse[]>) {
   const calls: RecordedCall[] = [];
 
   function makeBuilder(table: string): any {
-    const record = (method: string) => (...args: any[]) => {
-      calls.push({ table, method, args });
-      return builder;
-    };
+    const record =
+      (method: string) =>
+      (...args: any[]) => {
+        calls.push({ table, method, args });
+        return builder;
+      };
     const builder: any = {
       select: record("select"),
       eq: record("eq"),
@@ -156,7 +158,8 @@ describe("listProyectosParaUsuario - combinación de filtros", () => {
 
     // La consulta de alcance sigue siendo por el propio usuarioId (1), no por investigadorId (2)
     const propiosCall = fakeSupabase.calls.find(
-      (c: RecordedCall) => c.table === "proyecto_usuario" && c.method === "eq" && c.args[0] === "id_usuario"
+      (c: RecordedCall) =>
+        c.table === "proyecto_usuario" && c.method === "eq" && c.args[0] === "id_usuario"
     );
     expect(propiosCall?.args[1]).toBe(1);
     expect(result.proyectos).toHaveLength(1);
@@ -212,7 +215,8 @@ describe("listProyectosParaUsuario - combinación de filtros", () => {
       (c: RecordedCall) => c.table === "proyecto" && c.method === "or"
     );
     const eqCall = fakeSupabase.calls.find(
-      (c: RecordedCall) => c.table === "proyecto" && c.method === "eq" && c.args[0] === "id_estado_proyecto"
+      (c: RecordedCall) =>
+        c.table === "proyecto" && c.method === "eq" && c.args[0] === "id_estado_proyecto"
     );
 
     expect(orCall?.args[0]).toContain("forestal");

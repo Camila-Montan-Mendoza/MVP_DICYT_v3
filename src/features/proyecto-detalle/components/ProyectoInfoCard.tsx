@@ -43,9 +43,7 @@ export function ProyectoInfoCard({ proyecto }: ProyectoInfoCardProps) {
     <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-6">
       {/* Título y Estado */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h2 className="text-base md:text-lg font-bold text-[#001B47]">
-          {proyecto.nombre}
-        </h2>
+        <h2 className="text-base md:text-lg font-bold text-[#001B47]">{proyecto.nombre}</h2>
 
         <div>
           <span
@@ -70,10 +68,7 @@ export function ProyectoInfoCard({ proyecto }: ProyectoInfoCardProps) {
           label="Investigador Principal"
           value={proyecto.investigadorPrincipal?.nombre ?? "Sin asignar"}
         />
-        <Campo
-          label="Presupuesto Total"
-          value={formatMonto(proyecto.presupuestoTotal)}
-        />
+        <Campo label="Presupuesto Total" value={formatMonto(proyecto.presupuestoTotal)} />
         <Campo label="Programa" value={proyecto.programa} />
 
         <Campo

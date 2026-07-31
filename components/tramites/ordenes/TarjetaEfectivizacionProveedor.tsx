@@ -2,13 +2,7 @@
 
 import { OrdenContractualData } from "@/types/ordenes";
 import { calcularDiasRestantes } from "@/lib/utils/dias-restantes";
-import {
-  Building2,
-  Printer,
-  FileCheck2,
-  Clock,
-  ExternalLink,
-} from "lucide-react";
+import { Building2, Printer, FileCheck2, Clock, ExternalLink } from "lucide-react";
 
 interface TarjetaEfectivizacionProveedorProps {
   orden: OrdenContractualData;
@@ -102,7 +96,8 @@ export function TarjetaEfectivizacionProveedor({
           </div>
 
           <p className="text-[11px] text-slate-600 font-medium">
-            Impresión y firmas requeridas: <strong className="text-[#001B47]">Coordinador, Director DICyT y Proveedor</strong>.
+            Impresión y firmas requeridas:{" "}
+            <strong className="text-[#001B47]">Coordinador, Director DICyT y Proveedor</strong>.
           </p>
         </div>
 

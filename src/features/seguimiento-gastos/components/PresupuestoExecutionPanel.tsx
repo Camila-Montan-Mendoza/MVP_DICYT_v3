@@ -1,12 +1,12 @@
-import React from 'react';
-import { Wallet, PiggyBank, Clock, FileCheck, CheckCircle2, Calendar } from 'lucide-react';
-import { DashboardMetrics } from '../types';
-import { formatBolivianos } from '../utils/metrics-calculator';
+import React from "react";
+import { Wallet, PiggyBank, Clock, FileCheck, CheckCircle2, Calendar } from "lucide-react";
+import { DashboardMetrics } from "../types";
+import { formatBolivianos } from "../utils/metrics-calculator";
 
 interface PresupuestoExecutionPanelProps {
   metrics: DashboardMetrics;
   isLoading?: boolean;
-  selectedGestion?: number | 'global';
+  selectedGestion?: number | "global";
 }
 
 export function PresupuestoExecutionPanel({
@@ -26,35 +26,35 @@ export function PresupuestoExecutionPanel({
 
   const items = [
     {
-      name: 'Saldo Disponible',
+      name: "Saldo Disponible",
       amount: saldoDisponibleGlobal,
-      color: '#003770',
-      bgColor: 'bg-blue-50 border-blue-200',
-      textColor: 'text-[#003770]',
+      color: "#003770",
+      bgColor: "bg-blue-50 border-blue-200",
+      textColor: "text-[#003770]",
       icon: PiggyBank,
     },
     {
-      name: 'Preventivo',
+      name: "Preventivo",
       amount: preventivoReservado,
-      color: '#f59e0b',
-      bgColor: 'bg-amber-50 border-amber-200',
-      textColor: 'text-amber-800',
+      color: "#f59e0b",
+      bgColor: "bg-amber-50 border-amber-200",
+      textColor: "text-amber-800",
       icon: Clock,
     },
     {
-      name: 'Comprometido',
+      name: "Comprometido",
       amount: comprometido,
-      color: '#0284c7',
-      bgColor: 'bg-sky-50 border-sky-200',
-      textColor: 'text-sky-800',
+      color: "#0284c7",
+      bgColor: "bg-sky-50 border-sky-200",
+      textColor: "text-sky-800",
       icon: FileCheck,
     },
     {
-      name: 'Gastado',
+      name: "Gastado",
       amount: gastadoDevengado,
-      color: '#059669',
-      bgColor: 'bg-emerald-50 border-emerald-200',
-      textColor: 'text-emerald-800',
+      color: "#059669",
+      bgColor: "bg-emerald-50 border-emerald-200",
+      textColor: "text-emerald-800",
       icon: CheckCircle2,
     },
   ];
@@ -84,11 +84,12 @@ export function PresupuestoExecutionPanel({
             <h2 className="text-lg font-bold text-[#001B47]">Ejecución Presupuestaria</h2>
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#003770]/10 text-[#003770] border border-[#003770]/20 flex items-center gap-1">
               <Calendar className="w-3 h-3 text-[#003770]" />
-              {selectedGestion === 'global' ? 'Histórico Global' : `Gestión ${selectedGestion}`}
+              {selectedGestion === "global" ? "Histórico Global" : `Gestión ${selectedGestion}`}
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Distribución consolidada del presupuesto según su estado ({selectedGestion === 'global' ? 'Acumulado Multianual' : `Año ${selectedGestion}`})
+            Distribución consolidada del presupuesto según su estado (
+            {selectedGestion === "global" ? "Acumulado Multianual" : `Año ${selectedGestion}`})
           </p>
         </div>
 
@@ -112,7 +113,12 @@ export function PresupuestoExecutionPanel({
         {/* Gráfico Donut SVG */}
         <div className="lg:col-span-4 flex flex-col items-center justify-center py-2">
           <div className="relative w-44 h-44 flex items-center justify-center">
-            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
+            <svg
+              width={size}
+              height={size}
+              viewBox={`0 0 ${size} ${size}`}
+              className="transform -rotate-90"
+            >
               {items.map((item, idx) => {
                 const pct = (item.amount / total) * 100;
                 const strokeDasharray = `${(pct * circumference) / 100} ${circumference}`;
@@ -166,7 +172,9 @@ export function PresupuestoExecutionPanel({
                     {formatBolivianos(item.amount)}
                   </div>
                 </div>
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full bg-white border border-border ${item.textColor}`}>
+                <span
+                  className={`text-xs font-bold px-2 py-0.5 rounded-full bg-white border border-border ${item.textColor}`}
+                >
                   {pct}%
                 </span>
               </div>

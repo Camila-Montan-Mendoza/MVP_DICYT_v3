@@ -17,7 +17,7 @@ Tareas deliberadamente consolidadas (varios archivos pequeños por tarea) para m
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [X] T001 Añadir columna `nombre` al catálogo `partida` y poblarla con los nombres reales de los códigos ya sembrados (34200, 39500, 43120, 43400, 31100, 25600, 34110, 43110, 21600) en `docs/01_seed_catalogos_base.sql` (`ALTER TABLE ... ADD COLUMN IF NOT EXISTS "nombre" VARCHAR(255)` + `UPDATE`/seed), según `research.md` §1
+- [x] T001 Añadir columna `nombre` al catálogo `partida` y poblarla con los nombres reales de los códigos ya sembrados (34200, 39500, 43120, 43400, 31100, 25600, 34110, 43110, 21600) en `docs/01_seed_catalogos_base.sql` (`ALTER TABLE ... ADD COLUMN IF NOT EXISTS "nombre" VARCHAR(255)` + `UPDATE`/seed), según `research.md` §1
 
 ---
 
@@ -25,10 +25,10 @@ Tareas deliberadamente consolidadas (varios archivos pequeños por tarea) para m
 
 **Purpose**: Endpoint backend real con control de acceso y permisos ya resueltos. Bloquea todas las historias de usuario.
 
-- [X] T002 Crear las interfaces TypeScript `ProyectoDetalle`, `PartidaMemoriaCalculo`, `PermisosDetalleProyecto` en `src/features/proyecto-detalle/types/index.ts`, según `data-model.md`
-- [X] T003 Extender `lib/db/proyecto-repository.ts` con `getProyectoDetalle(supabase, { proyectoId, usuarioId, rolActivo })`: consulta real uniendo `proyecto`, `estado_proyecto`, `programa`, `convenio`, `fuente_financiamiento`, `proyecto_usuario`+`usuario` (investigador principal) y `partida_concreta`+`partida` (memoria de cálculo); calcula `permisos` (`puedeDetallarMemoria`, `puedeEvaluar`, `soloLectura`) según rol+estado (`data-model.md` §9); retorna `null` si el proyecto no existe o si el usuario no tiene acceso (CA-6, `research.md` §2). Sin arreglos de respaldo.
-- [X] T004 Implementar `GET /api/proyectos/[id]` en `app/api/proyectos/[id]/route.ts` reutilizando `resolveServerAuthContext` (de la HU 018) + `getProyectoDetalle`, devolviendo `401`/`403`/`404`/`200`/`500` según `contracts/proyecto-detalle-api-contract.md`
-- [X] T005 [P] Crear el fetcher cliente `fetchProyectoDetalle` en `src/features/proyecto-detalle/api/fetchProyectoDetalle.ts` (depends on T002)
+- [x] T002 Crear las interfaces TypeScript `ProyectoDetalle`, `PartidaMemoriaCalculo`, `PermisosDetalleProyecto` en `src/features/proyecto-detalle/types/index.ts`, según `data-model.md`
+- [x] T003 Extender `lib/db/proyecto-repository.ts` con `getProyectoDetalle(supabase, { proyectoId, usuarioId, rolActivo })`: consulta real uniendo `proyecto`, `estado_proyecto`, `programa`, `convenio`, `fuente_financiamiento`, `proyecto_usuario`+`usuario` (investigador principal) y `partida_concreta`+`partida` (memoria de cálculo); calcula `permisos` (`puedeDetallarMemoria`, `puedeEvaluar`, `soloLectura`) según rol+estado (`data-model.md` §9); retorna `null` si el proyecto no existe o si el usuario no tiene acceso (CA-6, `research.md` §2). Sin arreglos de respaldo.
+- [x] T004 Implementar `GET /api/proyectos/[id]` en `app/api/proyectos/[id]/route.ts` reutilizando `resolveServerAuthContext` (de la HU 018) + `getProyectoDetalle`, devolviendo `401`/`403`/`404`/`200`/`500` según `contracts/proyecto-detalle-api-contract.md`
+- [x] T005 [P] Crear el fetcher cliente `fetchProyectoDetalle` en `src/features/proyecto-detalle/api/fetchProyectoDetalle.ts` (depends on T002)
 
 **Checkpoint**: `GET /api/proyectos/[id]` listo y probable directamente antes de construir la UI.
 
@@ -42,9 +42,9 @@ Tareas deliberadamente consolidadas (varios archivos pequeños por tarea) para m
 
 ### Implementation for User Story 1
 
-- [X] T006 [US1] Crear el hook `useProyectoDetalle` (fetch por `proyectoId`, estados `isLoading`/`error`/`notFound`/`forbidden`) en `src/features/proyecto-detalle/hooks/useProyectoDetalle.ts` (depends on T005)
-- [X] T007 [US1] Crear `ProyectoInfoCard` (tarjeta con nombre, investigador principal, presupuesto, programa, fuente de financiamiento, fechas y `EstadoProyectoBadge` reutilizado de `src/features/proyectos-lista/components/EstadoProyectoBadge.tsx`) y `MemoriaCalculoTable` (tabla ID/Nombre de Partida/Monto + fila de total, ShadCN `Table` ya existente en `components/ui/table.tsx`) en `src/features/proyecto-detalle/components/ProyectoInfoCard.tsx` y `MemoriaCalculoTable.tsx`
-- [X] T008 [US1] Crear `ProyectoDetalleContainer` (orquesta hook + `ProyectoInfoCard` + `MemoriaCalculoTable`, maneja estados de carga/`403`/`404`/error) y `app/(dashboard)/proyectos/[id]/page.tsx` (monta el container con el `id` de la ruta dentro de `SigefiShell`) (depends on T006, T007)
+- [x] T006 [US1] Crear el hook `useProyectoDetalle` (fetch por `proyectoId`, estados `isLoading`/`error`/`notFound`/`forbidden`) en `src/features/proyecto-detalle/hooks/useProyectoDetalle.ts` (depends on T005)
+- [x] T007 [US1] Crear `ProyectoInfoCard` (tarjeta con nombre, investigador principal, presupuesto, programa, fuente de financiamiento, fechas y `EstadoProyectoBadge` reutilizado de `src/features/proyectos-lista/components/EstadoProyectoBadge.tsx`) y `MemoriaCalculoTable` (tabla ID/Nombre de Partida/Monto + fila de total, ShadCN `Table` ya existente en `components/ui/table.tsx`) en `src/features/proyecto-detalle/components/ProyectoInfoCard.tsx` y `MemoriaCalculoTable.tsx`
+- [x] T008 [US1] Crear `ProyectoDetalleContainer` (orquesta hook + `ProyectoInfoCard` + `MemoriaCalculoTable`, maneja estados de carga/`403`/`404`/error) y `app/(dashboard)/proyectos/[id]/page.tsx` (monta el container con el `id` de la ruta dentro de `SigefiShell`) (depends on T006, T007)
 
 **Checkpoint**: User Story 1 funcional de forma independiente — MVP.
 
@@ -58,7 +58,7 @@ Tareas deliberadamente consolidadas (varios archivos pequeños por tarea) para m
 
 ### Implementation for User Story 2
 
-- [X] T009 [US2] Crear `MemoriaCalculoActionBanner` en `src/features/proyecto-detalle/components/MemoriaCalculoActionBanner.tsx`: si `permisos.puedeDetallarMemoria`, muestra el mensaje + botón "Detallar memoria de cálculo" (`router.push` a `/proyectos/{id}/memoria-calculo`); si `permisos.soloLectura` o ninguna bandera activa, no renderiza nada. Integrarlo sobre `MemoriaCalculoTable` en `ProyectoDetalleContainer.tsx` (depends on T008)
+- [x] T009 [US2] Crear `MemoriaCalculoActionBanner` en `src/features/proyecto-detalle/components/MemoriaCalculoActionBanner.tsx`: si `permisos.puedeDetallarMemoria`, muestra el mensaje + botón "Detallar memoria de cálculo" (`router.push` a `/proyectos/{id}/memoria-calculo`); si `permisos.soloLectura` o ninguna bandera activa, no renderiza nada. Integrarlo sobre `MemoriaCalculoTable` en `ProyectoDetalleContainer.tsx` (depends on T008)
 
 **Checkpoint**: US1 + US2 funcionan juntas.
 
@@ -72,7 +72,7 @@ Tareas deliberadamente consolidadas (varios archivos pequeños por tarea) para m
 
 ### Implementation for User Story 3
 
-- [X] T010 [US3] Extender `MemoriaCalculoActionBanner.tsx`: si `permisos.puedeEvaluar`, mostrar la opción "Evaluar Memoria de Cálculo" (botón hacia `/proyectos/{id}/evaluar`, ruta stub de HU-B) en lugar del mensaje de detallar (depends on T009)
+- [x] T010 [US3] Extender `MemoriaCalculoActionBanner.tsx`: si `permisos.puedeEvaluar`, mostrar la opción "Evaluar Memoria de Cálculo" (botón hacia `/proyectos/{id}/evaluar`, ruta stub de HU-B) en lugar del mensaje de detallar (depends on T009)
 
 **Checkpoint**: US1, US2 y US3 funcionan juntas.
 
@@ -86,7 +86,7 @@ Tareas deliberadamente consolidadas (varios archivos pequeños por tarea) para m
 
 ### Implementation for User Story 4
 
-- [X] T011 [US4] Verificar y ajustar en `MemoriaCalculoActionBanner.tsx` que `permisos.soloLectura === true` tiene prioridad sobre cualquier otra bandera y oculta el componente por completo (depends on T010)
+- [x] T011 [US4] Verificar y ajustar en `MemoriaCalculoActionBanner.tsx` que `permisos.soloLectura === true` tiene prioridad sobre cualquier otra bandera y oculta el componente por completo (depends on T010)
 
 **Checkpoint**: Las 4 historias de usuario funcionan de forma independiente.
 
@@ -94,7 +94,7 @@ Tareas deliberadamente consolidadas (varios archivos pequeños por tarea) para m
 
 ## Phase 7: Polish
 
-- [X] T012 Verificar la compilación de TypeScript con `npx tsc --noEmit` y revisar manualmente los escenarios de `specs/019-detalle-proyecto/quickstart.md`
+- [x] T012 Verificar la compilación de TypeScript con `npx tsc --noEmit` y revisar manualmente los escenarios de `specs/019-detalle-proyecto/quickstart.md`
 
 ---
 

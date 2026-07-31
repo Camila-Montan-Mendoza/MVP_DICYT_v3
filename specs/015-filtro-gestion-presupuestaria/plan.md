@@ -74,4 +74,4 @@ src/features/seguimiento-gastos/
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 | --------- | ---------- | ------------------------------------ |
-| Ninguna | N/A | N/A |
+| Ninguna   | N/A        | N/A                                  |

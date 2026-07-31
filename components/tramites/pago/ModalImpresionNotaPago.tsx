@@ -32,7 +32,9 @@ export function ModalImpresionNotaPago({
         {/* Navy Top Header Bar */}
         <div className="bg-[#001B47] text-white px-6 py-4 flex items-center justify-between shrink-0 print:hidden">
           <div className="flex items-center gap-2 font-extrabold text-sm">
-            <span className="bg-[#BC000C] text-white px-2.5 py-0.5 rounded-md text-xs">UMSS • DICyT</span>
+            <span className="bg-[#BC000C] text-white px-2.5 py-0.5 rounded-md text-xs">
+              UMSS • DICyT
+            </span>
             <span>Documento Oficial: Nota de Solicitud de Pago</span>
           </div>
 
