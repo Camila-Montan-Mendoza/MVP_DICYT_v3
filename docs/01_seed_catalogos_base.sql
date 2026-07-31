@@ -96,9 +96,21 @@ INSERT INTO "tipo_documento_respaldo_pago" ("id", "codigo", "nombre", "es_requer
 ON CONFLICT ("id") DO UPDATE SET "codigo" = EXCLUDED."codigo", "nombre" = EXCLUDED."nombre";
 
 -- 5. Partidas, Ítems y Proveedores Generales
-INSERT INTO "partida" ("id", "codigo") VALUES
-  (1, 34200), (2, 39500), (3, 43120), (4, 43400), (5, 31100), (6, 25600), (7, 34110), (8, 43110), (9, 21600)
-ON CONFLICT ("id") DO UPDATE SET "codigo" = EXCLUDED."codigo";
+-- Columna "nombre" (clasificador presupuestario legible) requerida por la HU de Detalle de Proyecto
+-- (memoria de cálculo). Aditiva: no afecta partida_concreta ni item.
+ALTER TABLE "partida" ADD COLUMN IF NOT EXISTS "nombre" VARCHAR(255);
+
+INSERT INTO "partida" ("id", "codigo", "nombre") VALUES
+  (1, 34200, 'Productos Químicos y Farmacéuticos'),
+  (2, 39500, 'Útiles de Escritorio y Oficina'),
+  (3, 43120, 'Equipo de Computación y Periféricos'),
+  (4, 43400, 'Equipo e Instrumental Científico de Laboratorio'),
+  (5, 31100, 'Alimentos y Bebidas para Personas'),
+  (6, 25600, 'Imprenta, Publicaciones y Reproducción'),
+  (7, 34110, 'Combustibles, Lubricantes y Derivados'),
+  (8, 43110, 'Muebles de Oficina'),
+  (9, 21600, 'Consultores Individuales de Línea')
+ON CONFLICT ("id") DO UPDATE SET "codigo" = EXCLUDED."codigo", "nombre" = EXCLUDED."nombre";
 
 INSERT INTO "item" ("id", "id_partida", "nombre") VALUES
   (1, 1, 'Kit de Reactivos de Extracción de ADN Vegetal marca Qiagen'),

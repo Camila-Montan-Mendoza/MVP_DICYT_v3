@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import type { EstadoProyectoId, ProyectoListItem, RolActivoScope } from "@/src/features/proyectos-lista/types";
+import type { ProyectoDetalle } from "@/src/features/proyecto-detalle/types";
 
 export interface ProyectoDBItem {
   id: number;
@@ -145,6 +146,135 @@ export async function listProyectosParaUsuario(
   }));
 
   return { proyectos, total: count ?? 0, page, pageSize };
+}
+
+const ROLES_ACCESO_TOTAL_DETALLE = [
+  "Administradora DICyT",
+  "Administrador del Sistema SIGEFI",
+  "Resp. de Presupuestos",
+];
+
+interface ProyectoDetalleAccesoParams {
+  proyectoId: number;
+  usuarioId: number;
+  rolActivo: string;
+}
+
+/**
+ * Control de acceso puntual por proyecto (CA-6): un Investigador Principal
+ * solo tiene acceso si es IP de *este* proyecto específico, no de cualquiera.
+ */
+export async function usuarioTieneAccesoAProyecto(
+  supabase: SupabaseClient,
+  { proyectoId, usuarioId, rolActivo }: ProyectoDetalleAccesoParams
+): Promise<boolean> {
+  if (ROLES_ACCESO_TOTAL_DETALLE.includes(rolActivo)) return true;
+
+  if (rolActivo === "Investigador Principal") {
+    const { data, error } = await supabase
+      .from("proyecto_usuario")
+      .select("id_usuario")
+      .eq("id_proyecto", proyectoId)
+      .eq("id_usuario", usuarioId)
+      .eq("id_rol", ID_ROL_INVESTIGADOR_PRINCIPAL)
+      .maybeSingle();
+
+    if (error) throw error;
+    return Boolean(data);
+  }
+
+  return false;
+}
+
+interface GetProyectoDetalleParams {
+  proyectoId: number;
+  rolActivo: string;
+}
+
+function calcularPermisos(estadoId: EstadoProyectoId, rolActivo: string) {
+  const esInvestigadorPrincipal = rolActivo === "Investigador Principal";
+  const esRespPresupuestos = rolActivo === "Resp. de Presupuestos";
+  const esAdministrador =
+    rolActivo === "Administradora DICyT" || rolActivo === "Administrador del Sistema SIGEFI";
+
+  const soloLectura = esAdministrador || estadoId === 4;
+  const puedeDetallarMemoria = !soloLectura && esInvestigadorPrincipal && (estadoId === 1 || estadoId === 3);
+  const puedeEvaluar = !soloLectura && esRespPresupuestos && estadoId === 2;
+
+  return { puedeDetallarMemoria, puedeEvaluar, soloLectura };
+}
+
+/**
+ * Consulta real a Supabase para el detalle de un proyecto y su memoria de
+ * cálculo. Retorna `null` si el proyecto no existe (404). El control de
+ * acceso (403) se resuelve por separado con `usuarioTieneAccesoAProyecto`
+ * antes de llamar a esta función. Sin arreglos de respaldo.
+ */
+export async function getProyectoDetalle(
+  supabase: SupabaseClient,
+  { proyectoId, rolActivo }: GetProyectoDetalleParams
+): Promise<ProyectoDetalle | null> {
+  const { data: row, error } = await supabase
+    .from("proyecto")
+    .select(
+      `id, nombre, presupuesto, fecha_inicio, fecha_fin,
+       estado_proyecto(id, nombre),
+       programa(nombre, convenio(fuente_financiamiento(nombre)))`
+    )
+    .eq("id", proyectoId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!row) return null;
+
+  const proyectoRow = row as any;
+
+  const { data: ipRow, error: ipError } = await supabase
+    .from("proyecto_usuario")
+    .select("usuario(id, username)")
+    .eq("id_proyecto", proyectoId)
+    .eq("id_rol", ID_ROL_INVESTIGADOR_PRINCIPAL)
+    .order("id_usuario", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (ipError) throw ipError;
+
+  const { data: partidasRaw, error: partidasError } = await supabase
+    .from("partida_concreta")
+    .select("id, presupuesto, partida(codigo, nombre)")
+    .eq("id_proyecto", proyectoId);
+
+  if (partidasError) throw partidasError;
+
+  const memoriaCalculo = ((partidasRaw ?? []) as any[]).map((p) => ({
+    id: p.id,
+    codigoPartida: p.partida?.codigo ?? 0,
+    nombrePartida: p.partida?.nombre ?? "Partida sin nombre registrado",
+    monto: Number(p.presupuesto) || 0,
+  }));
+
+  const estadoId = (proyectoRow.estado_proyecto?.id ?? 1) as EstadoProyectoId;
+
+  return {
+    id: proyectoRow.id,
+    nombre: proyectoRow.nombre,
+    presupuestoTotal: Number(proyectoRow.presupuesto) || 0,
+    programa: proyectoRow.programa?.nombre ?? "No especificado",
+    fuenteFinanciamiento: proyectoRow.programa?.convenio?.fuente_financiamiento?.nombre ?? null,
+    fechaInicio: proyectoRow.fecha_inicio,
+    fechaFin: proyectoRow.fecha_fin,
+    estado: {
+      id: estadoId,
+      nombre: proyectoRow.estado_proyecto?.nombre ?? "Pendiente de memoria de cálculo",
+    },
+    investigadorPrincipal: (ipRow as any)?.usuario
+      ? { id: (ipRow as any).usuario.id, nombre: (ipRow as any).usuario.username }
+      : null,
+    memoriaCalculo,
+    totalMemoriaCalculo: memoriaCalculo.reduce((sum, p) => sum + p.monto, 0),
+    permisos: calcularPermisos(estadoId, rolActivo),
+  };
 }
 
 export class ProyectoDBRepository {
