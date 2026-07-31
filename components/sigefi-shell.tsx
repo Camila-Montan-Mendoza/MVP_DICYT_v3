@@ -111,7 +111,7 @@ function SigefiShellInner({ children }: SigefiShellProps) {
                 }`}
               >
                 <FileText className="w-4 h-4" />
-                Trámites
+                Compras/Contrataciones
               </Link>
 
               <Link

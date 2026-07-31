@@ -117,7 +117,7 @@ export default function AdjudicacionTramitePage({ params }: PageProps) {
           {error || "No existe información para este trámite."}
         </p>
         <Button onClick={() => router.push("/protected")} variant="outline" size="sm">
-          Volver a Trámites
+          Volver a Compras/Contrataciones
         </Button>
       </div>
     );
@@ -131,7 +131,7 @@ export default function AdjudicacionTramitePage({ params }: PageProps) {
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Link href="/protected" className="hover:text-primary transition-colors">
-            Trámites
+            Compras/Contrataciones
           </Link>
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="font-semibold text-foreground">

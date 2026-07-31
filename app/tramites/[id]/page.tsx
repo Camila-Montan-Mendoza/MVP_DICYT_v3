@@ -183,7 +183,7 @@ function TramiteWorkflowDetailContent() {
               href="/tramites"
               className="px-5 py-2.5 bg-[#002855] text-white font-bold text-xs rounded-xl hover:bg-[#001B47] transition-colors inline-block"
             >
-              Volver a la Lista de Trámites
+              Volver a la Lista de Compras/Contrataciones
             </Link>
           </div>
         </div>
@@ -209,7 +209,7 @@ function TramiteWorkflowDetailContent() {
             className="inline-flex items-center gap-1.5 text-xs font-bold text-[#002855] hover:text-[#001B47] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver a la Lista de Trámites
+            Volver a la Lista de Compras/Contrataciones
           </Link>
         </div>
 

@@ -138,7 +138,7 @@ export default function ListaTramitesPage() {
         {/* Cabecera Principal (Título y Botón "+ Agregar tramite" Fiel al Mockup) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h1 className="text-2xl md:text-3xl font-extrabold text-[#001B47] tracking-tight">
-            Lista de Trámites
+            Lista de Compras/Contrataciones
           </h1>
 
           <Link
@@ -259,7 +259,7 @@ export default function ListaTramitesPage() {
               <div className="w-14 h-14 bg-slate-100 text-[#64748b] rounded-full flex items-center justify-center mx-auto">
                 <Inbox className="w-7 h-7" />
               </div>
-              <h3 className="font-bold text-base text-[#001B47]">No se encontraron trámites</h3>
+              <h3 className="font-bold text-base text-[#001B47]">No se encontraron compras/contrataciones</h3>
               <p className="text-xs text-[#6b7280] max-w-sm mx-auto leading-relaxed">
                 Pruebe ajustando o limpiando los filtros de búsqueda.
               </p>
@@ -384,7 +384,7 @@ export default function ListaTramitesPage() {
                   <strong className="text-[#001B47]">
                     {Math.min(startIndex + itemsPerPage, totalItems)}
                   </strong>{" "}
-                  de <strong className="text-[#001B47]">{totalItems}</strong> trámites
+                  de <strong className="text-[#001B47]">{totalItems}</strong> Compras/Contrataciones
                 </div>
 
                 <div className="flex items-center gap-1">

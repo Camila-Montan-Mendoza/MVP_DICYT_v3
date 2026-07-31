@@ -50,7 +50,7 @@ export default function Home() {
                 <FileText className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-[#001B47]">Lista de Trámites</h3>
+                <h3 className="font-bold text-sm text-[#001B47]">Lista de Compras/Contrataciones</h3>
                 <p className="text-xs text-[#6b7280]">Ver estado de solicitudes</p>
               </div>
             </div>
