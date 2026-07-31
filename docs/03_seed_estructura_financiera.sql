@@ -42,12 +42,13 @@ INSERT INTO "programa_usuario" ("id_programa", "id_usuario", "id_rol") VALUES
 ON CONFLICT DO NOTHING;
 
 -- 4. Proyectos de Investigación y Usuarios
+-- id_estado_proyecto variado a propósito para cubrir los 4 estados de memoria de cálculo (HU Lista de Proyectos)
 INSERT INTO "proyecto" ("id", "id_estado_proyecto", "id_programa", "nombre", "codigo", "presupuesto", "fecha_inicio", "fecha_fin", "id_usuario_creador") VALUES
-  (1, 2, 2, 'Implementación de IA para la Agricultura de Precisión en el Valle Alto', 'SISIN-89301294', 450000.00, '2025-01-01', '2026-12-31', 1),
-  (2, 2, 3, 'Biotecnología Celular y Extractos Vegetales RAWSAYTA', 'SISIN-98210492', 600000.00, '2025-01-15', '2026-12-31', 2),
-  (3, 2, 4, 'Estudio Agroecológico de Variedades de Trigo Resistentes a la Sequía', 'SISIN-77102948', 350000.00, '2026-01-01', '2026-12-31', 1),
+  (1, 1, 2, 'Implementación de IA para la Agricultura de Precisión en el Valle Alto', 'SISIN-89301294', 450000.00, '2025-01-01', '2026-12-31', 1),
+  (2, 4, 3, 'Biotecnología Celular y Extractos Vegetales RAWSAYTA', 'SISIN-98210492', 600000.00, '2025-01-15', '2026-12-31', 2),
+  (3, 3, 4, 'Estudio Agroecológico de Variedades de Trigo Resistentes a la Sequía', 'SISIN-77102948', 350000.00, '2026-01-01', '2026-12-31', 1),
   (4, 2, 2, 'Investigación Forestal y Monitoreo de Microclimas Tropicales', 'SISIN-66291039', 350000.00, '2026-02-01', '2026-12-31', 2)
-ON CONFLICT ("id") DO NOTHING;
+ON CONFLICT ("id") DO UPDATE SET "id_estado_proyecto" = EXCLUDED."id_estado_proyecto";
 
 INSERT INTO "proyecto_usuario" ("id_proyecto", "id_usuario", "id_rol") VALUES
   (1, 1, 1),

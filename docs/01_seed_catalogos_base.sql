@@ -47,11 +47,12 @@ INSERT INTO "tipo_tramite" ("id", "nombre") VALUES
   (1, 'Compra Menor de 1001 Bs. a 20.000 Bs.')
 ON CONFLICT ("id") DO UPDATE SET "nombre" = EXCLUDED."nombre";
 
+-- Estados del flujo de memoria de cálculo del proyecto (HU: Lista de Proyectos)
 INSERT INTO "estado_proyecto" ("id", "nombre") VALUES
-  (1, 'En Formulación'),
-  (2, 'Aprobado y Activo'),
-  (3, 'En Cierre'),
-  (4, 'Concluido')
+  (1, 'Pendiente de memoria de cálculo'),
+  (2, 'En revisión de memoria de cálculo'),
+  (3, 'Observado'),
+  (4, 'Habilitado para ejecutar partidas')
 ON CONFLICT ("id") DO UPDATE SET "nombre" = EXCLUDED."nombre";
 
 INSERT INTO "estado_item_tramite" ("id", "nombre", "descripcion") VALUES
