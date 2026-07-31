@@ -6,10 +6,12 @@ interface PresupuestoConsolidadoFooterProps {
   totalPartidas: number;
   presupuestoTotal: number;
   excedente: number;
-  esValidoParaEnviar: boolean;
+  esValidoParaEnviar?: boolean;
   isSubmitting?: boolean;
   onCancelar?: () => void;
   onEnviarARevision?: () => void;
+  onObservar?: () => void;
+  onAprobar?: () => void;
 }
 
 function formatMonto(monto: number): string {
@@ -23,10 +25,12 @@ export function PresupuestoConsolidadoFooter({
   totalPartidas,
   presupuestoTotal,
   excedente,
-  esValidoParaEnviar,
+  esValidoParaEnviar = true,
   isSubmitting = false,
   onCancelar,
   onEnviarARevision,
+  onObservar,
+  onAprobar,
 }: PresupuestoConsolidadoFooterProps) {
   const tieneExcedente = excedente > 0;
 
@@ -111,6 +115,35 @@ export function PresupuestoConsolidadoFooter({
               </>
             ) : (
               <span>Enviar a revisión</span>
+            )}
+          </button>
+        )}
+
+        {onObservar && (
+          <button
+            type="button"
+            onClick={onObservar}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 bg-white border border-slate-300 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
+          >
+            Observar
+          </button>
+        )}
+
+        {onAprobar && (
+          <button
+            type="button"
+            onClick={onAprobar}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 bg-[#001B47] text-white font-bold text-xs rounded-xl hover:bg-[#002855] transition-all shadow-md flex items-center gap-2 disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Procesando...</span>
+              </>
+            ) : (
+              <span>Aprobar</span>
             )}
           </button>
         )}

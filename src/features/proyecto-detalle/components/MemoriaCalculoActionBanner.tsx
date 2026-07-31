@@ -1,59 +1,34 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { AlertCircle, ClipboardCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { PermisosDetalleProyecto } from "../types";
+import { AlertTriangle } from "lucide-react";
+import { ProyectoDetalle } from "../types";
 
 interface MemoriaCalculoActionBannerProps {
-  proyectoId: number;
-  permisos: PermisosDetalleProyecto;
+  proyecto: ProyectoDetalle;
+  onAprobarClick?: () => void;
+  onObservarClick?: () => void;
 }
 
-export function MemoriaCalculoActionBanner({
-  proyectoId,
-  permisos,
-}: MemoriaCalculoActionBannerProps) {
-  const router = useRouter();
+export function MemoriaCalculoActionBanner({ proyecto }: MemoriaCalculoActionBannerProps) {
+  const { estado, ultimaObservacion } = proyecto;
 
-  if (permisos.soloLectura) return null;
-
-  if (permisos.puedeDetallarMemoria) {
+  // Estado Observado (ID 3): Mostrar motivo de la observación al Investigador Principal
+  if (estado.id === 3 || (ultimaObservacion && estado.id !== 4)) {
     return (
-      <div className="flex flex-col items-start gap-3 border-b border-[#e5e7eb] bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-2">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
-          <p className="text-sm text-red-800">
-            Esta memoria de cálculo debe ser completada o corregida por el investigador principal.
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl shadow-2xs space-y-2">
+        <div className="flex items-center gap-2 text-amber-900 font-bold text-xs">
+          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>Proyecto Observado por la Unidad de Presupuestos</span>
+        </div>
+        <div className="pl-6 text-xs text-amber-950 font-medium bg-white/60 p-3 rounded-xl border border-amber-200/60">
+          <p className="font-bold text-[11px] text-amber-800 uppercase tracking-wider mb-0.5">
+            Motivo de la Observación:
+          </p>
+          <p>
+            {ultimaObservacion ||
+              "Se registraron observaciones en el desglose de partidas de este proyecto."}
           </p>
         </div>
-        <Button
-          size="sm"
-          className="shrink-0 bg-[#002855] text-white hover:bg-[#001B47]"
-          onClick={() => router.push(`/proyectos/${proyectoId}/memoria-calculo`)}
-        >
-          Detallar memoria de cálculo
-        </Button>
-      </div>
-    );
-  }
-
-  if (permisos.puedeEvaluar) {
-    return (
-      <div className="flex flex-col items-start gap-3 border-b border-[#e5e7eb] bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-2">
-          <ClipboardCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#003770]" />
-          <p className="text-sm text-[#001B47]">
-            Esta memoria de cálculo está en revisión y puede ser aprobada u observada.
-          </p>
-        </div>
-        <Button
-          size="sm"
-          className="shrink-0 bg-[#002855] text-white hover:bg-[#001B47]"
-          onClick={() => router.push(`/proyectos/${proyectoId}/evaluar`)}
-        >
-          Evaluar Memoria de Cálculo
-        </Button>
       </div>
     );
   }

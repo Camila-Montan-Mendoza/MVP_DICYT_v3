@@ -35,7 +35,13 @@ export interface ProyectoDetalle {
   investigadorPrincipal: InvestigadorPrincipalInfo | null;
   memoriaCalculo: PartidaMemoriaCalculo[];
   totalMemoriaCalculo: number;
+  ultimaObservacion?: string | null;
   permisos: PermisosDetalleProyecto;
+}
+
+export interface EvaluacionMemoriaRequest {
+  decision: "aprobar" | "observar";
+  motivoObservacion?: string;
 }
 
 export interface ProyectoDetalleApiErrorResponse {

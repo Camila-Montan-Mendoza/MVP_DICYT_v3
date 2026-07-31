@@ -51,7 +51,7 @@ export function ProyectoInfoCard({ proyecto }: ProyectoInfoCardProps) {
               isPendiente
                 ? "bg-red-50 text-red-700 border border-red-200"
                 : isEnRevision
-                  ? "bg-amber-50 text-amber-800 border border-amber-200"
+                  ? "bg-[#e2e8f8] text-[#001B47] border border-[#d0dcf5]"
                   : isObservado
                     ? "bg-[#BC000C]/10 text-[#BC000C] border border-[#BC000C]/20"
                     : "bg-emerald-50 text-emerald-800 border border-emerald-200"

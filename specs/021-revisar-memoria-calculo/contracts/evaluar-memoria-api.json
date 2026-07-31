@@ -1,0 +1,63 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Evaluación de Memoria de Cálculo API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/proyectos/{id}/evaluar": {
+      "post": {
+        "summary": "Aprobar u observar la memoria de cálculo de un proyecto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["decision"],
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": ["aprobar", "observar"]
+                  },
+                  "motivoObservacion": {
+                    "type": "string",
+                    "description": "Obligatorio si decision es 'observar'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Evaluación procesada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "proyecto": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o falta motivo de observación"
+          }
+        }
+      }
+    }
+  }
+}

@@ -64,19 +64,8 @@ export const MOCK_PROYECTOS_SEED: Record<number, ProyectoDetalle> = {
       id: 1,
       nombre: "Dr. Ricardo Villarroel",
     },
-    memoriaCalculo: [
-      { id: 101, codigoPartida: "101", nombrePartida: "Materiales y Suministros", monto: 45000 },
-      {
-        id: 205,
-        codigoPartida: "205",
-        nombrePartida: "Servicios Técnicos Profesionales",
-        monto: 55000,
-      },
-      { id: 301, codigoPartida: "301", nombrePartida: "Equipamiento de Laboratorio", monto: 25000 },
-      { id: 405, codigoPartida: "405", nombrePartida: "Insumos Químicos", monto: 15000 },
-      { id: 512, codigoPartida: "512", nombrePartida: "Capacitación Técnica", monto: 10000 },
-    ],
-    totalMemoriaCalculo: 150000,
+    memoriaCalculo: [],
+    totalMemoriaCalculo: 0,
     permisos: {
       puedeDetallarMemoria: true,
       puedeEvaluar: false,
@@ -144,6 +133,8 @@ export const MOCK_PROYECTOS_SEED: Record<number, ProyectoDetalle> = {
       { id: 702, codigoPartida: "702", nombrePartida: "Pasajes y Viáticos", monto: 30000 },
     ],
     totalMemoriaCalculo: 180000,
+    ultimaObservacion:
+      "Por favor justifique los montos de la partida de Equipamiento de Laboratorio (301) antes de la aprobación final.",
     permisos: {
       puedeDetallarMemoria: true,
       puedeEvaluar: false,
@@ -261,7 +252,7 @@ export class MockProyectoService {
   public evaluarMemoriaCalculo(
     proyectoId: number,
     decision: "aprobar" | "observar",
-    _observaciones?: string
+    observaciones?: string
   ): ProyectoDetalle {
     const proyecto = this.getProyecto(proyectoId);
     if (decision === "aprobar") {
@@ -269,11 +260,14 @@ export class MockProyectoService {
         id: 4,
         nombre: "Habilitado para ejecutar partidas",
       };
+      proyecto.ultimaObservacion = null;
     } else {
       proyecto.estado = {
         id: 3,
         nombre: "Observado",
       };
+      proyecto.ultimaObservacion =
+        observaciones || "Se observaron inconsistencias en la distribución presupuestaria.";
     }
     this.saveProyecto(proyecto);
     return proyecto;

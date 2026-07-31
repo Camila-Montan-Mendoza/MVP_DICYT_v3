@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldAlert, FolderX } from "lucide-react";
+import { ShieldAlert, FolderX, CheckCircle2, AlertCircle } from "lucide-react";
 import { useProyectoDetalle } from "../hooks/useProyectoDetalle";
 import { ProyectoHeaderNav } from "./ProyectoHeaderNav";
 import { ProyectoInfoCard } from "./ProyectoInfoCard";
+import { MemoriaCalculoActionBanner } from "./MemoriaCalculoActionBanner";
 import { MemoriaCalculoReadView } from "./MemoriaCalculoReadView";
 import { MemoriaCalculoEditView } from "./MemoriaCalculoEditView";
+import { EvaluacionMemoriaModal } from "./EvaluacionMemoriaModal";
 
 interface ProyectoDetalleContainerProps {
   proyectoId: number;
@@ -17,6 +19,14 @@ export function ProyectoDetalleContainer({ proyectoId }: ProyectoDetalleContaine
     useProyectoDetalle(proyectoId);
   const [activeTab, setActiveTab] = useState<"detalle" | "ejecucion">("detalle");
   const [isEditingOverride, setIsEditingOverride] = useState<boolean | null>(null);
+
+  // Estados para el Modal de Evaluación (Aprobar / Observar)
+  const [evaluacionModo, setEvaluacionModo] = useState<"aprobar" | "observar" | null>(null);
+  const [isSubmittingEvaluacion, setIsSubmittingEvaluacion] = useState(false);
+  const [evaluacionToast, setEvaluacionToast] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   if (isLoading) {
     return (
@@ -56,12 +66,64 @@ export function ProyectoDetalleContainer({ proyectoId }: ProyectoDetalleContaine
     );
   }
 
+  const handleProcesarEvaluacion = async (
+    decision: "aprobar" | "observar",
+    motivoObservacion?: string
+  ) => {
+    setIsSubmittingEvaluacion(true);
+    setEvaluacionToast(null);
+
+    try {
+      const res = await fetch(`/api/proyectos/${proyecto.id}/evaluar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision, motivoObservacion }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Error al evaluar la memoria de cálculo");
+
+      setEvaluacionToast({
+        type: "success",
+        message: data.message || "Evaluación procesada exitosamente.",
+      });
+      setEvaluacionModo(null);
+      setIsEditingOverride(false);
+      refetch();
+    } catch (err: any) {
+      setEvaluacionToast({
+        type: "error",
+        message: err.message || "Error al comunicarse con el servidor.",
+      });
+    } finally {
+      setIsSubmittingEvaluacion(false);
+    }
+  };
+
   // Determinar si la pantalla está en modo edición
   const puedeDetallar = Boolean(proyecto.permisos?.puedeDetallarMemoria);
   const isEditing = isEditingOverride !== null ? isEditingOverride : puedeDetallar;
 
   return (
     <div className="space-y-6">
+      {/* Toast Feedback Evaluaciones */}
+      {evaluacionToast && (
+        <div
+          className={`p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 border shadow-xs ${
+            evaluacionToast.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : "bg-red-50 text-red-800 border-red-200"
+          }`}
+        >
+          {evaluacionToast.type === "success" ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+          )}
+          <span>{evaluacionToast.message}</span>
+        </div>
+      )}
+
       {/* Header con Pestañas "Detalle del Proyecto" | "Ejecución Presupuestaria" */}
       <ProyectoHeaderNav
         proyectoId={proyecto.id}
@@ -83,6 +145,13 @@ export function ProyectoDetalleContainer({ proyectoId }: ProyectoDetalleContaine
           {/* Card de Información Principal del Proyecto */}
           <ProyectoInfoCard proyecto={proyecto} />
 
+          {/* Banner de Acción o Retroalimentación de Observación */}
+          <MemoriaCalculoActionBanner
+            proyecto={proyecto}
+            onAprobarClick={() => setEvaluacionModo("aprobar")}
+            onObservarClick={() => setEvaluacionModo("observar")}
+          />
+
           {/* Área de Memoria de Cálculo (Modo Lectura o Modo Edición) */}
           {isEditing ? (
             <MemoriaCalculoEditView
@@ -97,12 +166,28 @@ export function ProyectoDetalleContainer({ proyectoId }: ProyectoDetalleContaine
             <MemoriaCalculoReadView
               partidas={proyecto.memoriaCalculo}
               total={proyecto.totalMemoriaCalculo}
+              presupuestoTotal={proyecto.presupuestoTotal}
               puedeDetallar={puedeDetallar}
+              puedeEvaluar={Boolean(proyecto.permisos?.puedeEvaluar)}
               onEditarClick={() => setIsEditingOverride(true)}
+              onObservarClick={() => setEvaluacionModo("observar")}
+              onAprobarClick={() => setEvaluacionModo("aprobar")}
+              isSubmitting={isSubmittingEvaluacion}
             />
           )}
         </div>
       )}
+
+      {/* Modal de Evaluación (Aprobar / Observar) */}
+      <EvaluacionMemoriaModal
+        isOpen={evaluacionModo !== null}
+        modo={evaluacionModo}
+        proyecto={proyecto}
+        isSubmitting={isSubmittingEvaluacion}
+        onClose={() => setEvaluacionModo(null)}
+        onConfirmAprobar={() => handleProcesarEvaluacion("aprobar")}
+        onConfirmObservar={(motivo) => handleProcesarEvaluacion("observar", motivo)}
+      />
     </div>
   );
 }

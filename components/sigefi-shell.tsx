@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -187,7 +188,9 @@ function SigefiShellInner({ children }: SigefiShellProps) {
 export function SigefiShell({ children }: SigefiShellProps) {
   return (
     <AuthProvider>
-      <SigefiShellInner>{children}</SigefiShellInner>
+      <Suspense fallback={<div>Cargando...</div>}>
+        <SigefiShellInner>{children}</SigefiShellInner>
+      </Suspense>
     </AuthProvider>
   );
 }

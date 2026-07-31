@@ -1,13 +1,19 @@
 "use client";
 
-import { Calculator, Edit3 } from "lucide-react";
+import { Edit3 } from "lucide-react";
 import { PartidaMemoriaCalculo } from "../types";
+import { PresupuestoConsolidadoFooter } from "./PresupuestoConsolidadoFooter";
 
 interface MemoriaCalculoReadViewProps {
   partidas: PartidaMemoriaCalculo[];
   total: number;
+  presupuestoTotal?: number;
   puedeDetallar?: boolean;
+  puedeEvaluar?: boolean;
   onEditarClick?: () => void;
+  onObservarClick?: () => void;
+  onAprobarClick?: () => void;
+  isSubmitting?: boolean;
 }
 
 function formatMonto(monto: number): string {
@@ -20,14 +26,19 @@ function formatMonto(monto: number): string {
 export function MemoriaCalculoReadView({
   partidas,
   total,
+  presupuestoTotal = 100000,
   puedeDetallar = false,
+  puedeEvaluar = false,
   onEditarClick,
+  onObservarClick,
+  onAprobarClick,
+  isSubmitting = false,
 }: MemoriaCalculoReadViewProps) {
   return (
     <div className="space-y-4">
       {/* Encabezado de la Sección */}
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-bold text-[#001B47]">Memoria de calculo del proyecto</h3>
+        <h3 className="text-base font-bold text-[#001B47]">Memoria de cálculo del proyecto</h3>
 
         <div className="flex items-center gap-2">
           {puedeDetallar && onEditarClick && (
@@ -40,14 +51,6 @@ export function MemoriaCalculoReadView({
               <span>Detallar memoria de cálculo</span>
             </button>
           )}
-
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#001B47] text-white font-bold text-xs rounded-xl hover:bg-[#002855] transition-all shadow-xs"
-          >
-            <Calculator className="w-4 h-4" />
-            <span>Memoria de Cálculo</span>
-          </button>
         </div>
       </div>
 
@@ -82,18 +85,18 @@ export function MemoriaCalculoReadView({
               ))
             )}
           </tbody>
-          <tfoot className="bg-[#f8fafc] border-t border-slate-200 font-bold text-xs">
-            <tr>
-              <td colSpan={2} className="px-6 py-4 text-[#001B47]">
-                Total Consolidado
-              </td>
-              <td className="px-6 py-4 text-right font-mono text-sm text-[#001B47]">
-                {formatMonto(total)}
-              </td>
-            </tr>
-          </tfoot>
         </table>
       </div>
+
+      {/* Banner Consolidado con Métricas y Botones de Evaluación si aplica */}
+      <PresupuestoConsolidadoFooter
+        totalPartidas={total}
+        presupuestoTotal={presupuestoTotal}
+        excedente={Math.max(0, total - presupuestoTotal)}
+        isSubmitting={isSubmitting}
+        onObservar={puedeEvaluar ? onObservarClick : undefined}
+        onAprobar={puedeEvaluar ? onAprobarClick : undefined}
+      />
     </div>
   );
 }

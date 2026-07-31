@@ -9,8 +9,6 @@ export function useMemoriaCalculoEditor(
   onProyectoUpdated?: (updated: ProyectoDetalle) => void
 ) {
   const [partidas, setPartidas] = useState<PartidaMemoriaCalculo[]>(proyecto.memoriaCalculo || []);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(
     null
@@ -55,7 +53,6 @@ export function useMemoriaCalculoEditor(
         },
       ];
     });
-    setIsSearchModalOpen(false);
   }, []);
 
   const saveMemoriaCalculo = useCallback(async () => {
@@ -112,21 +109,12 @@ export function useMemoriaCalculoEditor(
     }
   }, [proyecto.id, partidas, esValidoParaEnviar, onProyectoUpdated]);
 
-  const catalogResults = useMemo(() => {
-    return mockProyectoService.buscarCatalogoPartidas(searchQuery);
-  }, [searchQuery]);
-
   return {
     partidas,
     totalPartidas,
     presupuestoTotal,
     excedente,
     esValidoParaEnviar,
-    searchQuery,
-    setSearchQuery,
-    catalogResults,
-    isSearchModalOpen,
-    setIsSearchModalOpen,
     isSubmitting,
     feedback,
     updateMonto,
