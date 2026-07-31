@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MemoriaCalculoAPI",
+  "description": "API Schema for GET, PUT, and POST endpoints of Project Detail and Memoria de Cálculo",
+  "endpoints": {
+    "GET /api/proyectos/{id}": {
+      "summary": "Obtener el detalle completo de un proyecto y su memoria de cálculo",
+      "responses": {
+        "200": {
+          "description": "Detalle del proyecto obtenido exitosamente",
+          "body": {
+            "id": 1,
+            "nombre": "Implementación de Inteligencia Artificial en Procesos Agrícolas",
+            "presupuestoTotal": 100000.0,
+            "programa": "Innovación Tecnológica 2024",
+            "fuenteFinanciamiento": "Recursos Propios IDH",
+            "fechaInicio": "15/01/2024",
+            "fechaFin": "15/07/2025",
+            "estado": { "id": 1, "nombre": "Memoria de cálculo pendiente" },
+            "investigadorPrincipal": { "id": 1, "nombre": "Dr. Ricardo Villarroel" },
+            "memoriaCalculo": [
+              { "id": 101, "codigoPartida": "101", "nombrePartida": "Materiales y Suministros", "monto": 45000.0 },
+              { "id": 205, "codigoPartida": "205", "nombrePartida": "Servicios Técnicos Profesionales", "monto": 55000.0 }
+            ],
+            "totalMemoriaCalculo": 100000.0,
+            "permisos": { "puedeDetallarMemoria": true, "puedeEvaluar": false, "soloLectura": false }
+          }
+        }
+      }
+    },
+    "PUT /api/proyectos/{id}/memoria-calculo": {
+      "summary": "Guardar borradores o actualizar partidas de la memoria de cálculo",
+      "requestBody": {
+        "partidas": [
+          { "id": 101, "monto": 35000.0 },
+          { "id": 205, "monto": 10000.0 },
+          { "id": 301, "monto": 25000.0 },
+          { "id": 405, "monto": 15000.0 },
+          { "id": 512, "monto": 15000.0 }
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Memoria de cálculo actualizada",
+          "body": { "success": true, "message": "Memoria de cálculo guardada correctamente" }
+        }
+      }
+    },
+    "POST /api/proyectos/{id}/enviar-revision": {
+      "summary": "Enviar la memoria de cálculo a revisión (cambia estado a 'En revisión de memoria de cálculo')",
+      "responses": {
+        "200": {
+          "description": "Proyecto enviado a revisión exitosamente",
+          "body": {
+            "success": true,
+            "nuevoEstado": { "id": 2, "nombre": "En revisión de memoria de cálculo" }
+          }
+        }
+      }
+    }
+  }
+}

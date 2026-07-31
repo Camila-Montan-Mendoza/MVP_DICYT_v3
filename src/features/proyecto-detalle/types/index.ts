@@ -2,9 +2,16 @@ import { EstadoProyectoInfo, InvestigadorPrincipalInfo } from "@/src/features/pr
 
 export interface PartidaMemoriaCalculo {
   id: number;
-  codigoPartida: number;
+  codigoPartida: number | string;
   nombrePartida: string;
   monto: number;
+}
+
+export interface PartidaCatalogo {
+  id: number;
+  codigo: string;
+  nombre: string;
+  itemsRelacionados: string[];
 }
 
 export interface PermisosDetalleProyecto {
