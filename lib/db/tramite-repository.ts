@@ -326,7 +326,7 @@ export class TramiteDBRepository {
 
           return {
             id: String(r.tarea_id),
-            pasoId: `p1`,
+            pasoId: `p${r.paso_flujo_id || 1}`,
             nombre: r.tarea_nombre,
             rolEsperado: r.rol_esperado || "Sin rol asignado",
             usuarioAsignado: usuarioNom,
@@ -498,11 +498,11 @@ export class TramiteDBRepository {
       for (const [estadoId, userInfo] of Array.from(usuarioPorEstadoAnterior.entries())) {
         if (estadoId === estadoActualId) continue;
         const info = estadosMap.get(estadoId);
-        if (!info || info.id_paso_flujo !== pasoActualId) continue;
+        if (!info) continue;
 
         pasadasList.push({
           id: String(info.id),
-          pasoId: `p${pasoActualId}`,
+          pasoId: `p${info.id_paso_flujo || pasoActualId}`,
           nombre: info.nombre,
           rolEsperado: rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
           usuarioAsignado: userInfo.username || "Sistema",
@@ -533,7 +533,7 @@ export class TramiteDBRepository {
       const actualUserInfo = usuarioPorEstadoAnterior.get(estadoActualId);
       const tareaActualItem = {
         id: String(estadoActualId),
-        pasoId: `p${pasoActualId}`,
+        pasoId: `p${estadoObj.id_paso_flujo || pasoActualId}`,
         nombre: estadoObj.nombre || "Tarea Actual",
         rolEsperado: rolEsperadoPorEstado.get(estadoActualId) || "Sin rol asignado",
         usuarioAsignado: actualUserInfo?.username || "—",
@@ -546,10 +546,10 @@ export class TramiteDBRepository {
 
       const tareasFuturas = rutaGanadora
         .map((nodeNum) => estadosMap.get(nodeNum))
-        .filter((n) => n && n.id_paso_flujo === pasoActualId)
+        .filter((n) => n)
         .map((n) => ({
           id: String(n.id),
-          pasoId: `p${pasoActualId}`,
+          pasoId: `p${n.id_paso_flujo || pasoActualId}`,
           nombre: n.nombre,
           rolEsperado: rolEsperadoPorEstado.get(n.id) || "Sin rol asignado",
           usuarioAsignado: "—",

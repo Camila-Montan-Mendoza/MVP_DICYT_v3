@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION obtener_timeline_tramite(p_tramite_id INT)
 RETURNS TABLE (
   tarea_id INT,
   tarea_nombre VARCHAR,
+  paso_flujo_id INT,
   rol_esperado VARCHAR,
   usuario_responsable VARCHAR,
   rol_responsable_real VARCHAR,
@@ -53,11 +54,12 @@ usuario_por_tarea AS (
   ORDER BY htt."id_tarea_anterior", htt."fecha_cambio" DESC
 ),
 
--- 2. TAREAS PASADAS COMPLETADAS
+-- 2. TAREAS PASADAS COMPLETADAS DE CUALQUIER PASO
 tareas_pasadas AS (
   SELECT DISTINCT ON (tpf."id")
     tpf."id"                                                         AS tarea_id,
     tpf."nombre"                                                     AS tarea_nombre,
+    tpf."id_paso_flujo"                                              AS paso_flujo_id,
     COALESCE(r."nombre", 'Sin rol asignado')::VARCHAR                AS rol_esperado,
     COALESCE(upt."username_responsable", 'Sistema')::VARCHAR         AS usuario_responsable,
     COALESCE(upt."rol_usuario_real", r."nombre", 'Sin rol asignado')::VARCHAR AS rol_responsable_real,
@@ -67,7 +69,7 @@ tareas_pasadas AS (
     upt."fecha_completado" AS orden_sort
   FROM usuario_por_tarea upt
   JOIN "tarea_paso_flujo" tpf ON upt.tarea_id = tpf."id"
-  JOIN tramite_info ti ON tpf."id_paso_flujo" = ti.paso_actual_id
+  JOIN tramite_info ti ON true
   LEFT JOIN "rol_tarea_paso_flujo" rtpf ON tpf."id" = rtpf."id_tarea_paso_flujo"
   LEFT JOIN "rol" r ON rtpf."id_rol" = r."id"
   WHERE tpf."id" <> ti.tarea_actual_id
@@ -79,6 +81,7 @@ tarea_actual AS (
   SELECT 
     tpf."id"                                    AS tarea_id,
     tpf."nombre"                                AS tarea_nombre,
+    tpf."id_paso_flujo"                         AS paso_flujo_id,
     COALESCE(r."nombre", 'Sin rol asignado')::VARCHAR AS rol_esperado,
     NULL::VARCHAR                               AS usuario_responsable,
     COALESCE(r."nombre", 'Sin rol asignado')::VARCHAR AS rol_responsable_real,
@@ -141,6 +144,7 @@ tareas_futuras AS (
   SELECT 
     tpf."id"                                    AS tarea_id,
     tpf."nombre"                                AS tarea_nombre,
+    tpf."id_paso_flujo"                         AS paso_flujo_id,
     COALESCE(r."nombre", 'Sin rol asignado')::VARCHAR AS rol_esperado,
     NULL::VARCHAR                               AS usuario_responsable,
     COALESCE(r."nombre", 'Sin rol asignado')::VARCHAR AS rol_responsable_real,
@@ -150,13 +154,12 @@ tareas_futuras AS (
     to_timestamp(1700000000 + nro.orden_secuencia) AS orden_sort
   FROM nodos_ruta_optima nro
   JOIN "tarea_paso_flujo" tpf ON nro.tarea_id = tpf."id"
-  JOIN tramite_info ti ON tpf."id_paso_flujo" = ti.paso_actual_id
   LEFT JOIN "rol_tarea_paso_flujo" rtpf ON tpf."id" = rtpf."id_tarea_paso_flujo"
   LEFT JOIN "rol" r ON rtpf."id_rol" = r."id"
 )
 
 -- ─── CONSOLIDADO FINAL ───
-SELECT tarea_id, tarea_nombre, rol_esperado, usuario_responsable, rol_responsable_real, fecha_completado, estado
+SELECT tarea_id, tarea_nombre, paso_flujo_id, rol_esperado, usuario_responsable, rol_responsable_real, fecha_completado, estado
 FROM (
   SELECT * FROM tareas_pasadas
   UNION ALL
