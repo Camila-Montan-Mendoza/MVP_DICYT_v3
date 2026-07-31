@@ -30,7 +30,7 @@ export default function TrazaTramitesPage() {
   return (
     <SigefiShell>
       <div className="space-y-6 pb-16 relative">
-        {/* Cabecera del Módulo con Título y Selectores de Programa / Proyecto */}
+        {/* Cabecera del Módulo con Título y Selectores (Programa, Proyecto) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
           <div>
             <div className="flex items-center gap-2">
@@ -38,12 +38,12 @@ export default function TrazaTramitesPage() {
                 <GitCommit className="w-5 h-5" />
               </span>
               <h1 className="text-2xl md:text-3xl font-extrabold text-[#001B47] tracking-tight">
-                Seguimiento de Partidas
+                Seguimiento de Partidas (Trazabilidad)
               </h1>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Consulta relacional de partidas presupuestarias e ítems afectantes (Datos en vivo
-              desde Supabase)
+              Traza de presupuesto comprometido, ejecutado y pagado a nivel de partida e ítem (Datos
+              en vivo desde Supabase)
             </p>
           </div>
 
@@ -63,7 +63,7 @@ export default function TrazaTramitesPage() {
                   className="bg-transparent font-bold text-[#001B47] focus:outline-hidden cursor-pointer truncate w-full"
                 >
                   <option value="all">Todos los Programas ({programasDisponibles.length})</option>
-                  {programasDisponibles.map((p) => (
+                  {programasDisponibles.map((p: any) => (
                     <option key={p.id} value={p.id}>
                       {p.nombre}
                     </option>
@@ -85,7 +85,7 @@ export default function TrazaTramitesPage() {
                   className="bg-transparent font-bold text-[#001B47] focus:outline-hidden cursor-pointer truncate w-full"
                 >
                   <option value="all">Todos los Proyectos ({proyectosDisponibles.length})</option>
-                  {proyectosDisponibles.map((p) => (
+                  {proyectosDisponibles.map((p: any) => (
                     <option key={p.id} value={p.id}>
                       {p.codigo} - {p.nombre}
                     </option>

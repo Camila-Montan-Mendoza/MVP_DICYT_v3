@@ -37,7 +37,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 - **III. Modular React Architecture**: Separación Container (`useProyectosLista` hook) / Presentacional (`ProyectosTable`, `ProyectosFilters`, `EstadoProyectoBadge`, `ProyectosEmptyState`); acceso a datos aislado en `lib/db/proyecto-repository.ts`. PASS.
 - **IV. Functional Core Scope (MVP First)**: Esta HU implementa exactamente el nodo `Lista de Proyectos` de la navegación mandatada por este principio. PASS.
 - **V. Relational Integrity & Traceability**: HU de solo lectura, sin nuevas escrituras ni relaciones; la única alteración de esquema es aditiva (nuevas filas de catálogo en `estado_proyecto`, ver `data-model.md`). PASS.
-- **VI. Prohibición de Mock Data**: El endpoint y el repositorio consultan Supabase directamente; ante error o ausencia de datos se renderiza un estado vacío explícito, replicando el patrón correcto (no el fallback estático usado hoy en `src/features/traza-tramites/api/fetchTrazaTramites.ts`, que esta HU **no** debe imitar). PASS, gate explícito por instrucción directa del usuario en esta sesión.
+- **VI. Prohibición de Mock Data**: El endpoint y el repositorio consultan Supabase directamente; ante error o ausencia de datos se renderiza un estado vacío explícito, replicando el patrón correcto (no el fallback estático usado hoy en `src/features/seguimiento-partidas/api/fetchTrazaTramites.ts`, que esta HU **no** debe imitar). PASS, gate explícito por instrucción directa del usuario en esta sesión.
 
 ## Project Structure
 
@@ -88,7 +88,7 @@ components/ui/
 └── pagination.tsx                 # `npx shadcn add pagination` (no existe aún)
 ```
 
-**Structure Decision**: Se reutiliza el monolito Next.js App Router existente (sin separar frontend/backend en proyectos distintos): el "backend" pedido son Route Handlers de Next.js bajo `app/api/`, siguiendo el mismo patrón ya usado por `app/api/tramites/[id]/transicion/route.ts` y `app/api/items/route.ts`. La UI sigue el patrón `src/features/<feature>/{api,components,hooks,types}` ya establecido por `traza-tramites` y `bitacora-modificaciones`, y el acceso a datos se centraliza en `lib/db/proyecto-repository.ts` (ya existente, hoy limitado a un `SELECT id, nombre` de cliente).
+**Structure Decision**: Se reutiliza el monolito Next.js App Router existente (sin separar frontend/backend en proyectos distintos): el "backend" pedido son Route Handlers de Next.js bajo `app/api/`, siguiendo el mismo patrón ya usado por `app/api/tramites/[id]/transicion/route.ts` y `app/api/items/route.ts`. La UI sigue el patrón `src/features/<feature>/{api,components,hooks,types}` ya establecido por `seguimiento-partidas` y `bitacora-modificaciones`, y el acceso a datos se centraliza en `lib/db/proyecto-repository.ts` (ya existente, hoy limitado a un `SELECT id, nombre` de cliente).
 
 ## Complexity Tracking
 

@@ -1,0 +1,70 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Modificaciones Presupuestarias API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/tramites/modificaciones": {
+      "get": {
+        "summary": "Obtener listado de trámites de modificación presupuestaria",
+        "responses": {
+          "200": {
+            "description": "Lista de solicitudes de modificación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ModificacionPresupuestaria" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Registrar una nueva modificación presupuestaria",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CrearModificacionInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Trámite registrado en estado PENDIENTE"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CrearModificacionInput": {
+        "type": "object",
+        "required": [
+          "proyectoId",
+          "partidasAfectadas",
+          "partidasBeneficiadas",
+          "justificacionTexto"
+        ],
+        "properties": {
+          "proyectoId": { "type": "integer" },
+          "partidasAfectadas": { "type": "array" },
+          "partidasBeneficiadas": { "type": "array" },
+          "justificacionTexto": { "type": "string" }
+        }
+      },
+      "ModificacionPresupuestaria": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "codigoTramite": { "type": "string" },
+          "estado": { "type": "string" }
+        }
+      }
+    }
+  }
+}

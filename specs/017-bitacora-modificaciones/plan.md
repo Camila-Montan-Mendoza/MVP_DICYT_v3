@@ -6,7 +6,7 @@
 
 ## Summary
 
-Implementar la vista de auditoría para el **Historial de Modificaciones Presupuestarias** en la ruta `/modificaciones-presupuestarias`. La interfaz contará con selectores de **Programa**, **Proyecto** y **Gestión Fiscal** en el encabezado. La tabla principal exhibirá las modificaciones aprobadas (Traspasos e Incrementos), y al interactuar con cualquier fila, se desplegará un **panel lateral a la derecha (Jira Split View)** para consultar la justificación extensa completa, el usuario autorizador, el documento respaldatorio y la **evolución del presupuesto vigente** en cada partida afectada (`Presupuesto Inicial +/- Ajuste = Presupuesto Vigente Resultante`).
+Implementar la vista de auditoría para el **Historial de Modificaciones Presupuestarias** en la ruta `/historial-modificaciones-presupuestarias`. La interfaz contará con selectores de **Programa**, **Proyecto** y **Gestión Fiscal** en el encabezado. La tabla principal exhibirá las modificaciones aprobadas (Traspasos e Incrementos), y al interactuar con cualquier fila, se desplegará un **panel lateral a la derecha (Jira Split View)** para consultar la justificación extensa completa, el usuario autorizador, el documento respaldatorio y la **evolución del presupuesto vigente** en cada partida afectada (`Presupuesto Inicial +/- Ajuste = Presupuesto Vigente Resultante`).
 
 ## Technical Context
 
@@ -54,7 +54,7 @@ specs/017-bitacora-modificaciones/
 ### Source Code (repository root)
 
 ```text
-app/(dashboard)/modificaciones-presupuestarias/
+app/(dashboard)/historial-modificaciones-presupuestarias/
 └── page.tsx             # Ruta física accesible desde el sidebar principal
 
 src/features/bitacora-modificaciones/

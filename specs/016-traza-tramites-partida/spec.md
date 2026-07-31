@@ -1,6 +1,6 @@
 # Feature Specification: Traza Detallada de Trámites e Impacto Presupuestario por Partida Concreta
 
-**Feature Branch**: `016-traza-tramites-partida`
+**Feature Branch**: `016-seguimiento-partidas-partida`
 
 **Created**: 2026-07-30
 

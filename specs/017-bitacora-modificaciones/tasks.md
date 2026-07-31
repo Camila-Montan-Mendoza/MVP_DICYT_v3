@@ -35,14 +35,14 @@
 
 **Goal**: Permitir consultar la lista de modificaciones aprobadas y abrir un sidebar por la derecha al hacer clic para ver la justificación larga y la evolución de partidas afectadas.
 
-**Independent Test**: Navegar a la vista `/modificaciones-presupuestarias`, hacer clic en cualquier modificación y comprobar la apertura del sidebar lateral con la justificación y tabla de evolución (+/-).
+**Independent Test**: Navegar a la vista `/historial-modificaciones-presupuestarias`, hacer clic en cualquier modificación y comprobar la apertura del sidebar lateral con la justificación y tabla de evolución (+/-).
 
 ### Implementation for User Story 1
 
 - [x] T005 [US1] Crear el hook `useBitacoraModificaciones.ts` para gestionar datos y selectores en `src/features/bitacora-modificaciones/hooks/useBitacoraModificaciones.ts`
 - [x] T006 [US1] Crear el panel lateral deslizable estilo Jira `BitacoraDetailSidebar.tsx` en `src/features/bitacora-modificaciones/components/BitacoraDetailSidebar.tsx`
 - [x] T007 [US1] Crear la vista de tabla principal de modificaciones `BitacoraModificacionesList.tsx` en `src/features/bitacora-modificaciones/components/BitacoraModificacionesList.tsx`
-- [x] T008 [US1] Crear la página principal en `app/(dashboard)/modificaciones-presupuestarias/page.tsx` integrando `<SigefiShell>`, selectores (Programa, Proyecto, Gestión) y sidebar Jira
+- [x] T008 [US1] Crear la página principal en `app/(dashboard)/historial-modificaciones-presupuestarias/page.tsx` integrando `<SigefiShell>`, selectores (Programa, Proyecto, Gestión) y sidebar Jira
 - [x] T009 [P] [US1] Crear prueba unitaria puntual para el cálculo de evolución de saldos en `src/features/bitacora-modificaciones/api/fetchBitacoraModificaciones.test.ts`
 
 ---

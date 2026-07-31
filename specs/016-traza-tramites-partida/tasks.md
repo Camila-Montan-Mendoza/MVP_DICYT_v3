@@ -1,6 +1,6 @@
 # Tasks: Traza Detallada de Trámites e Impacto Presupuestario por Partida Concreta
 
-**Input**: Design documents from `/specs/016-traza-tramites-partida/`
+**Input**: Design documents from `/specs/016-seguimiento-partidas-partida/`
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
 
@@ -17,7 +17,7 @@
 
 **Purpose**: Inicialización y enlace de navegación lateral en el sistema.
 
-- [x] T001 Inicializar documentación de tareas en `specs/016-traza-tramites-partida/tasks.md`
+- [x] T001 Inicializar documentación de tareas en `specs/016-seguimiento-partidas-partida/tasks.md`
 - [x] T002 Agregar el enlace de navegación lateral "Traza por Partida" con icono `FileText` en `components/sigefi-shell.tsx`
 
 ---
@@ -26,8 +26,8 @@
 
 **Purpose**: Definiciones de datos y cliente de consulta real a Supabase (sin datos mockeados).
 
-- [x] T003 Crear interfaces TypeScript para la traza de trámites en `src/features/traza-tramites/types/index.ts`
-- [x] T004 Implementar la función de consulta relacional directa a Supabase en `src/features/traza-tramites/api/fetchTrazaTramites.ts`
+- [x] T003 Crear interfaces TypeScript para la traza de trámites en `src/features/seguimiento-partidas/types/index.ts`
+- [x] T004 Implementar la función de consulta relacional directa a Supabase en `src/features/seguimiento-partidas/api/fetchTrazaTramites.ts`
 
 ---
 
@@ -35,15 +35,15 @@
 
 **Goal**: Permitir consultar la lista de partidas reales y desplegar un panel lateral estilo Jira a la derecha con los trámites asociados al hacer clic.
 
-**Independent Test**: Navegar a la vista `/traza-tramites`, hacer clic en cualquier partida de la lista y verificar que se despliegue el sidebar lateral derecho con los trámites reales de Supabase.
+**Independent Test**: Navegar a la vista `/seguimiento-partidas`, hacer clic en cualquier partida de la lista y verificar que se despliegue el sidebar lateral derecho con los trámites reales de Supabase.
 
 ### Implementation for User Story 1
 
-- [x] T005 [US1] Crear el hook `useTrazaTramites.ts` para gestionar partidas y la traza de trámites en `src/features/traza-tramites/hooks/useTrazaTramites.ts`
-- [x] T006 [US1] Crear el panel lateral deslizable estilo Jira `TrazaDetailSidebar.tsx` en `src/features/traza-tramites/components/TrazaDetailSidebar.tsx`
-- [x] T007 [US1] Crear la vista de tabla/lista principal de partidas `TrazaPartidasList.tsx` en `src/features/traza-tramites/components/TrazaPartidasList.tsx`
-- [x] T008 [US1] Crear la página principal en `app/(dashboard)/traza-tramites/page.tsx` integrando `<SigefiShell>`, la lista y el sidebar Jira
-- [x] T009 [P] [US1] Crear prueba unitaria puntual para la transformación de consultas en `src/features/traza-tramites/api/fetchTrazaTramites.test.ts`
+- [x] T005 [US1] Crear el hook `useTrazaTramites.ts` para gestionar partidas y la traza de trámites en `src/features/seguimiento-partidas/hooks/useTrazaTramites.ts`
+- [x] T006 [US1] Crear el panel lateral deslizable estilo Jira `TrazaDetailSidebar.tsx` en `src/features/seguimiento-partidas/components/TrazaDetailSidebar.tsx`
+- [x] T007 [US1] Crear la vista de tabla/lista principal de partidas `TrazaPartidasList.tsx` en `src/features/seguimiento-partidas/components/TrazaPartidasList.tsx`
+- [x] T008 [US1] Crear la página principal en `app/(dashboard)/seguimiento-partidas/page.tsx` integrando `<SigefiShell>`, la lista y el sidebar Jira
+- [x] T009 [P] [US1] Crear prueba unitaria puntual para la transformación de consultas en `src/features/seguimiento-partidas/api/fetchTrazaTramites.test.ts`
 
 ---
 
@@ -55,7 +55,7 @@
 
 ### Implementation for User Story 2
 
-- [x] T010 [US2] Implementar insignias de estado y badge de reintegro para trámites revertidos en `src/features/traza-tramites/components/TrazaDetailSidebar.tsx`
+- [x] T010 [US2] Implementar insignias de estado y badge de reintegro para trámites revertidos en `src/features/seguimiento-partidas/components/TrazaDetailSidebar.tsx`
 
 ---
 
@@ -67,7 +67,7 @@
 
 ### Implementation for User Story 3
 
-- [x] T011 [US3] Agregar control de filtrado por estado de trámite en `src/features/traza-tramites/components/TrazaDetailSidebar.tsx`
+- [x] T011 [US3] Agregar control de filtrado por estado de trámite en `src/features/seguimiento-partidas/components/TrazaDetailSidebar.tsx`
 
 ---
 
@@ -75,7 +75,7 @@
 
 **Purpose**: Verificación y compilación final.
 
-- [x] T012 Ejecutar validación de guía rápida en `specs/016-traza-tramites-partida/quickstart.md`
+- [x] T012 Ejecutar validación de guía rápida en `specs/016-seguimiento-partidas-partida/quickstart.md`
 - [x] T013 Verificar compilación de TypeScript mediante `npx tsc --noEmit`
 
 ---

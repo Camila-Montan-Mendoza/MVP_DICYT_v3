@@ -12,6 +12,8 @@ import {
   Menu,
   PieChart,
   GitCommit,
+  ShoppingCart,
+  FileSpreadsheet,
   History,
 } from "lucide-react";
 import { logoutSession } from "@/lib/auth/auth-service";
@@ -27,7 +29,14 @@ function SigefiShellInner({ children }: SigefiShellProps) {
   const { user } = useAuth();
 
   const isProyectosActive = pathname.startsWith("/proyectos");
-  const isTramitesActive = pathname.startsWith("/tramites");
+
+  // Rutas activas
+  const isComprasActive =
+    pathname === "/tramites/compras-contrataciones" ||
+    (pathname.startsWith("/tramites/compras-contrataciones") &&
+      !pathname.startsWith("/tramites/modificaciones-presupuestarias"));
+
+  const isModificacionesActive = pathname.startsWith("/tramites/modificaciones-presupuestarias");
 
   const handleLogout = async () => {
     await logoutSession();
@@ -100,7 +109,7 @@ function SigefiShellInner({ children }: SigefiShellProps) {
             </div>
 
             {/* Menú Principal de Navegación */}
-            <nav className="space-y-1 text-xs">
+            <nav className="space-y-3 text-xs">
               <Link
                 href="/proyectos"
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
@@ -113,17 +122,39 @@ function SigefiShellInner({ children }: SigefiShellProps) {
                 Proyectos
               </Link>
 
-              <Link
-                href="/tramites"
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
-                  isTramitesActive
-                    ? "bg-[#002855] text-white shadow-xs"
-                    : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
-                }`}
-              >
-                <FileText className="w-4 h-4" />
-                Compras/Contrataciones
-              </Link>
+              {/* Grupo Trámites con Subítems */}
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5 px-3.5 py-1.5 text-[#001B47] font-extrabold text-xs">
+                  <FileText className="w-4 h-4 text-[#002855]" />
+                  <span>Trámites</span>
+                </div>
+
+                <div className="pl-3 space-y-1 border-l-2 border-slate-200 ml-5">
+                  <Link
+                    href="/tramites/compras-contrataciones"
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl font-bold transition-all text-xs ${
+                      isComprasActive
+                        ? "bg-[#002855] text-white shadow-xs"
+                        : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
+                    }`}
+                  >
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    <span>Compras/Contrataciones</span>
+                  </Link>
+
+                  <Link
+                    href="/tramites/modificaciones-presupuestarias"
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl font-bold transition-all text-xs ${
+                      isModificacionesActive
+                        ? "bg-[#002855] text-white shadow-xs"
+                        : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
+                    }`}
+                  >
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                    <span>Modificaciones Presupuestarias</span>
+                  </Link>
+                </div>
+              </div>
 
               <Link
                 href="/seguimiento-gastos"
@@ -138,9 +169,9 @@ function SigefiShellInner({ children }: SigefiShellProps) {
               </Link>
 
               <Link
-                href="/traza-tramites"
+                href="/seguimiento-partidas"
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
-                  pathname.startsWith("/traza-tramites")
+                  pathname.startsWith("/seguimiento-partidas")
                     ? "bg-[#002855] text-white shadow-xs"
                     : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
                 }`}
@@ -150,9 +181,9 @@ function SigefiShellInner({ children }: SigefiShellProps) {
               </Link>
 
               <Link
-                href="/modificaciones-presupuestarias"
+                href="/historial-modificaciones-presupuestarias"
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all ${
-                  pathname.startsWith("/modificaciones-presupuestarias")
+                  pathname.startsWith("/historial-modificaciones-presupuestarias")
                     ? "bg-[#002855] text-white shadow-xs"
                     : "text-[#475569] hover:bg-[#f1f5f9] hover:text-[#002855]"
                 }`}

@@ -46,11 +46,11 @@ Ni el Route Handler ni el repositorio (`lib/db/proyecto-repository.ts`) incluyen
 ### Rationale
 
 - Instrucción explícita del usuario en esta sesión ("toda la implementación sin datos mockeados") y mandato directo del Principio VI de la constitución ("Fail-Fast Database Renders").
-- El proyecto ya tiene un antipatrón existente que **no** debe repetirse: `src/features/traza-tramites/api/fetchTrazaTramites.ts` retorna `FALLBACK_TRAZA_PARTIDAS` (un arreglo mock hardcodeado) cuando la consulta a Supabase falla o está vacía. Esta HU se implementa deliberadamente sin ese patrón.
+- El proyecto ya tiene un antipatrón existente que **no** debe repetirse: `src/features/seguimiento-partidas/api/fetchTrazaTramites.ts` retorna `FALLBACK_TRAZA_PARTIDAS` (un arreglo mock hardcodeado) cuando la consulta a Supabase falla o está vacía. Esta HU se implementa deliberadamente sin ese patrón.
 
 ### Alternatives considered
 
-- **Reutilizar el patrón de fallback de `traza-tramites` para consistencia**: rechazado explícitamente; es el antipatrón que se debe evitar, no imitar.
+- **Reutilizar el patrón de fallback de `seguimiento-partidas` para consistencia**: rechazado explícitamente; es el antipatrón que se debe evitar, no imitar.
 
 ---
 

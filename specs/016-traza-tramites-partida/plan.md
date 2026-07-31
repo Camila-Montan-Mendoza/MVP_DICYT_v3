@@ -1,8 +1,8 @@
 # Implementation Plan: Traza Detallada de Trámites e Impacto Presupuestario por Partida Concreta
 
-**Branch**: `016-traza-tramites-partida` | **Date**: 2026-07-30 | **Spec**: [specs/016-traza-tramites-partida/spec.md](spec.md)
+**Branch**: `016-seguimiento-partidas-partida` | **Date**: 2026-07-30 | **Spec**: [specs/016-seguimiento-partidas-partida/spec.md](spec.md)
 
-**Input**: Feature specification from `/specs/016-traza-tramites-partida/spec.md` + directivas de usuario (UI estilo Jira con panel lateral detallado a la derecha, consulta 100% real a Supabase sin datos mockeados).
+**Input**: Feature specification from `/specs/016-seguimiento-partidas-partida/spec.md` + directivas de usuario (UI estilo Jira con panel lateral detallado a la derecha, consulta 100% real a Supabase sin datos mockeados).
 
 ## Summary
 
@@ -20,7 +20,7 @@ Implementar la visualización y auditoría de la traza de trámites por partida 
 
 **Target Platform**: Web Responsive dentro de `<SigefiShell>` con sidebar principal.
 
-**Project Type**: Next.js App Router Client Component / Feature Module (`src/features/traza-tramites/`)
+**Project Type**: Next.js App Router Client Component / Feature Module (`src/features/seguimiento-partidas/`)
 
 **Performance Goals**: Carga de la traza desde Supabase en menos de 800ms.
 
@@ -42,22 +42,22 @@ Implementar la visualización y auditoría de la traza de trámites por partida 
 ### Documentation (this feature)
 
 ```text
-specs/016-traza-tramites-partida/
+specs/016-seguimiento-partidas-partida/
 ├── plan.md              # Este archivo
 ├── research.md          # Patrón Jira Split-View y consultas relacionales en Supabase
 ├── data-model.md        # Relaciones Postgres entre partida_concreta, item_tramite y tramite
 ├── quickstart.md        # Guía rápida de prueba de la traza estilo Jira
 └── contracts/
-    └── traza-tramites-contract.md # Esquema de respuesta y props del componente
+    └── seguimiento-partidas-contract.md # Esquema de respuesta y props del componente
 ```
 
 ### Source Code (repository root)
 
 ```text
-app/(dashboard)/traza-tramites/
+app/(dashboard)/seguimiento-partidas/
 └── page.tsx             # Vista accesible desde el sidebar principal en <SigefiShell>
 
-src/features/traza-tramites/
+src/features/seguimiento-partidas/
 ├── api/
 │   └── fetchTrazaTramites.ts # Consultas SQL relacionales a Supabase
 ├── hooks/
@@ -67,7 +67,7 @@ src/features/traza-tramites/
    └── TrazaDetailSidebar.tsx # Panel lateral desplegable por la derecha con el detalle completo
 ```
 
-**Structure Decision**: Módulo independiente en `src/features/traza-tramites/` integrado en la navegación lateral de `<SigefiShell>`.
+**Structure Decision**: Módulo independiente en `src/features/seguimiento-partidas/` integrado en la navegación lateral de `<SigefiShell>`.
 
 ## Complexity Tracking
 
