@@ -24,14 +24,10 @@ export class ItemDBRepository {
           `
           id,
           nombre,
-          id_partida_concreta,
-          partida_concreta:partida_concreta!item_id_partida_concreta_fkey (
+          id_partida,
+          partida:partida!id_partida (
             id,
-            id_proyecto,
-            id_partida,
-            presupuesto,
-            partida
-            :partida!partida_concreta_id_partida_fkey ( id, codigo )
+            codigo
           )
         `
         )
@@ -47,8 +43,7 @@ export class ItemDBRepository {
       }
 
       return items.map((i: any) => {
-        const pc = i.partida_concreta || {};
-        const p = pc.partida || {};
+        const p = i.partida || {};
         const codigoNum = p.codigo || 39500;
         const categoria: "ACTIVO_FIJO" | "MATERIAL" | "SERVICIO" =
           codigoNum >= 40000
@@ -60,9 +55,9 @@ export class ItemDBRepository {
         return {
           id: i.id,
           nombre: i.nombre,
-          idPartidaConcreta: i.id_partida_concreta,
+          idPartidaConcreta: i.id_partida,
           partidaCodigo: codigoNum,
-          partidaNombre: p.nombre || p.descripcion || "Partida Presupuestaria",
+          partidaNombre: p.nombre || p.descripcion || `Partida ${codigoNum}`,
           categoria,
         };
       });
