@@ -9,6 +9,7 @@ import { MemoriaCalculoActionBanner } from "./MemoriaCalculoActionBanner";
 import { MemoriaCalculoReadView } from "./MemoriaCalculoReadView";
 import { MemoriaCalculoEditView } from "./MemoriaCalculoEditView";
 import { EvaluacionMemoriaModal } from "./EvaluacionMemoriaModal";
+import { ProyectoEjecucionPresupuestaria } from "./ProyectoEjecucionPresupuestaria";
 
 interface ProyectoDetalleContainerProps {
   proyectoId: number;
@@ -132,14 +133,7 @@ export function ProyectoDetalleContainer({ proyectoId }: ProyectoDetalleContaine
       />
 
       {activeTab === "ejecucion" ? (
-        <div className="p-8 bg-white rounded-2xl border border-slate-200 text-center text-xs text-slate-500">
-          <p className="font-bold text-[#001B47]">
-            Módulo de Ejecución Presupuestaria del Proyecto
-          </p>
-          <p className="text-[11px] mt-1 text-slate-400">
-            Consolidado de gastos ejecutados y trámites iniciados en este proyecto.
-          </p>
-        </div>
+        <ProyectoEjecucionPresupuestaria proyecto={proyecto} />
       ) : (
         <div className="space-y-6">
           {/* Card de Información Principal del Proyecto */}
