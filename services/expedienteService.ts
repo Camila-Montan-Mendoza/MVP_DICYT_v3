@@ -141,10 +141,10 @@ export async function archivarExpedienteFinal(
   const supabase = createClient();
 
   try {
-    await supabase.from("historial_estado_tramite").insert({
+    await supabase.from("historial_tarea_tramite").insert({
       id_tramite: tramiteId,
-      id_estado_tramite: 18,
-      id_usuario: usuarioId || null,
+      id_tarea_nuevo: 18,
+      id_usuario_responsable: usuarioId || null,
       observaciones: "Expediente Digital de Respaldos consolidado y archivado exitosamente.",
     });
 

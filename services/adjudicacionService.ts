@@ -19,7 +19,7 @@ export async function obtenerCuadroComparativoTramite(
   // 1. Consultar datos del trámite
   const { data: tramiteData, error: tramiteErr } = await supabase
     .from("tramite")
-    .select("id, id_proyecto, id_tipo_tramite, id_estado_tramite, justificacion")
+    .select("id, id_proyecto, id_tipo_tramite, id_tarea_tramite, justificacion")
     .eq("id", tramiteId)
     .maybeSingle();
 
@@ -44,7 +44,7 @@ export async function obtenerCuadroComparativoTramite(
   // 2. Consultar ítems del trámite
   const { data: itemsData, error: itemsErr } = await supabase
     .from("item_tramite")
-    .select("id, id_item, id_tramite, cantidad_solicitada, precio, especificacion")
+    .select("id, id_item, id_tramite, cantidad_solicitada, precio_unitario, especificacion")
     .eq("id_tramite", tramiteId);
 
   if (itemsErr) {
@@ -120,7 +120,7 @@ export async function obtenerCuadroComparativoTramite(
     id: tramiteData.id,
     id_proyecto: tramiteData.id_proyecto,
     id_tipo_tramite: tramiteData.id_tipo_tramite,
-    id_estado_tramite: tramiteData.id_estado_tramite,
+    id_tarea_tramite: tramiteData.id_tarea_tramite,
     justificacion: tramiteData.justificacion,
     proyecto: proyectoObj,
     usuario: null,
@@ -129,7 +129,7 @@ export async function obtenerCuadroComparativoTramite(
       id_item: it.id_item,
       id_tramite: it.id_tramite,
       cantidad_solicitada: it.cantidad_solicitada,
-      precio: Number(it.precio),
+      precio: Number(it.precio_unitario || 0),
       especificacion: it.especificacion,
       item: catalogMap.get(it.id_item) || { id: it.id_item, nombre: it.especificacion },
     })),
@@ -161,7 +161,7 @@ export async function obtenerCuadroComparativoTramite(
 
 /**
  * Persiste la justificación obligatoria, limpia e inserta las adjudicaciones en `item_proveedor_tramite`
- * y registra la trazabilidad en `historial_estado_tramite`.
+ * y registra la trazabilidad en `historial_tarea_tramite`.
  */
 export async function confirmarAdjudicacionTramite({
   tramiteId,
@@ -229,11 +229,11 @@ export async function confirmarAdjudicacionTramite({
       }
     }
 
-    // 3. Registrar auditoría en historial_estado_tramite
-    const { error: historialErr } = await supabase.from("historial_estado_tramite").insert({
+    // 3. Registrar auditoría en historial_tarea_tramite
+    const { error: historialErr } = await supabase.from("historial_tarea_tramite").insert({
       id_tramite: tramiteId,
-      id_estado_tramite: 6, // Estado paso adjudicado o siguiente paso
-      id_usuario: usuarioId,
+      id_tarea_nuevo: 6, // Estado paso adjudicado o siguiente paso
+      id_usuario_responsable: usuarioId,
       observaciones: `Adjudicación finalizada por IP. Justificación General: ${justificacionGeneral}`,
     });
 

@@ -52,7 +52,7 @@ export interface TramiteAdjudicacion {
   id: number;
   id_proyecto: number;
   id_tipo_tramite: number;
-  id_estado_tramite: number;
+  id_tarea_tramite: number;
   justificacion?: string | null;
   proyecto?: {
     id: number;

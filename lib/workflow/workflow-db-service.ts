@@ -20,8 +20,8 @@ interface EstadoPasoFlujoRow {
 
 interface TransicionFlujoRow {
   id: number;
-  id_estado_origen: number;
-  id_estado_destino: number;
+  id_tarea_origen: number;
+  id_tarea_destino: number;
   nombre_accion: string;
 }
 
@@ -118,9 +118,9 @@ export async function cargarGrafoWorkflow(
   }
   const pasoIds = pasos.map((p) => p.id);
 
-  // 2. Cargar estados (nodos) del flujo con relación a paso_flujo
+  // 2. Cargar tareas/estados del flujo con relación a paso_flujo
   const { data: tareas } = await supabase
-    .from("estado_paso_flujo")
+    .from("tarea_paso_flujo")
     .select("id, id_paso_flujo, nombre, es_inicial, es_final")
     .in("id_paso_flujo", pasoIds)
     .order("id", { ascending: true });
@@ -135,16 +135,16 @@ export async function cargarGrafoWorkflow(
   // 3. Cargar transiciones entre nodos
   const { data: transiciones } = await supabase
     .from("transicion_flujo")
-    .select("id, id_estado_origen, id_estado_destino, nombre_accion")
-    .in("id_estado_origen", estadoIds);
+    .select("id, id_tarea_origen, id_tarea_destino, nombre_accion")
+    .in("id_tarea_origen", estadoIds);
 
   // 4. Cargar roles responsables por nodo
   const { data: rolesData } = await supabase.from("rol").select("id, nombre");
 
   const { data: rolesEstado } = await supabase
-    .from("rol_estado_paso_flujo")
-    .select("id_rol, id_estado_paso_flujo")
-    .in("id_estado_paso_flujo", estadoIds);
+    .from("rol_tarea_paso_flujo")
+    .select("id_rol, id_tarea_paso_flujo")
+    .in("id_tarea_paso_flujo", estadoIds);
 
   const rolCatalogMap = new Map<number, string>();
   (rolesData || []).forEach((r) => rolCatalogMap.set(r.id, r.nombre));
@@ -154,7 +154,7 @@ export async function cargarGrafoWorkflow(
   if (rolesEstado) {
     for (const re of rolesEstado as any[]) {
       const rolNombre = rolCatalogMap.get(re.id_rol) || "Sin rol asignado";
-      rolPorEstado.set(re.id_estado_paso_flujo, {
+      rolPorEstado.set(re.id_tarea_paso_flujo, {
         rolNombre,
         rolCode: inferActorRolCode(rolNombre),
       });
@@ -171,9 +171,9 @@ export async function cargarGrafoWorkflow(
   const transicionesPorEstado = new Map<number, TransicionFlujoRow[]>();
   if (transiciones) {
     for (const t of transiciones) {
-      const list = transicionesPorEstado.get(t.id_estado_origen) || [];
+      const list = transicionesPorEstado.get(t.id_tarea_origen) || [];
       list.push(t as TransicionFlujoRow);
-      transicionesPorEstado.set(t.id_estado_origen, list);
+      transicionesPorEstado.set(t.id_tarea_origen, list);
     }
   }
 
@@ -189,7 +189,7 @@ export async function cargarGrafoWorkflow(
 
     // Construir acciones de transición
     const acciones: AccionTransicion[] = transicionesSalientes.map((t) => {
-      const destinoEstado = estadosMap.get(t.id_estado_destino);
+      const destinoEstado = estadosMap.get(t.id_tarea_destino);
       const destinoPaso = destinoEstado ? pasosMap.get(destinoEstado.id_paso_flujo) : null;
 
       const { tipo, varianteBtn } = inferVarianteBtn(
@@ -201,7 +201,7 @@ export async function cargarGrafoWorkflow(
       return {
         id: `trans_${t.id}`,
         label: t.nombre_accion,
-        siguienteNodoId: String(t.id_estado_destino),
+        siguienteNodoId: String(t.id_tarea_destino),
         tipo,
         varianteBtn,
       };

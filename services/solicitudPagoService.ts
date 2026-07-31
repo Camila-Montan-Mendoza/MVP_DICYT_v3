@@ -135,10 +135,10 @@ export async function enviarSolicitudPago(
       // Ignorar si la tabla no existe en la BD local
     }
 
-    await supabase.from("historial_estado_tramite").insert({
+    await supabase.from("historial_tarea_tramite").insert({
       id_tramite: params.tramiteId,
-      id_estado_tramite: 13,
-      id_usuario: params.usuarioId || null,
+      id_tarea_nuevo: 13,
+      id_usuario_responsable: params.usuarioId || null,
       observaciones: `Solicitud de pago enviada a revisión para el proveedor ID ${params.proveedorId}. Monto: Bs. ${params.montoTotal.toLocaleString("es-BO")}`,
     });
 
@@ -174,10 +174,10 @@ export async function validarSolicitudPago(
       // Ignorar
     }
 
-    await supabase.from("historial_estado_tramite").insert({
+    await supabase.from("historial_tarea_tramite").insert({
       id_tramite: params.tramiteId,
-      id_estado_tramite: 13,
-      id_usuario: params.usuarioId || null,
+      id_tarea_nuevo: 13,
+      id_usuario_responsable: params.usuarioId || null,
       observaciones: `Solicitud de pago VALIDADA para el proveedor ID ${params.proveedorId} por Compras/Contabilidad.`,
     });
 
@@ -215,10 +215,10 @@ export async function observarSolicitudPago(
       // Ignorar
     }
 
-    await supabase.from("historial_estado_tramite").insert({
+    await supabase.from("historial_tarea_tramite").insert({
       id_tramite: params.tramiteId,
-      id_estado_tramite: 13,
-      id_usuario: params.usuarioId || null,
+      id_tarea_nuevo: 13,
+      id_usuario_responsable: params.usuarioId || null,
       observaciones: `Solicitud de pago OBSERVADA para el proveedor ID ${params.proveedorId}: "${params.motivoObservacion}"`,
     });
 

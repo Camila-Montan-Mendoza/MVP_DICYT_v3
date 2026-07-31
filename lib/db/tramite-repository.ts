@@ -55,7 +55,7 @@ export class TramiteDBRepository {
    */
   public async getTramites(): Promise<TramiteDBItem[]> {
     try {
-      // 1. Query principal de trámites con inclusión embebida de relaciones
+      // 1. Query principal de trámites con relaciones explícitas por columna id_tarea_tramite
       const { data: mainTramites, error: queryError } = await this.supabase
         .from("tramite")
         .select(
@@ -63,21 +63,21 @@ export class TramiteDBRepository {
           id,
           id_proyecto,
           id_tipo_tramite,
-          id_estado_tramite,
+          id_tarea_tramite,
           justificacion,
           fecha_creacion,
           fecha_actualizacion,
           rechazado,
-          proyecto:proyecto!tramite_id_proyecto_fkey ( nombre, codigo ),
-          tipo_tramite:tipo_tramite!tramite_id_tipo_tramite_fkey ( nombre ),
-          usuario:usuario!tramite_id_usuario_fkey ( username ),
-          estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre ) ),
-          item_tramite:item_tramite!item_tramite_id_tramite_fkey (
+          proyecto:proyecto!id_proyecto ( nombre, codigo ),
+          tipo_tramite:tipo_tramite!id_tipo_tramite ( nombre ),
+          usuario:usuario!id_usuario ( username ),
+          tarea_paso_flujo:tarea_paso_flujo!id_tarea_tramite ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!id_paso_flujo ( id, orden, nombre ) ),
+          item_tramite:item_tramite!id_tramite (
             id,
             cantidad_solicitada,
-            precio,
+            precio_unitario,
             especificacion,
-            item:item!item_tramite_id_item_fkey ( id, nombre )
+            item:item!id_item ( id, nombre )
           )
         `
         )
@@ -85,12 +85,12 @@ export class TramiteDBRepository {
 
       let tramites: any[] = mainTramites || [];
 
-      // Fallback resiliente si la consulta embebida de item_tramite falla por duplicados en restricciones PostgREST
+      // Fallback secundario si la relación con item_tramite no está expuesta en la caché PostgREST
       if (queryError) {
         console.warn(
           "[Supabase Tramites Query Warning]:",
           queryError.message,
-          "- Ejecutando consulta de respaldo resiliente"
+          "- Intentando consulta base de trámites"
         );
         const { data: baseTramites, error: baseErr } = await this.supabase
           .from("tramite")
@@ -99,15 +99,15 @@ export class TramiteDBRepository {
             id,
             id_proyecto,
             id_tipo_tramite,
-            id_estado_tramite,
+            id_tarea_tramite,
             justificacion,
             fecha_creacion,
             fecha_actualizacion,
             rechazado,
-            proyecto:proyecto!tramite_id_proyecto_fkey ( nombre, codigo ),
-            tipo_tramite:tipo_tramite!tramite_id_tipo_tramite_fkey ( nombre ),
-            usuario:usuario!tramite_id_usuario_fkey ( username ),
-            estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre ) )
+            proyecto:proyecto!id_proyecto ( nombre, codigo ),
+            tipo_tramite:tipo_tramite!id_tipo_tramite ( nombre ),
+            usuario:usuario!id_usuario ( username ),
+            tarea_paso_flujo:tarea_paso_flujo!id_tarea_tramite ( id, nombre, es_inicial, es_final, id_paso_flujo, paso_flujo:paso_flujo!id_paso_flujo ( id, orden, nombre ) )
           `
           )
           .order("id", { ascending: false });
@@ -125,9 +125,9 @@ export class TramiteDBRepository {
       }
 
       return tramites.map((t: any, idx: number) => {
-        const estadoObj = t.estado_paso_flujo || {};
+        const estadoObj = t.tarea_paso_flujo || {};
         const pasoObj = estadoObj.paso_flujo || {};
-        const dbIdEstado = t.id_estado_tramite || 1;
+        const dbIdEstado = t.id_tarea_tramite || 1;
         const esFinal = estadoObj.es_final || false;
 
         const tipoNombre = (t.tipo_tramite?.nombre || "").toLowerCase();
@@ -146,11 +146,11 @@ export class TramiteDBRepository {
           descripcion: it.item?.nombre || "Ítem Solicitado",
           categoria: categoria,
           cantidad: it.cantidad_solicitada || 1,
-          precioReferencial: Number(it.precio || 0),
-          precioUnitario: Number(it.precio || 0),
+          precioReferencial: Number(it.precio_unitario || 0),
+          precioUnitario: Number(it.precio_unitario || 0),
           especificacionesTecnicasTexto: it.especificacion || "",
           especificacion: it.especificacion || "",
-          total: (it.cantidad_solicitada || 1) * Number(it.precio || 0),
+          total: (it.cantidad_solicitada || 1) * Number(it.precio_unitario || 0),
         }));
 
         return {
@@ -192,7 +192,6 @@ export class TramiteDBRepository {
 
   /**
    * Obtener los Pasos Macro de un Trámite según su tipo desde la BD
-   * (Opción 1: Consulta directa con Supabase JS Client sin funciones almacenadas)
    */
   public async getPasosTramite(tramiteIdNum: number): Promise<
     Array<{
@@ -211,10 +210,10 @@ export class TramiteDBRepository {
           id,
           id_tipo_tramite,
           rechazado,
-          estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey (
+          tarea_paso_flujo:tarea_paso_flujo!id_tarea_tramite (
             id,
             id_paso_flujo,
-            paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre )
+            paso_flujo:paso_flujo!id_paso_flujo ( id, orden, nombre )
           )
         `
         )
@@ -226,7 +225,7 @@ export class TramiteDBRepository {
       }
 
       const idTipoTramite = tramiteData.id_tipo_tramite || 1;
-      const estadoObj = (tramiteData as any).estado_paso_flujo || {};
+      const estadoObj = (tramiteData as any).tarea_paso_flujo || {};
       const pasoObj = estadoObj.paso_flujo || {};
       const ordenActual = pasoObj.orden || 1;
 
@@ -278,9 +277,6 @@ export class TramiteDBRepository {
 
   /**
    * Obtener las Tareas del Paso en el que se encuentra el Trámite
-   * (Pasado de Bitácora + Presente En Curso + Ruta Optimista Futura hacia la meta)
-   * Enriquecido con: rol esperado, usuario responsable real, rol real y fecha completado.
-   * Consulta directa desde Supabase Client sin funciones almacenadas ni RPCs.
    */
   public async getTareasDelPaso(tramiteIdNum: number): Promise<
     Array<{
@@ -310,13 +306,13 @@ export class TramiteDBRepository {
         if (estadoActualId) {
           const { data: transicionesActuales } = await this.supabase
             .from("transicion_flujo")
-            .select("id, id_estado_destino, nombre_accion")
-            .eq("id_estado_origen", estadoActualId);
+            .select("id, id_tarea_destino, nombre_accion")
+            .eq("id_tarea_origen", estadoActualId);
 
           accionesDisponibles = (transicionesActuales || []).map((t: any) => ({
             idTransicion: t.id,
             nombreAccion: t.nombre_accion,
-            idEstadoDestino: t.id_estado_destino,
+            idEstadoDestino: t.id_tarea_destino,
           }));
         }
 
@@ -343,20 +339,20 @@ export class TramiteDBRepository {
         });
       }
 
-      // 1. Contexto del Trámite y su paso activo (Fallback si la RPC no existe aún)
+      // 1. Contexto del Trámite y su paso activo
       const { data: tramiteData, error: tramiteErr } = await this.supabase
         .from("tramite")
         .select(
           `
           id,
           id_tipo_tramite,
-          id_estado_tramite,
+          id_tarea_tramite,
           rechazado,
-          estado_paso_flujo:estado_paso_flujo!tramite_id_estado_tramite_fkey (
+          tarea_paso_flujo:tarea_paso_flujo!id_tarea_tramite (
             id,
             id_paso_flujo,
             nombre,
-            paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, nombre )
+            paso_flujo:paso_flujo!id_paso_flujo ( id, orden, nombre )
           )
         `
         )
@@ -365,28 +361,27 @@ export class TramiteDBRepository {
 
       if (tramiteErr || !tramiteData) return [];
 
-      const estadoActualId = tramiteData.id_estado_tramite;
-      const estadoObj = (tramiteData as any).estado_paso_flujo || {};
+      const estadoActualId = tramiteData.id_tarea_tramite;
+      const estadoObj = (tramiteData as any).tarea_paso_flujo || {};
       const pasoObj = estadoObj.paso_flujo || {};
       const pasoActualId = estadoObj.id_paso_flujo;
       const pasoActualOrden = pasoObj.orden;
       const idTipoTramite = tramiteData.id_tipo_tramite;
       const rechazado = Boolean(tramiteData.rechazado);
 
-      // 2. HISTORIAL: Quién completó cada estado + fecha (se sabe al SALIR del estado)
-      //    id_estado_anterior = el estado que se completó (salida)
+      // 2. HISTORIAL
       const { data: historial } = await this.supabase
-        .from("historial_estado_tramite")
+        .from("historial_tarea_tramite")
         .select(
           `
-          id_estado_anterior,
-          id_estado_nuevo,
+          id_tarea_anterior,
+          id_tarea_nuevo,
           fecha_cambio,
-          usuario:usuario!historial_estado_tramite_id_usuario_responsable_fkey (
+          usuario:usuario!id_usuario_responsable (
             id,
             username,
-            rol_usuario:rol_usuario!rol_usuario_id_usuario_fkey (
-              rol:rol ( nombre )
+            rol_usuario:rol_usuario!id_usuario (
+              rol:rol!id_rol ( nombre )
             )
           )
         `
@@ -394,18 +389,15 @@ export class TramiteDBRepository {
         .eq("id_tramite", tramiteIdNum)
         .order("fecha_cambio", { ascending: true });
 
-      // Mapa: id del estado completado → { username, rolReal, fechaCompletado }
       const usuarioPorEstadoAnterior = new Map<
         number,
         { username: string; rolReal: string; fechaCompletado: string }
       >();
-      // Mapa: id del estado nuevo → presente en historial (para marcar como completado)
       const estadosEnHistorial = new Set<number>();
 
       if (historial) {
         for (const h of historial as any[]) {
-          // Omitir registros iniciales de creación (ej. 1 -> 1)
-          if (h.id_estado_anterior && h.id_estado_anterior === h.id_estado_nuevo) {
+          if (h.id_tarea_anterior && h.id_tarea_anterior === h.id_tarea_nuevo) {
             continue;
           }
 
@@ -420,37 +412,36 @@ export class TramiteDBRepository {
             userOpt?.rolLabel || u?.rol_usuario?.[0]?.rol?.nombre || "Sin rol asignado";
           const fecha = h.fecha_cambio;
 
-          if (h.id_estado_anterior) {
-            // Sobrescribir para registrar la última salida válida del estado
-            usuarioPorEstadoAnterior.set(h.id_estado_anterior, {
+          if (h.id_tarea_anterior) {
+            usuarioPorEstadoAnterior.set(h.id_tarea_anterior, {
               username,
               rolReal,
               fechaCompletado: fecha,
             });
           }
-          if (h.id_estado_nuevo) {
-            estadosEnHistorial.add(h.id_estado_nuevo);
+          if (h.id_tarea_nuevo) {
+            estadosEnHistorial.add(h.id_tarea_nuevo);
           }
         }
       }
 
-      // 3. ROL ESPERADO por estado (de rol_estado_paso_flujo → rol)
+      // 3. ROL ESPERADO
       const { data: rolesEstado } = await this.supabase
-        .from("rol_estado_paso_flujo")
-        .select("id_estado_paso_flujo, rol:rol!rol_estado_paso_flujo_id_rol_fkey ( nombre )");
+        .from("rol_tarea_paso_flujo")
+        .select("id_tarea_paso_flujo, rol:rol!id_rol ( nombre )");
 
       const rolEsperadoPorEstado = new Map<number, string>();
       (rolesEstado || []).forEach((re: any) => {
-        rolEsperadoPorEstado.set(re.id_estado_paso_flujo, re.rol?.nombre || "Sin rol asignado");
+        rolEsperadoPorEstado.set(re.id_tarea_paso_flujo, re.rol?.nombre || "Sin rol asignado");
       });
 
-      // 4. BFS: Ruta más corta hacia siguiente paso o nodo final
+      // 4. BFS
       const { data: todosEstados } = await this.supabase
-        .from("estado_paso_flujo")
+        .from("tarea_paso_flujo")
         .select(
           `
           id, id_paso_flujo, nombre, es_final,
-          paso_flujo:paso_flujo!estado_paso_flujo_id_paso_flujo_fkey ( id, orden, id_tipo_tramite )
+          paso_flujo:paso_flujo!id_paso_flujo ( id, orden, id_tipo_tramite )
         `
         )
         .eq("paso_flujo.id_tipo_tramite", idTipoTramite || 1);
@@ -460,7 +451,7 @@ export class TramiteDBRepository {
 
       const { data: transiciones } = await this.supabase
         .from("transicion_flujo")
-        .select("id_estado_origen, id_estado_destino, nombre_accion");
+        .select("id_tarea_origen, id_tarea_destino, nombre_accion");
 
       const adjList = new Map<number, number[]>();
       (transiciones || []).forEach((t: any) => {
@@ -470,10 +461,10 @@ export class TramiteDBRepository {
           !accion.includes("observ") &&
           !accion.includes("subsan")
         ) {
-          if (!adjList.has(t.id_estado_origen)) {
-            adjList.set(t.id_estado_origen, []);
+          if (!adjList.has(t.id_tarea_origen)) {
+            adjList.set(t.id_tarea_origen, []);
           }
-          adjList.get(t.id_estado_origen)!.push(t.id_estado_destino);
+          adjList.get(t.id_tarea_origen)!.push(t.id_tarea_destino);
         }
       });
 
@@ -502,9 +493,7 @@ export class TramiteDBRepository {
         }
       }
 
-      // 5. CONSOLIDAR: Pasadas + Actual + Futuras con datos enriquecidos
-
-      // Tareas pasadas: estados anteriores presentes en historial (salidas completadas) dentro del paso actual
+      // 5. CONSOLIDAR
       const pasadasList: ReturnType<typeof this.makeTarea>[] = [];
       for (const [estadoId, userInfo] of Array.from(usuarioPorEstadoAnterior.entries())) {
         if (estadoId === estadoActualId) continue;
@@ -524,26 +513,23 @@ export class TramiteDBRepository {
         });
       }
 
-      // Ordenar tareas pasadas por fecha de finalización
       pasadasList.sort((a, b) => {
         const fa = a.fechaCompletado ? new Date(a.fechaCompletado).getTime() : 0;
         const fb = b.fechaCompletado ? new Date(b.fechaCompletado).getTime() : 0;
         return fa - fb;
       });
 
-      // Acciones disponibles desde la tarea actual (transiciones asociadas al id_estado_origen)
       const { data: transicionesActuales } = await this.supabase
         .from("transicion_flujo")
-        .select("id, id_estado_destino, nombre_accion")
-        .eq("id_estado_origen", estadoActualId);
+        .select("id, id_tarea_destino, nombre_accion")
+        .eq("id_tarea_origen", estadoActualId);
 
       const accionesDisponibles = (transicionesActuales || []).map((t: any) => ({
         idTransicion: t.id,
         nombreAccion: t.nombre_accion,
-        idEstadoDestino: t.id_estado_destino,
+        idEstadoDestino: t.id_tarea_destino,
       }));
 
-      // Tarea actual
       const actualUserInfo = usuarioPorEstadoAnterior.get(estadoActualId);
       const tareaActualItem = {
         id: String(estadoActualId),
@@ -558,7 +544,6 @@ export class TramiteDBRepository {
         accionesDisponibles,
       };
 
-      // Tareas futuras
       const tareasFuturas = rutaGanadora
         .map((nodeNum) => estadosMap.get(nodeNum))
         .filter((n) => n && n.id_paso_flujo === pasoActualId)
@@ -579,7 +564,6 @@ export class TramiteDBRepository {
     }
   }
 
-  // Helper para inferencia de tipos
   private makeTarea(_: {
     id: string;
     pasoId: string;
@@ -593,9 +577,6 @@ export class TramiteDBRepository {
     return _;
   }
 
-  /**
-   * Fetch single trámite by string ID or numeric ID
-   */
   public async getTramiteById(idOrCode: string): Promise<TramiteDBItem | undefined> {
     const list = await this.getTramites();
     const tramite = list.find(
@@ -607,7 +588,7 @@ export class TramiteDBRepository {
       try {
         const { data: itemRows } = await this.supabase
           .from("item_tramite")
-          .select("id, id_item, cantidad_solicitada, precio, especificacion, item ( id, nombre )")
+          .select("id, id_item, cantidad_solicitada, precio_unitario, especificacion, item:item!id_item ( id, nombre )")
           .eq("id_tramite", tramite.id);
 
         if (itemRows && itemRows.length > 0) {
@@ -617,11 +598,11 @@ export class TramiteDBRepository {
             descripcion: it.item?.nombre || "Ítem de Solicitud",
             categoria: tramite.categoria,
             cantidad: it.cantidad_solicitada || 1,
-            precioReferencial: Number(it.precio || 0),
-            precioUnitario: Number(it.precio || 0),
+            precioReferencial: Number(it.precio_unitario || 0),
+            precioUnitario: Number(it.precio_unitario || 0),
             especificacionesTecnicasTexto: it.especificacion || "",
             especificacion: it.especificacion || "",
-            total: (it.cantidad_solicitada || 1) * Number(it.precio || 0),
+            total: (it.cantidad_solicitada || 1) * Number(it.precio_unitario || 0),
           }));
         }
       } catch (err) {
@@ -632,10 +613,6 @@ export class TramiteDBRepository {
     return tramite;
   }
 
-  /**
-   * Create new trámite in real database.
-   * El estado inicial es estado_paso_flujo.id=1 (es_inicial=true del primer paso).
-   */
   public async createTramite(data: {
     proyectoId?: number;
     tipoTramiteId?: number;
@@ -643,10 +620,9 @@ export class TramiteDBRepository {
     items?: any[];
   }): Promise<TramiteDBItem> {
     try {
-      // Buscar el estado inicial del flujo del tipo de trámite
       const { data: estadoInicial } = await this.supabase
-        .from("estado_paso_flujo")
-        .select("id, nombre, paso_flujo ( orden, nombre )")
+        .from("tarea_paso_flujo")
+        .select("id, nombre, paso_flujo:paso_flujo!id_paso_flujo ( orden, nombre )")
         .eq("es_inicial", true)
         .limit(1)
         .single();
@@ -660,7 +636,7 @@ export class TramiteDBRepository {
         .insert({
           id_proyecto: data.proyectoId || 1,
           id_tipo_tramite: data.tipoTramiteId || 1,
-          id_estado_tramite: estadoInicialId,
+          id_tarea_tramite: estadoInicialId,
           id_usuario: 1,
           justificacion: data.justificacion || "Solicitud de compra menor",
           fecha_creacion: new Date().toISOString(),
@@ -675,7 +651,6 @@ export class TramiteDBRepository {
         throw new Error(error?.message || "Error al crear el trámite en la base de datos");
       }
 
-      // Insertar ítems solicitados en item_tramite
       if (data.items && data.items.length > 0) {
         const itemRows = data.items.map((it: any) => {
           let idItemNum = 1;
@@ -687,7 +662,7 @@ export class TramiteDBRepository {
             id_tramite: newRow.id,
             id_item: idItemNum,
             cantidad_solicitada: it.cantidad || 1,
-            precio: Number(it.precioReferencial || it.precioUnitario || it.precio || 0),
+            precio_unitario: Number(it.precioReferencial || it.precioUnitario || it.precio || 0),
             especificacion:
               it.especificacionesTecnicasTexto || it.especificacion || it.nombre || "",
             existe_en_mercado_virtual: true,

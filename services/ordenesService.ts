@@ -214,10 +214,10 @@ export async function emitirOrdenContractual(
       // Continuar si la tabla no existe en este entorno
     }
 
-    await supabase.from("historial_estado_tramite").insert({
+    await supabase.from("historial_tarea_tramite").insert({
       id_tramite: params.tramiteId,
-      id_estado_tramite: 9,
-      id_usuario: params.usuarioId || null,
+      id_tarea_nuevo: 9,
+      id_usuario_responsable: params.usuarioId || null,
       observaciones: `${params.tipoDocumento} ${correlativoFinal} emitida para el proveedor ID ${params.proveedorId} por un monto de Bs. ${params.montoTotal}.`,
     });
 
@@ -264,10 +264,10 @@ export async function confirmarEfectivizacionYFirmas(
     }
 
     // Auditoría
-    await supabase.from("historial_estado_tramite").insert({
+    await supabase.from("historial_tarea_tramite").insert({
       id_tramite: params.tramiteId,
-      id_estado_tramite: 10,
-      id_usuario: params.usuarioId || null,
+      id_tarea_nuevo: 10,
+      id_usuario_responsable: params.usuarioId || null,
       observaciones: `Firmas de ${params.ordenesFirmas.length} documento(s) contractual(es) verificadas y efectivizadas formalmente. Trámite en espera de entrega de materiales / ejecución de servicios.`,
     });
 

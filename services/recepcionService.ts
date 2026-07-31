@@ -116,13 +116,13 @@ export async function guardarActaRecepcion(
       // Ignorar si la tabla no existe en la BD local
     }
 
-    // 2. Auditoría en `historial_estado_tramite`
+    // 2. Auditoría en `historial_tarea_tramite`
     const obsStr = `Acta de Recepción ${params.tipoActa} registrada para el proveedor ID ${params.proveedorId}. Participantes: ${params.nombreCoordinador}, ${params.nombreRepProveedor}.`;
 
-    await supabase.from("historial_estado_tramite").insert({
+    await supabase.from("historial_tarea_tramite").insert({
       id_tramite: params.tramiteId,
-      id_estado_tramite: 11,
-      id_usuario: params.usuarioId || null,
+      id_tarea_nuevo: 11,
+      id_usuario_responsable: params.usuarioId || null,
       observaciones: obsStr,
     });
 

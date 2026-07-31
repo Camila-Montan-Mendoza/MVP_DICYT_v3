@@ -17,7 +17,7 @@ export class WorkflowTransitionService {
     // 1. Obtener estado actual del trámite
     const { data: tramite, error: tramiteErr } = await supabase
       .from("tramite")
-      .select("id, id_estado_tramite, rechazado")
+      .select("id, id_tarea_tramite, rechazado")
       .eq("id", idTramite)
       .single();
 
@@ -28,12 +28,12 @@ export class WorkflowTransitionService {
       };
     }
 
-    const estadoOrigenId = tramite.id_estado_tramite;
+    const estadoOrigenId = tramite.id_tarea_tramite;
 
     // 2. Validar que la transición existe y corresponde al estado origen actual
     const { data: transicion, error: transErr } = await supabase
       .from("transicion_flujo")
-      .select("id, id_estado_origen, id_estado_destino, nombre_accion")
+      .select("id, id_tarea_origen, id_tarea_destino, nombre_accion")
       .eq("id", idTransicion)
       .single();
 
@@ -44,14 +44,14 @@ export class WorkflowTransitionService {
       };
     }
 
-    if (transicion.id_estado_origen !== estadoOrigenId) {
+    if (transicion.id_tarea_origen !== estadoOrigenId) {
       return {
         success: false,
         message: "La transición enviada no corresponde al estado actual del trámite.",
       };
     }
 
-    const idEstadoDestino = transicion.id_estado_destino;
+    const idEstadoDestino = transicion.id_tarea_destino;
     const nombreAccion = transicion.nombre_accion;
 
     // 3. Obtener e invocar el handler de la tarea (Handler-First Execution)
@@ -76,7 +76,7 @@ export class WorkflowTransitionService {
     const { error: updateErr } = await supabase
       .from("tramite")
       .update({
-        id_estado_tramite: idEstadoDestino,
+        id_tarea_tramite: idEstadoDestino,
         ...(esRechazo ? { rechazado: true } : {}),
       })
       .eq("id", idTramite);
@@ -88,11 +88,11 @@ export class WorkflowTransitionService {
       };
     }
 
-    // 6. Insertar registro en historial_estado_tramite
-    const { error: histErr } = await supabase.from("historial_estado_tramite").insert({
+    // 6. Insertar registro en historial_tarea_tramite
+    const { error: histErr } = await supabase.from("historial_tarea_tramite").insert({
       id_tramite: idTramite,
-      id_estado_anterior: estadoOrigenId,
-      id_estado_nuevo: idEstadoDestino,
+      id_tarea_anterior: estadoOrigenId,
+      id_tarea_nuevo: idEstadoDestino,
       id_usuario_responsable: usuarioId || null,
       observaciones: observaciones || handlerResult.message || `Acción '${nombreAccion}' ejecutada`,
     });

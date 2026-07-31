@@ -6,7 +6,7 @@ export interface TramiteDBRow {
   id: number;
   id_proyecto: number;
   id_tipo_tramite: number;
-  id_estado_tramite: number;
+  id_tarea_tramite: number;
   fecha_creacion: string;
   fecha_actualizacion: string;
   rechazado: boolean;
@@ -15,8 +15,8 @@ export interface TramiteDBRow {
 export interface HistorialEstadoDBRow {
   id: number;
   id_tramite: number;
-  id_estado_anterior: number;
-  id_estado_nuevo: number;
+  id_tarea_anterior: number;
+  id_tarea_nuevo: number;
   fecha_cambio: string;
   id_usuario_responsable: number | null;
   observaciones: string | null;
@@ -35,7 +35,7 @@ export class WorkflowRepository {
     try {
       const { data, error } = await this.supabase
         .from("tramite")
-        .select("id_estado_tramite")
+        .select("id_tarea_tramite")
         .eq("id", tramiteIdNum)
         .single();
 
@@ -44,7 +44,7 @@ export class WorkflowRepository {
         return { dbIdEstado: 1, nodo: nodoFallback };
       }
 
-      const dbId = data.id_estado_tramite || 1;
+      const dbId = data.id_tarea_tramite || 1;
       const nodo = await obtenerNodoPorId(dbId);
       return { dbIdEstado: dbId, nodo };
     } catch {
@@ -54,7 +54,7 @@ export class WorkflowRepository {
   }
 
   /**
-   * Execute node transition in DB (inserts into `historial_estado_tramite` and updates `tramite.id_estado_tramite`)
+   * Execute node transition in DB (inserts into `historial_tarea_tramite` and updates `tramite.id_tarea_tramite`)
    * Trabaja directamente con IDs de la BD — sin mapeos intermedios.
    */
   public async transicionarEstadoTramite(
@@ -65,11 +65,11 @@ export class WorkflowRepository {
     observacion?: string
   ): Promise<boolean> {
     try {
-      // 1. Insert row into `historial_estado_tramite`
-      await this.supabase.from("historial_estado_tramite").insert({
+      // 1. Insert row into `historial_tarea_tramite`
+      await this.supabase.from("historial_tarea_tramite").insert({
         id_tramite: tramiteIdNum,
-        id_estado_anterior: estadoOrigenDbId,
-        id_estado_nuevo: estadoDestinoDbId,
+        id_tarea_anterior: estadoOrigenDbId,
+        id_tarea_nuevo: estadoDestinoDbId,
         fecha_cambio: new Date().toISOString(),
         id_usuario_responsable: idUsuarioResponsable,
         observaciones: observacion || "Transición de estado realizada en SIGEFI",
@@ -79,9 +79,9 @@ export class WorkflowRepository {
       const { error: updateErr } = await this.supabase
         .from("tramite")
         .update({
-          id_estado_tramite: estadoDestinoDbId,
+          id_tarea_tramite: estadoDestinoDbId,
           fecha_actualizacion: new Date().toISOString(),
-          rechazado: estadoDestinoDbId === 4, // estado_paso_flujo.id=4 es "Rechazo definitivo"
+          rechazado: estadoDestinoDbId === 4, // tarea_paso_flujo.id=4 es "Rechazo definitivo"
         })
         .eq("id", tramiteIdNum);
 
