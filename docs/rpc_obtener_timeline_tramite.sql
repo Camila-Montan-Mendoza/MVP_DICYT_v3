@@ -1,5 +1,5 @@
 -- ─── RPC FUNCTION: obtener_timeline_tramite ──────────────────────────────
--- Ejecuta la consulta SQL pura recursiva (CTE + BFS) para obtener la cronología del trámite según schema.sql
+-- Ejecuta la consulta SQL pura recursiva (CTE + BFS + Backward CTE) para obtener todo el histórico pasado y futuro del trámite
 
 CREATE OR REPLACE FUNCTION obtener_timeline_tramite(p_tramite_id INT)
 RETURNS TABLE (
@@ -54,7 +54,37 @@ usuario_por_tarea AS (
   ORDER BY htt."id_tarea_anterior", htt."fecha_cambio" DESC
 ),
 
--- 2. TAREAS PASADAS COMPLETADAS DE CUALQUIER PASO
+-- 1c. Búsqueda hacia atrás (Backward CTE) desde la tarea actual hacia la tarea inicial (Tarea 1)
+busqueda_pasados AS (
+  SELECT 
+    tf."id_tarea_origen" AS tarea_id,
+    1 AS depth
+  FROM "transicion_flujo" tf
+  JOIN tramite_info ti ON tf."id_tarea_destino" = ti.tarea_actual_id
+  WHERE tf."nombre_accion" NOT ILIKE '%rechaz%'
+    AND tf."nombre_accion" NOT ILIKE '%observ%'
+    AND tf."nombre_accion" NOT ILIKE '%subsan%'
+  UNION ALL
+  SELECT 
+    tf."id_tarea_origen",
+    bp.depth + 1
+  FROM "transicion_flujo" tf
+  JOIN busqueda_pasados bp ON tf."id_tarea_destino" = bp.tarea_id
+  WHERE tf."nombre_accion" NOT ILIKE '%rechaz%'
+    AND tf."nombre_accion" NOT ILIKE '%observ%'
+    AND tf."nombre_accion" NOT ILIKE '%subsan%'
+    AND bp.depth < 15
+),
+
+nodos_pasados AS (
+  SELECT DISTINCT tarea_id FROM (
+    SELECT tarea_id FROM usuario_por_tarea
+    UNION
+    SELECT tarea_id FROM busqueda_pasados
+  ) all_pasados
+),
+
+-- 2. TAREAS PASADAS COMPLETADAS DE TODO EL HISTÓRICO
 tareas_pasadas AS (
   SELECT DISTINCT ON (tpf."id")
     tpf."id"                                                         AS tarea_id,
@@ -66,14 +96,15 @@ tareas_pasadas AS (
     upt."fecha_completado",
     'COMPLETADO'::text AS estado,
     1 AS seccion,
-    upt."fecha_completado" AS orden_sort
-  FROM usuario_por_tarea upt
-  JOIN "tarea_paso_flujo" tpf ON upt.tarea_id = tpf."id"
+    COALESCE(upt."fecha_completado", to_timestamp(1600000000 + tpf."id")) AS orden_sort
+  FROM nodos_pasados np
+  JOIN "tarea_paso_flujo" tpf ON np.tarea_id = tpf."id"
   JOIN tramite_info ti ON true
+  LEFT JOIN usuario_por_tarea upt ON tpf."id" = upt.tarea_id
   LEFT JOIN "rol_tarea_paso_flujo" rtpf ON tpf."id" = rtpf."id_tarea_paso_flujo"
   LEFT JOIN "rol" r ON rtpf."id_rol" = r."id"
   WHERE tpf."id" <> ti.tarea_actual_id
-  ORDER BY tpf."id", upt."fecha_completado" ASC
+  ORDER BY tpf."id", orden_sort ASC
 ),
 
 -- 3. TAREA ACTUAL EN CURSO

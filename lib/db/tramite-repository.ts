@@ -493,29 +493,63 @@ export class TramiteDBRepository {
         }
       }
 
-      // 5. CONSOLIDAR
+      // 4b. BACKWARD TRAVERSAL: Encontrar todas las tareas previas desde la tarea actual hacia el inicio
+      const reverseAdjList = new Map<number, number[]>();
+      (transiciones || []).forEach((t: any) => {
+        const accion = (t.nombre_accion || "").toLowerCase();
+        if (
+          !accion.includes("rechaz") &&
+          !accion.includes("observ") &&
+          !accion.includes("subsan")
+        ) {
+          if (!reverseAdjList.has(t.id_tarea_destino)) {
+            reverseAdjList.set(t.id_tarea_destino, []);
+          }
+          reverseAdjList.get(t.id_tarea_destino)!.push(t.id_tarea_origen);
+        }
+      });
+
+      const pasadosSet = new Set<number>(Array.from(usuarioPorEstadoAnterior.keys()));
+      const backQueue: number[] = [estadoActualId];
+      const backVisited = new Set<number>([estadoActualId]);
+      while (backQueue.length > 0) {
+        const curr = backQueue.shift()!;
+        for (const prev of reverseAdjList.get(curr) || []) {
+          if (!backVisited.has(prev)) {
+            backVisited.add(prev);
+            pasadosSet.add(prev);
+            backQueue.push(prev);
+          }
+        }
+      }
+
+      // 5. CONSOLIDAR TAREAS PASADAS
       const pasadasList: ReturnType<typeof this.makeTarea>[] = [];
-      for (const [estadoId, userInfo] of Array.from(usuarioPorEstadoAnterior.entries())) {
+      for (const estadoId of Array.from(pasadosSet)) {
         if (estadoId === estadoActualId) continue;
         const info = estadosMap.get(estadoId);
         if (!info) continue;
+
+        const userInfo = usuarioPorEstadoAnterior.get(estadoId);
 
         pasadasList.push({
           id: String(info.id),
           pasoId: `p${info.id_paso_flujo || pasoActualId}`,
           nombre: info.nombre,
           rolEsperado: rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
-          usuarioAsignado: userInfo.username || "Sistema",
+          usuarioAsignado: userInfo?.username || "Sistema",
           rolResponsable:
-            userInfo.rolReal || rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
+            userInfo?.rolReal || rolEsperadoPorEstado.get(info.id) || "Sin rol asignado",
           estado: "COMPLETADO" as const,
-          fechaCompletado: userInfo.fechaCompletado,
+          fechaCompletado: userInfo?.fechaCompletado,
         });
       }
 
       pasadasList.sort((a, b) => {
-        const fa = a.fechaCompletado ? new Date(a.fechaCompletado).getTime() : 0;
-        const fb = b.fechaCompletado ? new Date(b.fechaCompletado).getTime() : 0;
+        const idA = Number(a.id);
+        const idB = Number(b.id);
+        const fa = a.fechaCompletado ? new Date(a.fechaCompletado).getTime() : idA;
+        const fb = b.fechaCompletado ? new Date(b.fechaCompletado).getTime() : idB;
         return fa - fb;
       });
 
