@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -27,6 +27,7 @@ function SigefiShellInner({ children }: SigefiShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const isProyectosActive = pathname.startsWith("/proyectos");
 
@@ -54,7 +55,11 @@ function SigefiShellInner({ children }: SigefiShellProps) {
       {/* Header Superior Institucional */}
       <header className="bg-white border-b border-[#e5e7eb] h-14 px-4 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
         <div className="flex items-center gap-4">
-          <button className="text-[#6b7280] hover:text-[#002855] transition-colors p-1">
+          <button
+            onClick={() => setIsSidebarOpen((prev) => !prev)}
+            title={isSidebarOpen ? "Cerrar menú" : "Abrir menú"}
+            className="text-[#6b7280] hover:text-[#002855] hover:bg-slate-100 p-1.5 rounded-lg transition-all cursor-pointer"
+          >
             <Menu className="w-5 h-5" />
           </button>
           <span className="font-bold text-xs md:text-sm text-[#001B47] uppercase tracking-wider">
@@ -89,10 +94,24 @@ function SigefiShellInner({ children }: SigefiShellProps) {
       </header>
 
       {/* Main Body with Sidebar and Content */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 relative">
+        {/* Backdrop para móviles */}
+        {isSidebarOpen && (
+          <div
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-slate-900/20 backdrop-blur-2xs z-20 lg:hidden"
+          />
+        )}
+
         {/* Sidebar Left Navigation */}
-        <aside className="w-64 bg-white border-r border-[#e5e7eb] hidden lg:flex flex-col justify-between p-4 min-h-[calc(100vh-3.5rem)]">
-          <div className="space-y-6">
+        <aside
+          className={`bg-white border-r border-[#e5e7eb] flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 min-h-[calc(100vh-3.5rem)] z-20 ${
+            isSidebarOpen
+              ? "w-64 p-4 opacity-100 translate-x-0"
+              : "w-0 p-0 opacity-0 -translate-x-full overflow-hidden border-none pointer-events-none"
+          }`}
+        >
+          <div className="space-y-6 min-w-[224px]">
             {/* Logo Marca DICYT */}
             <div className="flex items-center gap-3 px-2 py-1">
               <div className="w-9 h-9 rounded-full bg-[#002855] text-white flex items-center justify-center font-extrabold text-xs tracking-tighter border-2 border-[#BC000C]">
@@ -195,11 +214,11 @@ function SigefiShellInner({ children }: SigefiShellProps) {
           </div>
 
           {/* Bottom Sidebar Logout */}
-          <div className="pt-4 border-t border-[#e5e7eb]">
+          <div className="pt-4 border-t border-[#e5e7eb] min-w-[224px]">
             <button
               type="button"
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-[#6b7280] hover:text-[#BC000C] transition-colors text-left"
+              className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-[#6b7280] hover:text-[#BC000C] transition-colors text-left cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               Cerrar Sesión
@@ -208,7 +227,7 @@ function SigefiShellInner({ children }: SigefiShellProps) {
         </aside>
 
         {/* Content Area */}
-        <main className="flex-1 p-4 md:p-8 flex flex-col justify-between min-h-[calc(100vh-3.5rem)]">
+        <main className="flex-1 p-4 md:p-8 flex flex-col justify-between min-h-[calc(100vh-3.5rem)] transition-all duration-300">
           <div className="max-w-6xl mx-auto w-full">{children}</div>
         </main>
       </div>
