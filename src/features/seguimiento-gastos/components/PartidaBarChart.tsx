@@ -29,7 +29,7 @@ export function PartidaBarChart({ data }: PartidaBarChartProps) {
       <div className="flex items-center justify-between mb-6 border-b border-border pb-4">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-[#003770]" />
-          <h3 className="font-semibold text-[#001B47]">Gasto por Partida</h3>
+          <h3 className="text-lg font-bold text-[#001B47]">Gasto por Partida</h3>
         </div>
         <span className="text-xs text-muted-foreground">Asignado vs. Ejecutado</span>
       </div>

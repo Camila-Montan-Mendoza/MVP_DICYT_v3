@@ -70,69 +70,71 @@ export function ProyectosFilters({
     };
   }, [canFilterByInvestigador]);
 
+  // Determine if any filter is active to show "Limpiar" button
+  const hasActiveFilters = search !== "" || estadoId !== "all" || investigadorId !== "all";
+
   return (
-    <div className="flex flex-col gap-4 border-b border-border p-4 sm:flex-row sm:items-end sm:justify-between">
-      <div className="flex flex-1 flex-col gap-4 sm:flex-row">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold uppercase text-muted-foreground">Buscar</label>
-          <div className="relative w-full sm:w-64">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Proyecto, código..."
-              className="pl-8"
-            />
-          </div>
-        </div>
-
-        {canFilterByInvestigador && (
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold uppercase text-muted-foreground">
-              Investigador
-            </label>
-            <Select
-              className="sm:w-56"
-              value={investigadorId}
-              onChange={(e) =>
-                onInvestigadorIdChange(e.target.value === "all" ? "all" : Number(e.target.value))
-              }
-            >
-              <option value="all">Todos</option>
-              {investigadores.map((inv) => (
-                <option key={inv.id} value={inv.id}>
-                  {inv.nombre}
-                </option>
-              ))}
-            </Select>
-          </div>
-        )}
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold uppercase text-muted-foreground">Estado</label>
-          <Select
-            className="sm:w-64"
-            value={estadoId}
-            onChange={(e) =>
-              onEstadoIdChange(
-                e.target.value === "all" ? "all" : (Number(e.target.value) as EstadoProyectoId)
-              )
-            }
-          >
-            <option value="all">Todos</option>
-            {ESTADOS.map((estado) => (
-              <option key={estado.id} value={estado.id}>
-                {estado.nombre}
-              </option>
-            ))}
-          </Select>
-        </div>
+    <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-[#e5e7eb]">
+      <div className="relative flex-1 max-w-xs min-w-[200px]">
+        {" "}
+        {/* Añadido min-w para evitar que se colapse */}
+        <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder="Buscar proyecto por nombre o código..."
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full bg-white border border-border rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#001B47] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[#003770] focus:border-[#003770] transition-colors"
+        />
       </div>
 
-      <Button variant="outline" size="sm" onClick={onClearFilters} className="gap-1.5">
-        <X className="h-3.5 w-3.5" />
-        Limpiar filtros
-      </Button>
+      <div className="flex items-center gap-3 flex-wrap">
+        {" "}
+        {/* Flex-wrap para mejor responsividad */}
+        {/* Los filtros de estado e investigador pueden necesitar un ajuste de estilo si no usan un componente común */}
+        {/* Por ahora, se asume que son selects o inputs que se ajustarán al layout */}
+        {canFilterByInvestigador && (
+          <select
+            value={investigadorId}
+            onChange={(e) =>
+              onInvestigadorIdChange(e.target.value === "all" ? "all" : Number(e.target.value))
+            }
+            className="bg-white border border-border rounded-lg px-3 py-1.5 text-xs text-[#001B47] focus:outline-none focus:ring-1 focus:ring-[#003770] focus:border-[#003770] transition-colors"
+          >
+            <option value="all">Todos los investigadores</option>
+            {investigadores.map((inv) => (
+              <option key={inv.id} value={inv.id}>
+                {inv.nombre}
+              </option>
+            ))}
+          </select>
+        )}
+        <select
+          value={estadoId}
+          onChange={(e) =>
+            onEstadoIdChange(
+              e.target.value === "all" ? "all" : (Number(e.target.value) as EstadoProyectoId)
+            )
+          }
+          className="bg-white border border-border rounded-lg px-3 py-1.5 text-xs text-[#001B47] focus:outline-none focus:ring-1 focus:ring-[#003770] focus:border-[#003770] transition-colors w-50"
+        >
+          <option value="all">Todos los estados</option>
+          {ESTADOS.map((estado) => (
+            <option key={estado.id} value={estado.id}>
+              {estado.nombre}
+            </option>
+          ))}
+        </select>
+        {hasActiveFilters && (
+          <button
+            onClick={onClearFilters}
+            className="text-xs text-muted-foreground hover:text-[#001B47] px-2 py-1.5 rounded-md transition-colors"
+          >
+            Limpiar
+          </button>
+        )}
+      </div>
     </div>
   );
 }
+
