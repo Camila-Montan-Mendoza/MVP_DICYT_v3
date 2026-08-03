@@ -80,13 +80,11 @@ export function PresupuestoExecutionPanel({
       {/* Cabecera del Panel con Presupuesto Vigente Total e Indicador de Gestión */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-[#001B47]">Ejecución Presupuestaria</h2>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#003770]/10 text-[#003770] border border-[#003770]/20 flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-[#003770]" />
-              {selectedGestion === "global" ? "Histórico Global" : `Gestión ${selectedGestion}`}
-            </span>
-          </div>
+          <span className="text-xs font-semibold text-[#003770] flex items-center gap-1 ">
+            <Calendar className="w-3 h-3 text-[#003770]" />
+            {selectedGestion === "global" ? "Histórico Global" : `Gestión ${selectedGestion}`}
+          </span>
+          <h2 className="text-lg font-bold text-[#001B47]">Ejecución Presupuestaria</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             Distribución consolidada del presupuesto según su estado (
             {selectedGestion === "global" ? "Acumulado Multianual" : `Año ${selectedGestion}`})

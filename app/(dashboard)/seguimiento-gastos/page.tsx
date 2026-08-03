@@ -8,7 +8,7 @@ import { ProgramaViewSection } from "@/src/features/seguimiento-gastos/component
 import { ProyectoViewSection } from "@/src/features/seguimiento-gastos/components/ProyectoViewSection";
 import { PartidaBarChart } from "@/src/features/seguimiento-gastos/components/PartidaBarChart";
 import { EmptyDashboardState } from "@/src/features/seguimiento-gastos/components/EmptyDashboardState";
-import { Filter, RefreshCw, Calendar } from "lucide-react";
+import { Filter, RefreshCw, Calendar, GitCommit, PieChart } from "lucide-react";
 
 export default function SeguimientoGastosPage() {
   const {
@@ -36,31 +36,31 @@ export default function SeguimientoGastosPage() {
     allPartidas.length > 0
       ? allPartidas.slice(0, 5)
       : [
-          {
-            codigoPartida: 34200,
-            nombrePartida: "Productos Químicos y Farmacéuticos",
-            presupuestoAsignado: 45000,
-            presupuestoEjecutado: 12500,
-          },
-          {
-            codigoPartida: 39500,
-            nombrePartida: "Útiles de Escritorio y Oficina",
-            presupuestoAsignado: 18000,
-            presupuestoEjecutado: 6400,
-          },
-          {
-            codigoPartida: 43120,
-            nombrePartida: "Equipo de Computación",
-            presupuestoAsignado: 85000,
-            presupuestoEjecutado: 32000,
-          },
-          {
-            codigoPartida: 25600,
-            nombrePartida: "Imprenta y Publicaciones",
-            presupuestoAsignado: 12000,
-            presupuestoEjecutado: 3100,
-          },
-        ];
+        {
+          codigoPartida: 34200,
+          nombrePartida: "Productos Químicos y Farmacéuticos",
+          presupuestoAsignado: 45000,
+          presupuestoEjecutado: 12500,
+        },
+        {
+          codigoPartida: 39500,
+          nombrePartida: "Útiles de Escritorio y Oficina",
+          presupuestoAsignado: 18000,
+          presupuestoEjecutado: 6400,
+        },
+        {
+          codigoPartida: 43120,
+          nombrePartida: "Equipo de Computación",
+          presupuestoAsignado: 85000,
+          presupuestoEjecutado: 32000,
+        },
+        {
+          codigoPartida: 25600,
+          nombrePartida: "Imprenta y Publicaciones",
+          presupuestoAsignado: 12000,
+          presupuestoEjecutado: 3100,
+        },
+      ];
 
   const safeRawProgramas = rawProgramas;
   const safeRawProyectos = rawProyectos;
@@ -70,14 +70,18 @@ export default function SeguimientoGastosPage() {
       <div className="space-y-8 pb-16">
         {/* Cabecera de Módulo con Selectores Compactos a la Derecha */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
-          <h1 className="text-2xl md:text-3xl font-extrabold text-[#001B47] tracking-tight shrink-0">
-            Seguimiento de Gastos
-          </h1>
-
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 bg-[#003770]/10 text-[#003770] rounded-lg">
+              <PieChart className="w-5 h-5" />
+            </span>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-[#001B47] tracking-tight">
+              Seguimiento de Gastos
+            </h1>
+          </div>
           <div className="flex flex-wrap items-center justify-end gap-2.5 ms-auto">
             {/* Selector Dinámico de Programa asignado */}
             {safeRawProgramas.length > 0 && (
-              <div className="flex items-center gap-1.5 bg-white border border-border px-2.5 py-1.5 rounded-lg text-xs shadow-2xs max-w-[210px]">
+              <div className="flex items-center gap-1.5 bg-white border border-border px-2.5 py-1.5 rounded-lg text-xs shadow-2xs max-w-[230px]">
                 <Filter className="w-3.5 h-3.5 text-[#003770] shrink-0" />
                 <span className="text-muted-foreground font-medium shrink-0">Programa:</span>
                 <select
@@ -101,7 +105,7 @@ export default function SeguimientoGastosPage() {
 
             {/* Selector Dinámico de Proyecto asignado */}
             {safeRawProyectos.length > 0 && (
-              <div className="flex items-center gap-1.5 bg-white border border-border px-2.5 py-1.5 rounded-lg text-xs shadow-2xs max-w-[210px]">
+              <div className="flex items-center gap-1.5 bg-white border border-border px-2.5 py-1.5 rounded-lg text-xs shadow-2xs max-w-[230px]">
                 <Filter className="w-3.5 h-3.5 text-[#003770] shrink-0" />
                 <span className="text-muted-foreground font-medium shrink-0">Proyecto:</span>
                 <select
@@ -122,7 +126,7 @@ export default function SeguimientoGastosPage() {
             )}
 
             {/* Selector Dinámico de Gestión Presupuestaria */}
-            <div className="flex items-center gap-1.5 bg-white border border-[#003770]/40 px-2.5 py-1.5 rounded-lg text-xs shadow-2xs">
+            <div className="flex items-center gap-1.5 bg-white border border-[#003770]/40 px-2.5 py-1.5 rounded-lg text-xs shadow-2xs max-w-[240px]">
               <Calendar className="w-3.5 h-3.5 text-[#003770] shrink-0" />
               <span className="text-muted-foreground font-medium shrink-0">Gestión:</span>
               <select
@@ -131,7 +135,7 @@ export default function SeguimientoGastosPage() {
                   const val = e.target.value === "global" ? "global" : Number(e.target.value);
                   if (setSelectedGestion) setSelectedGestion(val);
                 }}
-                className="bg-transparent font-bold text-[#001B47] focus:outline-hidden cursor-pointer shrink-0"
+                className="bg-transparent font-bold text-[#001B47] focus:outline-hidden cursor-pointer shrink-0 max-w-[150px]"
               >
                 {availableGestiones.map((g) => (
                   <option key={g} value={g}>
